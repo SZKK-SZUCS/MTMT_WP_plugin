@@ -148,38 +148,61 @@ Formátum: `cond=mező;operátor;érték`. Több `cond` = ÉS. URL-kódolás kö
 
 A `cond_json` a profilban strukturáltan tárolja ezeket, a kliens onnan építi az URL-t (ne stringet tárolj, hanem `[{field, op, value}]` listát).
 
-### 5.3 Tipikus hívások
+### 5.3 Tipikus hívások (élő teszttel megerősítve, 2026-08)
 
-Szerző összes nyilvános közleménye, legújabb elöl:
+**FONTOS:** a szerző-szűrő mezőneve **`authors`**, NEM `authors.mtid`. Ezt egy éles teszt igazolta: az `authors.institutes.mtid;eq;…` **csendben figyelmen kívül maradt** és a teljes adatbázist adta vissza (`totalElements` ~5000, becsült 11M). Az MTMT az ismeretlen `cond`-ot nem hibázza el, hanem IGNORÁLJA — ezért mindig ellenőrizd a `paging.totalElements`-t, hogy tényleg szűkült-e a találat.
+
+Szerző összes közleménye (megerősítve működik), csak tudományos, évre csoportosítva:
 ```
-https://m2.mtmt.hu/api/publication?cond=authors.mtid%3Beq%3B<MTID>&sort=mtid%2Cdesc&size=100&page=1&format=json
+https://m2.mtmt.hu/api/publication?cond=authors%3Beq%3B<AUTHOR_MTID>&cond=category.mtid%3Beq%3B1&groupBy=publishedYear&sort=publishedYear%2Cdesc&sort=firstAuthor%2Casc&size=100&format=json&labelLang=hun
 ```
-Intézmény/részleg (több id):
-```
-...?cond=institutes.mtid%3Bin%3B<id1>%2C<id2>&sort=mtid%2Cdesc&size=100&format=json
-```
+- `cond=authors;eq;<mtid>` vagy `cond=authors;in;<mtid1>,<mtid2>` — szerző(k) szerint.
+- `cond=category.mtid;eq;1` — csak „Tudományos".
+- `groupBy=publishedYear` — az MTMT natívan tud évre csoportosítani (jól jön a megjelenítéshez).
+- Csak saját közlemény (nem idéző rekord): `cond=core;eq;true` (lásd lentebb).
+
 Inkrementális (csak új, a tárolt max fölött):
 ```
-...?cond=authors.mtid%3Beq%3B<MTID>&cond=mtid%3Bgt%3B<LAST_MAX>&sort=mtid%2Casc&size=100&format=json
+...?cond=authors%3Beq%3B<AUTHOR_MTID>&cond=mtid%3Bgt%3B<LAST_MAX>&sort=mtid%2Casc&size=100&format=json
 ```
 Szerző mtid feloldás névből (admin autocomplete):
 ```
 https://m2.mtmt.hu/api/author?cond=label;any;<szó>&size=50&depth=0&sort=familyName,asc&labelLang=hun&format=json
 ```
+BibTeX / RIS export **közvetlenül az MTMT-ből** (a 9.2 opcionális BibTeX-hez — nem kell magunknak generálni):
+```
+...?cond=authors%3Beq%3B<AUTHOR_MTID>&export=1&exportFormat=BIBTEX
+...?cond=...&export=1&exportFormat=RIS_BIBL
+```
 
-**Sync-stratégia:** elsődleges a **teljes lekérés + `mtid`-diff** (elkapja a módosult/utólag nyilvánossá vált rekordokat is); az inkrementális `mtid;gt` csak optimalizáció. Lapozz `page`-dzsel `size` lépésközzel az összes elem eléréséig.
+**`core` vs `citation`:** a publication-objektumon `core:true` = az intézmény/szerző saját (forrás) közleménye; `citation:true, core:false` = idéző rekord (valaki más műve, ami hivatkozik). A publikus listához jellemzően a **`core:true`** kell. A gridben ez a „Forrás" vs „Idéző" jelölés.
+
+**Sync-stratégia:** elsődleges a **teljes lekérés + `mtid`-diff**; az inkrementális `mtid;gt` csak optimalizáció. Lapozz `page`-dzsel; MINDIG ellenőrizd `paging.totalElements`-t és `paging.last`-ot.
+
+### 5.3b Intézményre szűkítés — SZE (NYITOTT, Fázis 0-ban lezárandó)
+
+A megrendelő a **Széchenyi István Egyetem** egészét adta scope-nak (gui: `sel=institutes257`), de „nem kell minden, csak szelektálva". A teljes egyetem több tízezer rekord + zaj, ezért **NE** a teljes intézményt húzd. Két járható út, prioritási sorrendben:
+
+1. **Ajánlott: profilok szerző-mtid-k (és/vagy al-intézmény/tanszék-mtid-k) szerint.** A `cond=authors;in;<mtid-lista>` megerősítetten szűr. Egy kurált SZE-szerzőlista pontosan a „szelektálva" munkafolyamatot adja, sane mennyiséggel. A kutatócsoportokhoz amúgy is kézzel sorolunk (§7), így a profil = egy csoport szerzői.
+2. **Intézményi cond — helyes utat élesben kell megtalálni.** A `257` valószínűleg NEM a jó intézményi mtid (a valódi mtid-k nagyobbak), és a mezőút sem `authors.institutes.mtid`. Fázis 0-ban:
+   - Oldd fel az SZE valódi intézményi mtid-jét: `GET /api/institute?cond=label;any;Széchenyi&depth=0&size=10&labelLang=hun&format=json`.
+   - Próbáld ki a szűkítést, és **verifikáld, hogy `totalElements` reális számra esik** (nem 5000/11M): jelöltek `cond=institutes;in;<mtid>`, `cond=authors.institutes;in;<mtid>`. Amelyik szűkít, az a jó. Ha egyik sem, maradj az 1. útnál.
 
 ### 5.4 Szerzőnevek
 
-A cél **tiszta** névsor: pl. „Gergő Ignéczi, Roland Tóth, Ernő Horváth, and Krisztián Nyilas". Az MTMT export bőbeszédű affiliációkkal ír; **ne** azt használd. Építsd az `authors[]` strukturált objektumaiból (`familyName` + `givenName`), affiliáció nélkül. **Élesben ellenőrizd**, hogy az API ad-e külön tiszta given/family mezőt `depth` növelésével; ha nem, dokumentáld és a label-ből parse-olj kontrolláltan.
+A cél **tiszta** névsor: pl. „Gergő Ignéczi, Roland Tóth, Ernő Horváth, and Krisztián Nyilas". MEGERŐSÍTVE: a tiszta nevek az **`authorships[]`** tömbben vannak (`familyName`, `givenName`, `listPosition`, `first`, `last`, `corresponding`), affiliáció nélkül — ezekből építs, NE a bőbeszédű `label`-ből (az affiliációt is tartalmaz). Sorrend: `listPosition`. A megrendelői „…and X" formátumhoz az utolsó szerző elé tegyél „and"-et. A `corresponding:true` (levelező szerző) a ✉ jel forrása.
 
-### 5.5 SJR-negyed (Best Q)
+### 5.5 SJR-negyed (Best Q) — MEGERŐSÍTVE: a közlemény-objektumban van
 
-Az MTMT a Scimago Q1–Q4 értékeket a folyóirathoz és **évhez** rendeli, és publikusan elérhetővé teszi (Q1 felső 10%-a = D1). A „Best Q" a folyóirat adott évi legjobb kvartilise több tudományterület esetén. Ez a **folyóirat-objektum** tulajdonsága, nem a cikké → a mapper oldja fel: vagy megfelelő `depth`-fel a beágyazott folyóiratból, vagy külön journal-lekéréssel az ISSN/journal-mtid alapján, a cikk `published_year`-jéhez illesztve. **A pontos API-utat élesben térképezd fel** (5.6), és cache-eld a folyóirat→(év→Q) feloldást transienttel, hogy ne kérdezz újra minden cikknél.
+Élő teszt szerint az SJR **közvetlenül a publication-objektumon** van, nincs szükség külön journal-lekérésre:
+- `ratings[]` tömb, ahol `otype: "SjrRating"`, mezők: `ranking` ("Q1"/"Q2"/"D1"…), `label` ("sjr:Q1 (2027) Scopus - Medicine (miscellaneous) …"), `calculation`, `subject.label`, az évvel a labelben.
+- Kényelmi mező: **`ratingsForSort`** = a rendezéshez használt kvartilis (pl. "Q1", "D1"). Ez jó gyors forrás a badge-hez.
+- Több `SjrRating` is lehet (több tudományterület) → a **Best Q**-hoz vedd a legjobbat (D1 > Q1 > Q2 > Q3 > Q4). A `ratings[]`-ben lehet `MtaRating` is (MTA doktori bizottsági besorolás) — azt ne keverd az SJR-rel.
+- Mapper: `sjr_quartile` = a legjobb `SjrRating.ranking` (vagy `ratingsForSort`, ha csak egy van).
 
-### 5.6 Kötelező felderítő lépés kód előtt
+### 5.6 Felderítés — MÁR ELVÉGEZVE, lásd `docs/field-map.md`
 
-Fetchelj le 1-2 valós rekordot `depth=1` (és próbáld `depth=2`) mellett, és a **tényleges** JSON alapján töltsd ki egy `docs/field-map.md`-t: melyik JSON-kulcs → melyik táblaoszlop. A 4.1 oszlopnevek fixek, de a forrás-kulcsok élesből jönnek. Ezt tekintsd a mapper egyetlen igazságforrásának.
+Egy éles próbalekérés megtörtént; a valós mezőtérkép a `docs/field-map.md`-ben van, a megerősített kulcsokkal. **Ezt tekintsd a mapper igazságforrásának.** Ami még nyitott és Fázis 0-ban lezárandó: (a) az SZE intézményi szűkítés helyes útja (§5.3b), (b) a **támogatás/projektazonosító** (NKFIH grant) API-mezője — az alap `depth`-en NEM jött vissza, magasabb `depth` vagy külön `grants/projects` reláció kell; ha nem elérhető publikusan, marad a kézi bevitel (§8.2).
 
 ### 5.7 MTMT link
 
