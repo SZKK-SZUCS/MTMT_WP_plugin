@@ -1,0 +1,23 @@
+Mezők amik kellenek:
+- Szakmai terület (page link) (multi)
+
+Widget state:
+Cím
+Szerzők
+Szakmai terület*
+Forrás (folyóirat / kötet)
+DOI
+Kiadványtípus
+Megjelenés éve
+SJR-negyed
+egyéb azonosítós generált link gombok
+
+Döntések:
+- DOI szám alapján legyen tovább irányítás
+	query == csak doi számmal rendelkezők
+
+- Mennyi a DOI számmal rendelkező? Teams-en megírni a határvonal meghúzása miatt
+- pdf, kód, videó nem kell!
+- email értesítés az új cikkekről
+- kézi szinkron gomb
+- Alapértelmezett kép amire automata generált szöveg megy, azt lehessen felülírni saját képpel

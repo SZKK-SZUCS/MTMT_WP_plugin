@@ -90,6 +90,7 @@ CREATE TABLE {prefix}jkk_mtmt_publications (
   funding_override TEXT NULL,             -- felülbírált támogatás
   project_ids     TEXT NULL,              -- projektazonosító(k)
   project_verified TINYINT(1) DEFAULT 0,  -- ellenőrizve?
+  is_featured     TINYINT(1) DEFAULT 0,   -- kiemelt cikk (csak ha a "kiemelt cikk" opció engedélyezve, lásd §14/9,11)
   verified_by     BIGINT UNSIGNED NULL,
   verified_at     DATETIME NULL,
   moderated_by    BIGINT UNSIGNED NULL,
@@ -128,9 +129,10 @@ CREATE TABLE {prefix}jkk_mtmt_query_profiles (
 
 Upsert `mtid` kulcson:
 - **új `mtid`** → beszúrás, `status='pending'`.
-- **létező `mtid`** → csak az MTMT-forrású mezők frissülnek; a kézi mezők (`status`, `thumbnail_id`, `funding_override`, `project_*`, taxonómia) **érintetlenek**.
+- **létező `mtid`, MTMT-oldali tartalom NEM változott** → az MTMT-forrású mezők frissülnek (gyakorlatilag no-op, ha valóban azonos), a kézi mezők (`status`, `thumbnail_id`, `funding_override`, `project_*`, `is_featured`, taxonómia) **érintetlenek**.
+- **létező `mtid`, MTMT-oldali tartalom VÁLTOZOTT** (§14/7, MEGBESZÉLÉS UTÁN MÓDOSÍTVA) → az MTMT-forrású mezők frissülnek ÉS ha a rekord `status`-a `approved` (vagy `rejected`) volt, azt **vissza kell állítani `pending`-re** — nincs csendes auto-apply egy már jóváhagyott/elutasított tételen. A kézi mezők (thumbnail, kutatócsoport/terület, funding_override, project_*, is_featured) megmaradnak, csak a `status` esik vissza. Ha már úgyis `pending` volt, nincs teendő. A "valóban változott-e" eldöntéséhez a mapper-kimenet MTMT-forrású oszlopait kell összevetni a tárolt értékekkel (nem elég a `raw_json`-t nézni, mert abban admin-időbélyegek — `lastRefresh`, `lastModified` — akkor is változnak, ha a tartalom nem).
 - **eltűnt `mtid`** → ne törölj, állítsd `missing_since`-t; admin dönthet.
-- `rejected` rekord `mtid`-je marad `rejected`; a sync nem húzza vissza `pending`-be. Legyen „Elutasítás visszavonása" művelet.
+- `rejected` rekord `mtid`-je marad `rejected`, HACSAK a fenti tartalom-változás vissza nem állítja `pending`-re. Legyen „Elutasítás visszavonása" művelet is (kézi, tartalom-változástól függetlenül).
 
 ---
 
@@ -314,6 +316,8 @@ jkk-mtmt-publications/
 
 A **`Version` fejlécet minden kiadásnál növeld** (SemVer), és egyezzen a GitHub release taggel — a PUC ebből tudja, van-e frissítés.
 
+**KRITIKUS verzió-szabály**: a plugin `0.x.y` verziószámon marad, amíg a megrendelő explicit ki nem mondja, hogy a rendszer kész. Az **`1.0.0`-t soha nem lépjük át magunktól** — az kizárólag a megrendelő kifejezett jóváhagyásával történhet. Addig minden érdemi mérföldkő (egy fázis lezárása) egy `0.MINOR.0` bump, hibajavítás `0.x.PATCH`. Ez a `readme.txt` `Stable tag`-jére és a `Changelog`-jára is vonatkozik.
+
 ### 10.3 PUC v5 inicializálás
 
 ```php
@@ -357,6 +361,10 @@ Node/IDE/OS szemét, `*.log`, lokális env; a `lib/plugin-update-checker/` **mar
 
 ## 12. Fázisok és elfogadási kritériumok
 
+> A §14-es megbeszélés több ponton bővítette/átrendezte az itt felsorolt fázisokat.
+> A mindenkori, összefésült, "hol tartunk" sorrendhez lásd `docs/roadmap.md` —
+> az a napra kész munkaterv, ez a szakasz az eredeti, változatlan alapterv marad.
+
 **Fázis 0 — Felderítés.** Élő minta-fetch (5.6), `docs/field-map.md` kész. *Kész, ha:* a valós JSON-ból dokumentált mezőtérkép van, benne a tiszta szerzőnév és az SJR feloldási útja.
 
 **Fázis 1 — Ingest mag.** API-kliens + mapper + repository + upsert/diff, WP-CLI `sync`. *Kész, ha:* egy profilra `wp jkk-mtmt sync` feltölti a táblát `pending`-be, újrafuttatva nem duplikál és nem írja felül a (még nem létező) kézi mezőket, lapozás működik.
@@ -382,6 +390,27 @@ Node/IDE/OS szemét, `*.log`, lokális env; a `lib/plugin-update-checker/` **mar
 - Az SJR és Norvég-szint pontos API-útja — élesből, ne találd ki.
 - Role→capability leképzés (kik kapják a `moderate`-et és a `classify`-t).
 - Ha egy mező nem jön az API-ból, azt **jelezd** (mi hiányzik), ne pótold kitalált adattal.
+
+---
+
+## 14. Megbeszélés utáni kiegészítések (2026-08, Fázis 1 lezárása után)
+
+A Fázis 1 élesben igazolt (767/0/0, JKK profil) után tartott megbeszélésen 12 pontban rögzültek módosítások/kiegészítések. Ezek **véglegesítik/bővítik** a fenti szakaszokat — ahol ütköznek egy korábbi ponttal, ez a szakasz nyer. Részletes indoklás/verifikáció: `docs/decisions.md`.
+
+1. **"Szakmai terület" mező — opt-in, terület↔aloldal párokkal.** Új kézi/plugin-oldali mező: publikációnként több "szakmai terület" rendelhető hozzá (dropdown), mindegyik terület egy konkrét WP-aloldalhoz van párosítva. **MEGERŐSÍTVE a megrendelőtől: ez a §7 „kutatócsoport-taxonómia + szakmai aloldalak" fogalmának átnevezése**, nem külön, harmadik koncepció — egy kategória-rendszer marad. ÚJ követelmény hozzá: a teljes funkció **plugin-beállításban ki/bekapcsolható legyen** (más telepítéseken nincs rá igény). Ha kikapcsolva: a moderációs űrlapon ne jelenjen meg a terület-választó, a widgeteken ne jelenjen meg a terület-badge/szűrő.
+2. **Query-profil opció: csak DOI-val rendelkező rekordok.** Az admin profil-oldalon (és CLI-n) legyen egy checkbox/opció, ami hozzáadja a `cond=identifiers.source.name;eq;DOI` feltételt a profil cond-jaihoz. **VERIFIKÁLVA élesben**, JKK-profilon (`directInstitutes;in;19662&core;eq;true`): teljes halmaz 767, DOI-val rendelkezik **372** (≈48%), a komplementer `identifiers.source.name;ne;DOI` pontosan 395-öt ad (372+395=767, tehát a szűrés valós). **Ez fontos üzleti döntés, nem csak technikai**: a DOI-only bekapcsolása kb. a felére vágja a behúzott tételszámot — a megrendelővel egyeztetve dőljön el profilonként, nem globális kényszer.
+3. **PDF / Kód / Videó gombok törölve** a `docs/widget-design.md` korábbi mockup-referenciájából — nem kellenek.
+4. **Egyéb azonosítók → logó-gombok.** A `external_ids` mezőben (WoS/Scopus/PubMed/SZTAKI stb., forrás+idValue+realUrl hármasokkal, már ma is helyesen gyűjtve) minden elemhez egy kis logó-ikon, linkelve a `realUrl`-re. Ehhez Fázis 5-ben logó-asset-eket kell beszerezni (Scopus/WoS/PubMed stb. hivatalos ikonjai — bevett gyakorlat tudományos oldalakon, nem jogi aggály).
+5. **Email-értesítés heti sync után**, ha volt új/frissült tétel. Konfigurálható címzett-lista (globális beállítás, Fázis 2 kör: a `wp_jkk_mtmt_query_profiles`-tól független, egyetlen recipient-lista site-szinten, hacsak a megrendelő nem kér profilonkénti bontást). A meglévő futás-napló (§6) ad alapot a tartalomhoz (hány új/frissült/hiányzó).
+6. **Kézi "Szinkron most" gomb** az adminban, bármikor megnyomható (nem csak cron/WP-CLI). Figyelem: egy teljes JKK-futás élesben ~24s volt 767 rekordra (lásd Fázis 1 teszt) — nagyobb intézménynél ez szinkron HTTP-request alatt PHP timeoutba futhat; Fázis 2-ben érdemben kezelni kell (pl. emelt `set_time_limit`, vagy async/AJAX-progress).
+7. **MTMT-oldali tartalomváltozás → vissza `pending`-be, NEM auto-apply.** Lásd fent, §4.3 frissítve. Ez a legérdemibb logikai változás — a `Jkk_Mtmt_Publication_Repository::upsert()`-öt bővíteni kell egy tartalom-diff lépéssel, mielőtt a kézi mezőkhöz (itt: `status`) nyúlna.
+8. **Alapértelmezett placeholder-kép + rágenerált cím**, ha a rekordhoz nincs feltöltött indexkép (`thumbnail_id` üres). A placeholder-kép maga feltölthető/cserélhető beállításokban. **Nyitott implementációs döntés** (Fázis 5): CSS-alapú felirat-overlay a kártyán (egyszerű, nincs szerver-oldali képgenerálás) VAGY tényleges szerver-oldali (GD/Imagick) beégetett szöveg a képbe (nehezebb, de valódi képfájlt ad pl. OG-megosztáshoz). Ajánlott az első, amíg nincs konkrét igény a másodikra.
+9. **`is_featured` kézi mező** (lásd §4.1, hozzáadva) — "kiemelt cikk" jelölés a moderációs űrlapon.
+10. **Két widget típus (Fázis 5-ben mindkettő, nem csak az alap 9.1):**
+    - **„A" — összesítő központi widget**: minden (nem csak kiemelt) jóváhagyott tétel, dátum-lapozó (év-fülek, lásd `docs/widget-design.md`), szakmai terület szerinti szűrő-lenyíló (ha a §14/1 opció be van kapcsolva), jól megcsinált kereső.
+    - **„B" — terület-aloldal widget**: csak az adott terület `is_featured=1` tételei, Elementor widget-beállításban választva ki, melyik terület/profil a scope.
+11. **A "kiemelt cikk" funkció is önálló, saját be/ki plugin-beállítás** (nem ugyanaz a kapcsoló, mint a §14/1 terület-toggle, bár a "B" widget gyakorlatilag mindkettőt igényli). Ha kikapcsolva: a moderációs űrlapon nincs "kiemelés" opció, és a "B" widget nem jelenik meg az Elementor widget-listában.
+12. **Widget-kártya link-célja**: a teljes sáv/kártya kattintható, célja `https://doi.org/<doi>`, ha van DOI; ha nincs (és az MTMT-link megjelenítése engedélyezve van, §9.1 „DOI-link és SJR-badge megjelenítése" kapcsoló), akkor a **humán MTMT gui-link**: `https://m2.mtmt.hu/gui2/?mode=browse&params=publication;<mtid>` — **VERIFIKÁLVA élesben** (a nyers publication-objektum `template`/`template2` mezőjében, a cím-linkként). Ez NEM ugyanaz, mint az §5.7-ben eddig egyedül dokumentált API-link (`/api/publication/<mtid>`, ami JSON-t ad, nem böngészhető oldalt) — a widget-linkeléshez mindig a gui2-s formát kell használni.
 
 ---
 

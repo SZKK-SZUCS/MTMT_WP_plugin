@@ -93,6 +93,10 @@ Eredmény: `totalElements` **2943**, `totalEstimatedElements` **2100** — reál
 
 **Több tanszék/kar egyszerre:** `directInstitutes;in;<id1>,<id2>` (vesszős lista, `in` operátor natívan támogatja — konzisztens az 5.2-es specifikációval).
 
+**PONTOSÍTVA: a tényleges scope nem a teljes SZE (257), hanem a JKK.** A megrendelő adott egy pontosabb intézmény-mtid-et: `19662` = „Járműipari Kutatóközpont SZE JKK [2011-]" (`GET /api/institute/19662` → `otype:Institute`, `type.label:"Kutatóközpont"`, `parent[0]` = SZE-n belüli `DivisionContainment`, saját `publicationCount: 767`). Teszt: `cond=directInstitutes;in;19662&cond=core;eq;true` → `totalElements=767` — **bájtra egyezik** az intézmény-objektum saját `publicationCount` mezőjével. Ez a legpontosabb, zajmentes scope; a `257` (teljes SZE) csak akkor kellene, ha a megrendelő explicit egyetem-szintű listát kérne.
+
+**Fontos architektúra-elv (nem csak ennél a telepítésnél):** SEM a `257`, SEM a `19662` nem kerül semmilyen PHP-kódba hardcode-olva. Az intézmény-mtid (vagy szerző-mtid-lista) kizárólag a `wp_jkk_mtmt_query_profiles.cond_json`-ban él, telepítésenként/site-onként beállítva — lásd „Query profil = dobozos scope-konfiguráció" lentebb.
+
 **Döntés a profilokhoz:** intézményi profil esetén `cond_json` mezője `directInstitutes`, operátor `in`, érték `[257]` (bővíthető alintézmény-mtid-ekkel, ha kar/tanszék-szintű szűkítés kell — azokat ugyanígy `/api/institute?cond=label;any;...` kereséssel kell feloldani, ékezet nélkül). Ha egy adott profilnál mégsem elég pontos (pl. túl sok "csak egy társszerző SZE-s" találat jön be), a fallback a CLAUDE.md-ben is javasolt **szerző-mtid-alapú** profil (`cond=authors;eq;<szerző-mtid>`).
 
 ## Nyitott pontok
