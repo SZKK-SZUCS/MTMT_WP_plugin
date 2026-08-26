@@ -31,12 +31,19 @@ final class Mtmt_Publications_Page {
 	private $profile_repo;
 
 	/**
+	 * @var Mtmt_Topic_Area_Repository
+	 */
+	private $topic_area_repo;
+
+	/**
 	 * @param Mtmt_Publication_Repository       $repository
 	 * @param Mtmt_Query_Profile_Repository     $profile_repo
+	 * @param Mtmt_Topic_Area_Repository        $topic_area_repo
 	 */
-	public function __construct( Mtmt_Publication_Repository $repository, Mtmt_Query_Profile_Repository $profile_repo ) {
-		$this->repository   = $repository;
-		$this->profile_repo = $profile_repo;
+	public function __construct( Mtmt_Publication_Repository $repository, Mtmt_Query_Profile_Repository $profile_repo, Mtmt_Topic_Area_Repository $topic_area_repo ) {
+		$this->repository      = $repository;
+		$this->profile_repo    = $profile_repo;
+		$this->topic_area_repo = $topic_area_repo;
 	}
 
 	/**
@@ -222,6 +229,16 @@ final class Mtmt_Publications_Page {
 
 		$this->repository->save_enrichment( $id, $fields, get_current_user_id() );
 
+		// A terület-besorolás is classify-hoz kötött (CLAUDE.md §7: "A besorolás
+		// kézi, a moderáció része, és külön jogosultsághoz kötött") — moderate-only
+		// user beküldése itt szerveroldalon csendben figyelmen kívül marad.
+		if ( get_option( 'mtmt_enable_topic_areas' ) && current_user_can( Mtmt_Capabilities::CLASSIFY ) ) {
+			$area_ids = isset( $_POST['topic_areas'] ) && is_array( $_POST['topic_areas'] )
+				? array_map( 'absint', wp_unslash( $_POST['topic_areas'] ) )
+				: array();
+			$this->topic_area_repo->set_areas_for_publication( $id, $area_ids );
+		}
+
 		wp_safe_redirect(
 			add_query_arg(
 				array(
@@ -251,7 +268,7 @@ final class Mtmt_Publications_Page {
 			$this->profile_repo->get_all()
 		);
 
-		$list_table = new Mtmt_List_Table( $this->repository, self::PAGE_SLUG, $years, $profiles );
+		$list_table = new Mtmt_List_Table( $this->repository, $this->topic_area_repo, self::PAGE_SLUG, $years, $profiles );
 		$list_table->prepare_items();
 		?>
 		<div class="wrap">
@@ -281,6 +298,9 @@ final class Mtmt_Publications_Page {
 
 		$can_classify      = current_user_can( Mtmt_Capabilities::CLASSIFY );
 		$featured_enabled  = (bool) get_option( 'mtmt_enable_featured' );
+		$topic_areas_on    = (bool) get_option( 'mtmt_enable_topic_areas' );
+		$all_areas         = $topic_areas_on ? $this->topic_area_repo->get_all() : array();
+		$assigned_area_ids = $topic_areas_on ? $this->topic_area_repo->get_area_ids_for_publication( $id ) : array();
 		$back_url          = remove_query_arg( array( 'action', 'id' ) );
 		$status_labels     = array(
 			'pending'  => __( 'Függőben', 'mtmt-sync' ),
@@ -359,6 +379,47 @@ final class Mtmt_Publications_Page {
 							<p class="description"><?php esc_html_e( 'Az NKFIH vagy más pályázati azonosító(k), amikhez a publikáció köthető (pl. "K 123456"). Az MTMT ezt sem adja automatikusan. Az "Ellenőrizve" pipa azt jelzi, hogy valaki kézzel leellenőrizte a fenti azonosító helyességét — ezt rögzíti, ki és mikor tette.', 'mtmt-sync' ); ?></p>
 						</td>
 					</tr>
+					<?php if ( $topic_areas_on ) : ?>
+						<tr>
+							<th><?php esc_html_e( 'Szakmai terület', 'mtmt-sync' ); ?></th>
+							<td>
+								<?php if ( ! $can_classify ) : ?>
+									<?php
+									$assigned_labels = array_map(
+										static function ( $area ) {
+											return $area['label'];
+										},
+										array_filter(
+											$all_areas,
+											static function ( $area ) use ( $assigned_area_ids ) {
+												return in_array( (int) $area['id'], $assigned_area_ids, true );
+											}
+										)
+									);
+									?>
+									<p class="description"><?php echo $assigned_labels ? esc_html( implode( ', ', $assigned_labels ) ) : esc_html__( 'Nincs terület kijelölve.', 'mtmt-sync' ); ?></p>
+								<?php elseif ( empty( $all_areas ) ) : ?>
+									<p class="description">
+										<?php
+										printf(
+											/* translators: %s: link a Területek oldalra */
+											esc_html__( 'Még nincs egy szakmai terület sem beállítva. %s', 'mtmt-sync' ),
+											'<a href="' . esc_url( admin_url( 'admin.php?page=mtmt-topic-areas' ) ) . '">' . esc_html__( 'Területek kezelése', 'mtmt-sync' ) . '</a>'
+										);
+										?>
+									</p>
+								<?php else : ?>
+									<?php foreach ( $all_areas as $area ) : ?>
+										<label style="display:block;">
+											<input type="checkbox" name="topic_areas[]" value="<?php echo esc_attr( (string) $area['id'] ); ?>" <?php checked( in_array( (int) $area['id'], $assigned_area_ids, true ) ); ?>>
+											<?php echo esc_html( $area['label'] ); ?>
+										</label>
+									<?php endforeach; ?>
+									<p class="description"><?php esc_html_e( 'Melyik szakmai terület aloldalán jelenjen meg ez a publikáció. Több is választható, vagy egy sem.', 'mtmt-sync' ); ?></p>
+								<?php endif; ?>
+							</td>
+						</tr>
+					<?php endif; ?>
 					<?php if ( $featured_enabled ) : ?>
 						<tr>
 							<th><?php esc_html_e( 'Kiemelt cikk', 'mtmt-sync' ); ?></th>

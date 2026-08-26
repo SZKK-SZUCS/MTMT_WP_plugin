@@ -316,3 +316,48 @@ dokumentálás közben, nem csak leírtam:
     kiemelés-visszavonáshoz (enélkül a bulk unfeature-nek nem sok értelme
     lenne — nem kérted külön, de e nélkül a funkció gyakorlatilag
     használhatatlan lett volna).
+
+## Fázis 4 — szakmai terület (2026-08)
+
+42. **NEM WP-taxonómia**, ahogy a CLAUDE.md §7 már eredetileg is javasolta —
+    a publikáció nem post-típus, `register_taxonomy()`/`wp_set_object_terms()`
+    proxy-objektummal ráerőltetve csak felesleges komplexitás lenne. Sima
+    saját tábla (`wp_mtmt_topic_areas`) + pivot tábla (`wp_mtmt_pub_topic_area`).
+
+43. **Névváltoztatás a CLAUDE.md §7 pivot-tábla-vázlatához képest**: ott
+    `wp_mtmt_pub_group (pub_id, term_id)` szerepelt — a `term_id` nevet
+    szándékosan `topic_area_id`-ra cseréltem, mert "term" a WP natív
+    taxonómia-rendszerére utalna (`wp_terms`), amit pont NEM használunk (#42).
+    A táblanevet is `mtmt_pub_topic_area`-ra neveztem át ez okból (konzisztens
+    az "topic_area" elnevezéssel mindenhol a kódban).
+
+44. **Terület↔aloldal párosítás**: `page_id` oszlop, `wp_dropdown_pages()`-szel
+    választva ki admin oldalon — NEM szabad URL-mező. Indoklás: a §7 explicit
+    "WP-aloldal" (nem tetszőleges link) párosítást ír elő, egy page-picker
+    validálja is, hogy a hivatkozott oldal tényleg létezik, és később
+    (Fázis 5) egyszerűen visszakereshető a link/permalink belőle.
+
+45. **Terület-hozzárendelés (melyik publikáció melyik területhez tartozik)
+    `mtmt_classify`-hoz kötve**, a terület-DEFINIÁLÁS (mi létezik, melyik
+    oldalhoz tartozik) `manage_options`-höz — ugyanaz a réteg-elválasztás,
+    mint a query-profiloknál (ki határozza meg a kereteket) vs. a
+    projektazonosító-ellenőrzésnél (ki dönt egy konkrét tételről).
+
+46. **`get_list()` bővítve egy `ids` szűrővel** (nem topic-area-specifikus a
+    repository szintjén — bármilyen előre kiválogatott id-halmazra szűkít).
+    Ha `ids` explicit ÜRES tömb (pl. egy területhez még nincs egyetlen
+    publikáció sem rendelve), a metódus AZONNAL 0 találatot ad, DB-hívás
+    nélkül — ez szándékosan más, mint az "ids nincs megadva" eset (nincs
+    szűrés). Unit-teszttel külön ellenőrizve, hogy ez a rövidzár tényleg
+    lefut és nem esik vissza "nincs szűrés"-re.
+
+47. **`page_id=0` normalizálva `NULL`-ra tároláskor** (`Mtmt_Topic_Area_
+    Repository::create()`), mert a `wp_dropdown_pages()` "— nincs kiválasztva —"
+    opciója `0`-t küld, de `0` nem érvényes post ID — a `NULL` egyértelműbben
+    jelzi "nincs hozzárendelt oldal", mint egy hamis `0` post ID.
+
+48. A "Kész, ha: egy terület aloldalán csak az adott terület tételei jönnek"
+    kritérium (eredeti roadmap-szöveg) **csak Fázis 5 után zárható le
+    ténylegesen** — widget nélkül nincs mit "aloldalon" megjeleníteni. Fázis 4
+    az adatmodellt + admin UI-t adja, és előkészíti a `get_publication_ids_
+    for_area()` metódust, amit a Fázis 5-ös "B" widget közvetlenül hívhat majd.

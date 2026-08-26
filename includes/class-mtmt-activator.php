@@ -101,9 +101,30 @@ final class Mtmt_Activator {
   KEY idx_profile (profile_id)
 ) {$charset_collate};";
 
+		$topic_areas_table = $wpdb->prefix . 'mtmt_topic_areas';
+
+		$sql_topic_areas = "CREATE TABLE {$topic_areas_table} (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  label VARCHAR(255) NOT NULL,
+  page_id BIGINT UNSIGNED NULL,
+  created_at DATETIME NULL,
+  PRIMARY KEY  (id)
+) {$charset_collate};";
+
+		$pub_topic_area_table = $wpdb->prefix . 'mtmt_pub_topic_area';
+
+		$sql_pub_topic_area = "CREATE TABLE {$pub_topic_area_table} (
+  pub_id BIGINT UNSIGNED NOT NULL,
+  topic_area_id BIGINT UNSIGNED NOT NULL,
+  PRIMARY KEY  (pub_id, topic_area_id),
+  KEY idx_topic_area (topic_area_id)
+) {$charset_collate};";
+
 		dbDelta( $sql_publications );
 		dbDelta( $sql_profiles );
 		dbDelta( $sql_sync_log );
+		dbDelta( $sql_topic_areas );
+		dbDelta( $sql_pub_topic_area );
 
 		update_option( 'mtmt_db_version', MTMT_DB_VERSION );
 	}

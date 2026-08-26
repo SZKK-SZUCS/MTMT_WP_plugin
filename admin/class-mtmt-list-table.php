@@ -13,8 +13,8 @@ if ( ! class_exists( 'WP_List_Table' ) ) {
 
 /**
  * Oszlopok: indexkép, cím+szerzők, forrás, év, típus, SJR, MTMT-státusz,
- * linkek (DOI/MTMT), státusz. (A "kutatócsoport" oszlop Fázis 4-ig hiányzik,
- * addig nincs mihez kötni.) Sor-műveletek és tömeges jóváhagyás/elutasítás.
+ * linkek (DOI/MTMT), szakmai terület (csak ha be van kapcsolva), státusz.
+ * Sor-műveletek és tömeges jóváhagyás/elutasítás/kiemelés.
  */
 final class Mtmt_List_Table extends WP_List_Table {
 
@@ -22,6 +22,11 @@ final class Mtmt_List_Table extends WP_List_Table {
 	 * @var Mtmt_Publication_Repository
 	 */
 	private $repository;
+
+	/**
+	 * @var Mtmt_Topic_Area_Repository
+	 */
+	private $topic_area_repo;
 
 	/**
 	 * @var string
@@ -39,12 +44,18 @@ final class Mtmt_List_Table extends WP_List_Table {
 	private $filter_profiles;
 
 	/**
+	 * @var array<int,string[]> pub_id => terület-label-ek, prepare_items() tölti fel.
+	 */
+	private $topic_area_labels = array();
+
+	/**
 	 * @param Mtmt_Publication_Repository $repository
+	 * @param Mtmt_Topic_Area_Repository  $topic_area_repo
 	 * @param string                      $page_slug
 	 * @param int[]                       $filter_years
 	 * @param array                       $filter_profiles
 	 */
-	public function __construct( Mtmt_Publication_Repository $repository, string $page_slug, array $filter_years, array $filter_profiles ) {
+	public function __construct( Mtmt_Publication_Repository $repository, Mtmt_Topic_Area_Repository $topic_area_repo, string $page_slug, array $filter_years, array $filter_profiles ) {
 		parent::__construct(
 			array(
 				'singular' => 'publication',
@@ -54,6 +65,7 @@ final class Mtmt_List_Table extends WP_List_Table {
 		);
 
 		$this->repository      = $repository;
+		$this->topic_area_repo = $topic_area_repo;
 		$this->page_slug       = $page_slug;
 		$this->filter_years    = $filter_years;
 		$this->filter_profiles = $filter_profiles;
@@ -63,7 +75,7 @@ final class Mtmt_List_Table extends WP_List_Table {
 	 * @return array
 	 */
 	public function get_columns(): array {
-		return array(
+		$columns = array(
 			'cb'         => '<input type="checkbox" />',
 			'thumbnail'  => '',
 			'title'      => __( 'Cím / szerzők', 'mtmt-sync' ),
@@ -73,8 +85,15 @@ final class Mtmt_List_Table extends WP_List_Table {
 			'sjr'        => __( 'SJR', 'mtmt-sync' ),
 			'mtmt_state' => __( 'MTMT-státusz', 'mtmt-sync' ),
 			'links'      => __( 'Linkek', 'mtmt-sync' ),
-			'status'     => __( 'Státusz', 'mtmt-sync' ),
 		);
+
+		if ( get_option( 'mtmt_enable_topic_areas' ) ) {
+			$columns['topic_areas'] = __( 'Szakmai terület', 'mtmt-sync' );
+		}
+
+		$columns['status'] = __( 'Státusz', 'mtmt-sync' );
+
+		return $columns;
 	}
 
 	/**
@@ -121,22 +140,37 @@ final class Mtmt_List_Table extends WP_List_Table {
 		$status     = isset( $_REQUEST['status'] ) ? sanitize_key( wp_unslash( $_REQUEST['status'] ) ) : '';
 		$year       = isset( $_REQUEST['year'] ) ? absint( $_REQUEST['year'] ) : 0;
 		$profile_id = isset( $_REQUEST['profile_id'] ) ? absint( $_REQUEST['profile_id'] ) : 0;
+		$area_id    = isset( $_REQUEST['area_id'] ) ? absint( $_REQUEST['area_id'] ) : 0;
 		$orderby    = isset( $_REQUEST['orderby'] ) ? sanitize_key( wp_unslash( $_REQUEST['orderby'] ) ) : 'published_year';
 		$order      = isset( $_REQUEST['order'] ) ? sanitize_key( wp_unslash( $_REQUEST['order'] ) ) : 'desc';
 
-		$result = $this->repository->get_list(
-			array(
-				'status'     => $status,
-				'year'       => $year,
-				'profile_id' => $profile_id,
-				'orderby'    => $orderby,
-				'order'      => $order,
-				'paged'      => $paged,
-				'per_page'   => $per_page,
-			)
+		$list_args = array(
+			'status'     => $status,
+			'year'       => $year,
+			'profile_id' => $profile_id,
+			'orderby'    => $orderby,
+			'order'      => $order,
+			'paged'      => $paged,
+			'per_page'   => $per_page,
 		);
 
+		if ( $area_id && get_option( 'mtmt_enable_topic_areas' ) ) {
+			$list_args['ids'] = $this->topic_area_repo->get_publication_ids_for_area( $area_id );
+		}
+
+		$result = $this->repository->get_list( $list_args );
+
 		$this->items = $result['items'];
+
+		if ( get_option( 'mtmt_enable_topic_areas' ) && ! empty( $this->items ) ) {
+			$ids = array_map(
+				static function ( $item ) {
+					return (int) $item['id'];
+				},
+				$this->items
+			);
+			$this->topic_area_labels = $this->topic_area_repo->get_labels_by_publication( $ids );
+		}
 
 		$this->_column_headers = array( $this->get_columns(), array(), $this->get_sortable_columns() );
 
@@ -232,6 +266,15 @@ final class Mtmt_List_Table extends WP_List_Table {
 	 * @param array $item
 	 * @return string
 	 */
+	public function column_topic_areas( $item ): string {
+		$labels = $this->topic_area_labels[ (int) $item['id'] ] ?? array();
+		return $labels ? esc_html( implode( ', ', $labels ) ) : '—';
+	}
+
+	/**
+	 * @param array $item
+	 * @return string
+	 */
 	public function column_status( $item ): string {
 		$labels = array(
 			'pending'  => __( 'Függőben', 'mtmt-sync' ),
@@ -282,6 +325,8 @@ final class Mtmt_List_Table extends WP_List_Table {
 		$current_status  = isset( $_REQUEST['status'] ) ? sanitize_key( wp_unslash( $_REQUEST['status'] ) ) : '';
 		$current_year    = isset( $_REQUEST['year'] ) ? absint( $_REQUEST['year'] ) : 0;
 		$current_profile = isset( $_REQUEST['profile_id'] ) ? absint( $_REQUEST['profile_id'] ) : 0;
+		$current_area    = isset( $_REQUEST['area_id'] ) ? absint( $_REQUEST['area_id'] ) : 0;
+		$topic_areas_on  = (bool) get_option( 'mtmt_enable_topic_areas' );
 		?>
 		<div class="alignleft actions">
 			<select name="status">
@@ -302,6 +347,14 @@ final class Mtmt_List_Table extends WP_List_Table {
 					<option value="<?php echo esc_attr( (string) $profile['id'] ); ?>" <?php selected( $current_profile, (int) $profile['id'] ); ?>><?php echo esc_html( $profile['label'] ); ?></option>
 				<?php endforeach; ?>
 			</select>
+			<?php if ( $topic_areas_on ) : ?>
+				<select name="area_id">
+					<option value=""><?php esc_html_e( 'Minden szakmai terület', 'mtmt-sync' ); ?></option>
+					<?php foreach ( $this->topic_area_repo->get_all() as $area ) : ?>
+						<option value="<?php echo esc_attr( (string) $area['id'] ); ?>" <?php selected( $current_area, (int) $area['id'] ); ?>><?php echo esc_html( $area['label'] ); ?></option>
+					<?php endforeach; ?>
+				</select>
+			<?php endif; ?>
 			<?php submit_button( __( 'Szűrés', 'mtmt-sync' ), '', 'filter_action', false ); ?>
 		</div>
 		<?php

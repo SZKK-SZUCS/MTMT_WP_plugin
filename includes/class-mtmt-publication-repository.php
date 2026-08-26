@@ -201,7 +201,9 @@ final class Mtmt_Publication_Repository {
 	/**
 	 * Moderációs lista, szűrve/lapozva (CLAUDE.md §8.1).
 	 *
-	 * @param array $args status, year, profile_id, orderby, order, paged, per_page.
+	 * @param array $args status, year, profile_id, ids (előre kiválogatott
+	 *                    id-lista, pl. terület-szűréshez), orderby, order,
+	 *                    paged, per_page.
 	 * @return array{items:array[],total:int}
 	 */
 	public function get_list( array $args = array() ): array {
@@ -210,6 +212,7 @@ final class Mtmt_Publication_Repository {
 				'status'     => '',
 				'year'       => 0,
 				'profile_id' => 0,
+				'ids'        => null,
 				'orderby'    => 'published_year',
 				'order'      => 'DESC',
 				'paged'      => 1,
@@ -232,6 +235,19 @@ final class Mtmt_Publication_Repository {
 		if ( $args['profile_id'] ) {
 			$where[]  = 'query_profile_id = %d';
 			$params[] = (int) $args['profile_id'];
+		}
+		if ( is_array( $args['ids'] ) ) {
+			$ids = array_map( 'absint', $args['ids'] );
+			if ( empty( $ids ) ) {
+				// Üres szűrt id-lista (pl. egy területhez még nincs hozzárendelve
+				// egy publikáció sem) -> szándékosan 0 találat, nem "nincs szűrés".
+				return array(
+					'items' => array(),
+					'total' => 0,
+				);
+			}
+			$where[] = 'id IN (' . implode( ',', array_fill( 0, count( $ids ), '%d' ) ) . ')';
+			$params  = array_merge( $params, $ids );
 		}
 
 		$allowed_orderby = array( 'published_year', 'title', 'first_seen_at', 'last_synced_at' );

@@ -83,6 +83,15 @@ final class Mtmt_Settings_Page {
 				<input type="hidden" name="mtmt_action" value="save_features">
 				<p>
 					<label>
+						<input type="checkbox" name="enable_topic_areas" value="1" <?php checked( (bool) get_option( 'mtmt_enable_topic_areas' ) ); ?>>
+						<?php esc_html_e( '„Szakmai terület" funkció engedélyezése', 'mtmt-sync' ); ?>
+					</label>
+				</p>
+				<p class="description">
+					<?php esc_html_e( 'Ezen a site-on kategorizálod-e a publikációkat szakmai terület szerint (pl. "Autonóm járművek", "Robotika"), mindegyik területhez egy külön WP-aloldallal. Nem minden telepítésen kell — ha kikapcsolod: a gazdagító űrlapon nincs terület-választó, a widgeteken nincs terület-badge/szűrő. A területek listáját a "Területek" almenüben szerkesztheted.', 'mtmt-sync' ); ?>
+				</p>
+				<p>
+					<label>
 						<input type="checkbox" name="enable_featured" value="1" <?php checked( (bool) get_option( 'mtmt_enable_featured' ) ); ?>>
 						<?php esc_html_e( '„Kiemelt cikk" funkció engedélyezése', 'mtmt-sync' ); ?>
 					</label>
@@ -184,6 +193,7 @@ final class Mtmt_Settings_Page {
 		}
 
 		if ( 'save_features' === $action ) {
+			update_option( 'mtmt_enable_topic_areas', ! empty( $_POST['enable_topic_areas'] ) ? 1 : 0 );
 			update_option( 'mtmt_enable_featured', ! empty( $_POST['enable_featured'] ) ? 1 : 0 );
 
 			return array(
