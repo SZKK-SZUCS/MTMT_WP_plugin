@@ -4,7 +4,7 @@ Tags: mtmt, publications, elementor, publikaciok, tudomanyos
 Requires at least: 6.4
 Tested up to: 6.7
 Requires PHP: 8.1
-Stable tag: 0.2.0
+Stable tag: 0.3.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -42,6 +42,20 @@ a `CLAUDE.md` és a `docs/roadmap.md` fájlokban vannak dokumentálva.
 
 == Changelog ==
 
+= 0.3.0 =
+* Moderációs lista (jóváhagyás/elutasítás, tömeges műveletek, szűrés
+  státusz/év/profil szerint), szerkesztő/gazdagító űrlap (indexkép WP
+  média-feltöltővel, támogatás felülbírálás, projektazonosító + ellenőrizve
+  pipa, kiemelt cikk jelölő).
+* Kétszintű jogosultság: `mtmt_moderate` (jóváhagyás/elutasítás, alap
+  szerkesztés) és `mtmt_classify` (kutatócsoport-besorolás, projekt-
+  ellenőrzés), alapból Editor és Administrator szerepkörre.
+* Admin menü átrendezve: a moderációs lista lett a top-level "MTMT" oldal
+  (pending-szám piros buborékban), a Profilok/Beállítások almenükké váltak.
+* Bulk kiemelés/kiemelés-visszavonás a listán, feltételesen (csak ha a
+  "Kiemelt cikk" funkció be van kapcsolva Beállításokban).
+* Minden szerkeszthető mezőnél közérthető magyarázó szöveg az adminban.
+
 = 0.2.0 =
 * Ingest mag: MTMT API-kliens (cond-építés, lapozás, retry/backoff), mapper
   (docs/field-map.md szerint), repository upsert/diff, WP-CLI `sync` parancs.
@@ -67,7 +81,10 @@ a `CLAUDE.md` és a `docs/roadmap.md` fájlokban vannak dokumentálva.
 
 == Upgrade Notice ==
 
+= 0.3.0 =
+Moderáció + jogosultságok. A plugin továbbra is 0.x verziószámon fejlődik —
+1.0.0-t csak akkor kap, ha a megrendelő explicit jóváhagyja, hogy a rendszer
+kész (lásd CLAUDE.md §10.2).
+
 = 0.2.0 =
-Az ingest mag első élesben validált verziója. A plugin továbbra is 0.x
-verziószámon fejlődik — 1.0.0-t csak akkor kap, ha a megrendelő explicit
-jóváhagyja, hogy a rendszer kész (lásd CLAUDE.md §10.2).
+Az ingest mag első élesben validált verziója.
