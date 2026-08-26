@@ -101,6 +101,14 @@ final class Jkk_Mtmt_Profiles_Page {
 							<td>
 								<form method="post" style="display:inline">
 									<?php wp_nonce_field( $nonce_action ); ?>
+									<input type="hidden" name="jkk_mtmt_action" value="sync_now">
+									<input type="hidden" name="id" value="<?php echo esc_attr( (string) $profile['id'] ); ?>">
+									<button type="submit" class="button button-primary">
+										<?php esc_html_e( 'Szinkron most', 'jkk-mtmt-publications' ); ?>
+									</button>
+								</form>
+								<form method="post" style="display:inline">
+									<?php wp_nonce_field( $nonce_action ); ?>
 									<input type="hidden" name="jkk_mtmt_action" value="toggle">
 									<input type="hidden" name="id" value="<?php echo esc_attr( (string) $profile['id'] ); ?>">
 									<input type="hidden" name="enabled" value="<?php echo $profile['enabled'] ? '0' : '1'; ?>">
@@ -191,6 +199,8 @@ final class Jkk_Mtmt_Profiles_Page {
 				return $this->handle_toggle();
 			case 'delete':
 				return $this->handle_delete();
+			case 'sync_now':
+				return $this->handle_sync_now();
 			default:
 				return null;
 		}
@@ -314,6 +324,63 @@ final class Jkk_Mtmt_Profiles_Page {
 		return array(
 			'type'    => 'success',
 			'message' => __( 'Profil törölve.', 'jkk-mtmt-publications' ),
+		);
+	}
+
+	/**
+	 * Kézi "Szinkron most" — bármikor elindítható, nem csak cronból/CLI-ből
+	 * (CLAUDE.md §14/6). Szinkron HTTP-requestben fut; nagyobb intézménynél
+	 * ez timeoutba futhat — a `set_time_limit(0)` csak a PHP-oldali korlátot
+	 * emeli, a webszerver/proxy saját timeoutját nem. Ha ez élesben problémát
+	 * okoz, ez a pont válik async/AJAX-progress-szé (lásd docs/roadmap.md).
+	 *
+	 * @return array{type:string,message:string}
+	 */
+	private function handle_sync_now(): array {
+		$id = isset( $_POST['id'] ) ? absint( $_POST['id'] ) : 0;
+
+		if ( ! $id ) {
+			return array(
+				'type'    => 'error',
+				'message' => __( 'Érvénytelen profil.', 'jkk-mtmt-publications' ),
+			);
+		}
+
+		if ( function_exists( 'set_time_limit' ) ) {
+			@set_time_limit( 0 ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+		}
+
+		$results = Jkk_Mtmt_Sync_Runner::run( 'manual', $id );
+		$result  = $results[0] ?? null;
+
+		if ( ! $result ) {
+			return array(
+				'type'    => 'error',
+				'message' => __( 'A szinkron nem futott le.', 'jkk-mtmt-publications' ),
+			);
+		}
+
+		if ( ! empty( $result['errors'] ) ) {
+			return array(
+				'type'    => 'error',
+				'message' => sprintf(
+					/* translators: %s: hibaüzenetek */
+					__( 'Hiba a szinkron közben: %s', 'jkk-mtmt-publications' ),
+					implode( '; ', $result['errors'] )
+				),
+			);
+		}
+
+		return array(
+			'type'    => 'success',
+			'message' => sprintf(
+				/* translators: 1: uj, 2: frissitett, 3: visszaesett, 4: hianyzo */
+				__( 'Szinkron lefutott: %1$d új, %2$d frissített (ebből %3$d visszaesett pending-be), %4$d hiányzóként jelölt.', 'jkk-mtmt-publications' ),
+				$result['inserted'],
+				$result['updated'],
+				$result['reverted_to_pending'],
+				$result['missing']
+			),
 		);
 	}
 }

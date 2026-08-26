@@ -32,23 +32,12 @@ final class Jkk_Mtmt_Sync_Command {
 	 * @param array $assoc_args
 	 */
 	public function __invoke( array $args, array $assoc_args ): void {
-		global $wpdb;
+		$profile_id = ! empty( $assoc_args['profile'] ) ? (int) $assoc_args['profile'] : null;
+		$results    = Jkk_Mtmt_Sync_Runner::run( 'cli', $profile_id );
 
-		$sync = new Jkk_Mtmt_Sync(
-			new Jkk_Mtmt_Api_Client(),
-			new Jkk_Mtmt_Publication_Repository( $wpdb ),
-			new Jkk_Mtmt_Query_Profile_Repository( $wpdb )
-		);
-
-		if ( ! empty( $assoc_args['profile'] ) ) {
-			$results = array( $sync->run_profile( (int) $assoc_args['profile'] ) );
-		} else {
-			$results = $sync->run_all();
-
-			if ( empty( $results ) ) {
-				WP_CLI::warning( 'Nincs enabled query profil. Hozz létre egyet: wp jkk-mtmt profile create --label=... --cond=...' );
-				return;
-			}
+		if ( empty( $results ) ) {
+			WP_CLI::warning( 'Nincs enabled query profil. Hozz létre egyet: wp jkk-mtmt profile create --label=... --cond=...' );
+			return;
 		}
 
 		foreach ( $results as $result ) {

@@ -1,5 +1,5 @@
 === JKK MTMT Publications ===
-Contributors: szkkszucs
+Contributors: Szurofka Márton, MFÜI
 Tags: mtmt, publications, elementor, publikaciok, tudomanyos
 Requires at least: 6.4
 Tested up to: 6.7

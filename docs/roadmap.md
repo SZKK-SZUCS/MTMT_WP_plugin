@@ -57,8 +57,9 @@ létrehozva ténylegesen csak DOI-s rekordokat húz be.
    pipával — ellenőrizd, hogy a listában a cond JSON tartalmazza az
    `identifiers.source.name` feltételt.
 
-## Fázis 2 — Cron + napló + email + kézi szinkron
+## 🔜 Fázis 2 — Cron + napló + email + kézi szinkron
 
+**KÓD KÉSZ, ág: `fazis-2-cron-log-email`, ÉLES ELLENŐRZÉS MÉG NEM TÖRTÉNT.**
 Eredeti scope (§6) + két új pont a megbeszélésből:
 
 - Heti `jkk_mtmt_weekly` cron + `wp jkk-mtmt sync` ugyanarra a logikára.
@@ -73,6 +74,28 @@ Eredeti scope (§6) + két új pont a megbeszélésből:
 *Kész, ha:* ütemezetten fut, napló látszik adminban, `DISABLE_WP_CRON`-nal
 rendszer-cronból is hívható, email megérkezik új tételnél, a gomb megnyomható
 és nem fut timeoutba a JKK-méretű profilon.
+
+**Éles ellenőrzéshez** (Local site, Site Shell + wp-admin):
+1. **Regresszió a "frissített" számlálóra** (a legfontosabb, saját teszt közben
+   találtam hibát benne, most javítva): `wp jkk-mtmt sync --profile=<jkk-id>`
+   kétszer egymás után, rövid időn belül. A MÁSODIK futásnak ~0 "frissítve"-t
+   kell mutatnia (semmi nem változott MTMT-oldalon eközben) — ha 767-et (vagy
+   közel ennyit) mutatna újra, az azt jelentené, hogy a fix nem működik és
+   minden héten kimenne az email feleslegesen.
+2. **Beállítások oldal** (JKK MTMT → Beállítások): adj meg egy valódi email-címet
+   a "Címzettek" mezőben, mentsd el, majd wp-adminban "Szinkron most"-tal
+   futtass egy syncet — MANUÁLIS triggernél NEM szabad emailnek mennie (csak
+   cronnál megy). `wp cron event run jkk_mtmt_weekly_sync` egy CLI-ből
+   szimulált cron-futás — ha van új/frissült tétel, ennél MENNIE kell az emailnek
+   (ha a WP-oldal ki tud küldeni emailt — helyi fejlesztésnél ehhez kellhet
+   pl. egy SMTP-plugin, ha a Local nem küld ki natívan leveleket).
+3. **Futás-napló** (JKK MTMT → Beállítások, alsó tábla): minden fenti futásnak
+   meg kell jelennie egy sorban, helyes trigger-típussal (cli/manual/cron).
+4. **Cron-ütemezés**: `wp cron event list` — legyen benne `jkk_mtmt_weekly_sync`,
+   "weekly" recurrence-szel.
+5. **Kézi gomb timeoutja**: a JKK profilon (767 rekord, ~24s) a "Szinkron most"
+   gombnak simán le kell futnia böngészőből is, admin-notice-ban a helyes
+   számokkal.
 
 ## Fázis 3 — Moderáció + gazdagítás + jogosultságok
 

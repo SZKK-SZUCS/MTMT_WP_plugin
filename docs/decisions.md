@@ -162,3 +162,43 @@ dokumentálás közben, nem csak leírtam:
     nem mondja, hogy a rendszer kész — `1.0.0`-t soha nem lépünk át magunktól.
     Rögzítve a CLAUDE.md §10.2-ben is, hogy jövőbeli session se felejtse el.
     A 0.2.0 az első érdemi verzió (Fázis 0+1+1.5 kész, élesben validálva).
+
+## Fázis 2 — cron, napló, email, kézi gomb (2026-08)
+
+27. **HIBA JAVÍTVA, saját teszt közben találtam meg, mielőtt élesedett volna**:
+    a `Jkk_Mtmt_Sync::run_profile()` eddig MINDEN meglévő (nem új) rekordot
+    "frissítettként" számolt, függetlenül attól, hogy a tartalma tényleg
+    változott-e (`else { ++$result['updated']; }` ág, `content_changed`
+    figyelmen kívül hagyva). Ez azt jelentette volna, hogy egy stabil,
+    767 rekordos profil MINDEN heti syncnál 767 "frissítést" jelentett volna
+    — és mivel a §14/5 email-értesítés az "volt-e frissült tétel" jelre
+    kapcsolódik, ez MINDEN héten kiküldte volna az emailt, akkor is, ha
+    semmi nem történt. Javítva: `updated` csak akkor nő, ha
+    `$upsert['content_changed']` igaz. Regressziós teszt: két egymást követő
+    upsert ugyanazzal a mapped-row-val -> `updated` marad 0 a másodikon.
+
+28. Új osztályok a futtatás egységesítésére, hogy cron/kézi gomb/CLI mind
+    ugyanazon a logikán menjen át (naplózás + feltételes email):
+    `Jkk_Mtmt_Sync_Runner::run($trigger_type, $profile_id=null)` —
+    ezt hívja mindhárom belépési pont, NEM közvetlenül a `Jkk_Mtmt_Sync`-et.
+    `$trigger_type`: 'cron'|'manual'|'cli' — csak 'cron'-nál megy email.
+
+29. Email-cimzettek: `wp_options` (`jkk_mtmt_notification_recipients`), NEM
+    külön tábla — egyetlen site-szintű, sorononkénti/vesszős lista, admin
+    "Beállítások" oldalon szerkeszthető (`admin/class-jkk-mtmt-settings-page.php`).
+
+30. Futás-napló: ÚJ tábla `wp_jkk_mtmt_sync_log` (profilonkénti sor minden
+    futásból, trigger_type-tal), `JKK_MTMT_DB_VERSION` 1->2 emelve. Hozzá
+    ÚJ auto-upgrade check `plugins_loaded`-en (`jkk_mtmt_maybe_upgrade_db()`):
+    ha a tárolt db_version eltér, újrafuttatja a dbDelta-t reaktiválás
+    nélkül is — enélkül egy sima fájl-frissítés (deaktiválás nélkül) nem
+    hozta volna létre az új táblát.
+
+31. `is_featured` oszlop pótolva a TÉNYLEGES `Jkk_Mtmt_Activator` SQL-jében —
+    korábban csak a CLAUDE.md §4.1 dokumentációba került be, az éles
+    migrációs kódba nem (dokumentáció-kód drift, most zárva).
+
+32. Kézi "Szinkron most" gomb: `set_time_limit(0)` a PHP-oldali korláthoz,
+    DE ez nem old meg webszerver/proxy-szintű timeoutot — ha ez élesben
+    nagyobb intézménynél gondot okoz, async/AJAX-progress kell (lásd
+    docs/roadmap.md, §14/6 eredeti figyelmeztetése).

@@ -103,7 +103,12 @@ final class Jkk_Mtmt_Sync {
 
 				if ( $upsert['inserted'] ) {
 					++$result['inserted'];
-				} else {
+				} elseif ( ! empty( $upsert['content_changed'] ) ) {
+					// Csak akkor "frissített", ha a tartalom ténylegesen eltért —
+					// egy változatlan, csak újra lekérdezett rekord NEM az
+					// (különben minden heti sync "frissítettnek" jelentene
+					// mindent, és az email-értesítés mindig kimenne, lásd
+					// docs/decisions.md).
 					++$result['updated'];
 				}
 
