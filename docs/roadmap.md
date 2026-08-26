@@ -100,9 +100,10 @@ rendszer-cronból is hívható, email megérkezik új tételnél, a gomb megnyom
    gombnak simán le kell futnia böngészőből is, admin-notice-ban a helyes
    számokkal.
 
-## 🔜 Fázis 3 — Moderáció + gazdagítás + jogosultságok
+## ✅ Fázis 3 — Moderáció + gazdagítás + jogosultságok
 
-**KÓD KÉSZ, ág: `fazis-3-moderation`, ÉLES ELLENŐRZÉS MÉG NEM TÖRTÉNT.**
+**KÉSZ, mergelve (PR #2), élesben validálva.** A megrendelői kérésre PR előtt
+mezőmagyarázatok + bulk kiemelés is bekerült. 0.3.0-ban kiadva.
 Eredeti scope (§8) + két új mező a megbeszélésből:
 
 - `WP_List_Table` lista (indexkép, cím+szerzők egy oszlopban, forrás, év, típus,
@@ -153,23 +154,50 @@ tényleg elrejti/mutatja a checkboxot.
    capability-szétválasztás elvi ellenőrzése, nem éles korlátozás — a
    finomabb role-mapping később, ha kell).
 
-## Fázis 4 — Taxonómia + aloldalak ("Szakmai terület")
+## 🔜 Fázis 4 — Taxonómia + aloldalak ("Szakmai terület")
 
+**KÓD KÉSZ, ág: `fazis-4-topic-areas`, ÉLES ELLENŐRZÉS MÉG NEM TÖRTÉNT.**
 Eredeti scope (§7), a megbeszélésen **megerősítve átnevezve** "Szakmai terület"-re
 (docs/decisions.md #18) — NEM külön, második kategória-rendszer a kutatócsoport
 mellett, ugyanaz a mechanizmus.
 
-- `mtmt_research_group`-szerű taxonómia (belső néven maradhat, UI-szövegben
-  "Szakmai terület"), pivot tábla a publikáció↔terület sokoldalú kapcsolathoz.
-- Terület↔aloldal párosítás (melyik területhez melyik WP-oldal tartozik).
-- **ÚJ: teljes funkció opt-in plugin-beállítás** (§14/1) — kikapcsolva: a Fázis 3
-  szerkesztő űrlapon nincs terület-választó, a Fázis 5 widgeteken nincs
-  terület-badge/szűrő.
-- Fázis 3 edit-formja bővül a terület-választóval (feltételesen, a toggle szerint).
+- **NEM WP-taxonómia** (a publikáció nem post-típus, CLAUDE.md §7 explicit
+  javaslata szerint) — sima saját tábla (`wp_mtmt_topic_areas`: label +
+  `page_id`) és pivot tábla (`wp_mtmt_pub_topic_area`) a publikáció↔terület
+  sokoldalú kapcsolathoz. `MTMT_DB_VERSION` 2->3.
+- Terület↔aloldal párosítás: egy `wp_dropdown_pages()`-es oldal-választó a
+  Területek admin oldalon (`manage_options`, saját almenü "Területek" néven).
+- Terület-hozzárendelés egy publikációhoz a szerkesztő űrlapon, **`mtmt_classify`-hoz
+  kötve** (CLAUDE.md §7: "A besorolás kézi, a moderáció része, és külön
+  jogosultsághoz kötött") — moderate-only user csak olvashatja, mit lát,
+  szerveroldalon is védve, nem csak a form UI-ban elrejtve (ugyanaz a minta,
+  mint a project_verified-nél, lásd docs/decisions.md #39).
+- **Teljes funkció opt-in plugin-beállítás** (§14/1, `mtmt_enable_topic_areas`,
+  Beállítások oldal "Funkciók" szakasza) — kikapcsolva: a szerkesztő űrlapon
+  nincs terület-választó, a listán nincs terület-oszlop/szűrő.
+- A moderációs lista (Fázis 3) bővült: "Szakmai terület" oszlop + szűrő-lenyíló
+  felül, mindkettő feltételes a toggle szerint (CLAUDE.md §8.1 eredetileg is
+  előírta a "kutatócsoport" szűrőt, ez pótolja).
 
-*Kész, ha:* egy terület aloldalán csak az adott terület tételei jönnek; a
-funkció kikapcsolva a moderációs form és a widgetek is korrektül eltüntetik a
-terület-UI-t.
+*Kész, ha:* a terület-hozzárendelés menti/tölti magát a szerkesztő űrlapon;
+a lista szűrhető/oszloppal mutatja a területet; a funkció kikapcsolva a
+moderációs form és a lista is korrektül eltünteti a terület-UI-t. **A "egy
+terület aloldalán csak az adott terület tételei jönnek" kritérium csak
+Fázis 5 (widget) megépülése után zárható le teljesen** — Fázis 4 önmagában
+csak az adatmodellt + admin UI-t adja, a `get_publication_ids_for_area()`
+repository-metódus már készen áll a Fázis 5-ös widget számára.
+
+**Éles ellenőrzéshez** (Local site, wp-admin):
+1. Beállítások → "Szakmai terület" funkció engedélyezése.
+2. MTMT → Területek (új almenü) → hozz létre 1-2 területet, mindegyikhez
+   válassz egy meglévő WP-oldalt.
+3. Nyiss meg egy publikációt szerkesztésre — jelenjen meg a terület-választó
+   checkbox-lista, pipálj be egyet, mentsd — töltsön vissza helyesen.
+4. A moderációs listán jelenjen meg a "Szakmai terület" oszlop a hozzárendelt
+   címkével, és szűrj a felső "Minden szakmai terület" lenyílóval.
+5. Kapcsold ki a funkciót Beállításokban — a szerkesztő űrlapon és a listán is
+   tűnjön el a terület-UI (a korábban elmentett hozzárendelés a DB-ben marad,
+   csak nem látszik/szerkeszthető, amíg vissza nem kapcsolod).
 
 ## Fázis 5 — Elementor widget (A + B)
 
@@ -211,3 +239,28 @@ Release. *Kész, ha:* egy teszt-oldal a GitHub release-ből frissülést lát a 
 Változatlan (§9.2), csak külön jóváhagyással: Dimensions idézettség-badge,
 BibTeX lenyíló, haladó frontend-szűrők (szerző/típus/folyóirat/SJR/Norvég-szint),
 Norvég-szint API-útjának lezárása (ha idáig még nem történt meg).
+
+## Backlog — még nincs fázishoz kötve
+
+- **Profil-előnézet ("Preview") létrehozás előtt** (megrendelői kérés, 2026-08) —
+  az admin "Új profil" űrlapon (Profilok oldal) legyen egy "Előnézet" gomb,
+  ami a beírt scope-ból (intézmény/szerző/haladó + DOI-only) összeépített
+  `cond_json`-nal kimegy az MTMT API-hoz `size=5`-tel (NEM menti el a profilt,
+  NEM indít syncet — csak olvas), és megmutatja:
+  - `paging.totalElements` / `totalEstimatedElements` — ha ez gyanúsan nagy
+    (a docs/field-map.md-ben már dokumentált minta: ~5000/több millió =
+    valószínűleg NEM szűrt, az MTMT csendben ignorálta az ismeretlen cond-ot),
+    erre kifejezetten figyelmeztessen.
+  - Pár minta-cím/szerző a találatokból, hogy vizuálisan is ellenőrizhető
+    legyen, hogy tényleg a várt publikációk jönnek-e.
+  - Cél: ne lehessen véletlenül elgépelt intézmény-mtiddel vagy rosszul szűrő
+    cond-dal létrehozni egy profilt, ami aztán szinkronnál felesleges/rossz
+    tömeget importál be.
+  - Implementáció-vázlat: a `build_conditions()` logika (már megvan
+    `Mtmt_Profiles_Page`-ben) újrahasználható; egy új `mtmt_action=preview`
+    a meglévő (nem-AJAX, sima form-POST) mintát követve — ugyanaz az oldal
+    jelenítse meg az előnézetet a form fölött, a beírt mezőket megőrizve.
+    Nem kell hozzá új tábla vagy repository-módszer, csak az `Mtmt_Api_Client`
+    egyetlen `get_page()` hívása.
+  - Nincs konkrét fázishoz kötve — a Profilok oldalt (Fázis 1) bővítené,
+    bármikor felvehető, amikor ráérünk.

@@ -14,7 +14,7 @@
 defined( 'ABSPATH' ) || exit;
 
 define( 'MTMT_VERSION', '0.3.0' );
-define( 'MTMT_DB_VERSION', '2' );
+define( 'MTMT_DB_VERSION', '3' );
 define( 'MTMT_CAPS_VERSION', '1' );
 define( 'MTMT_PLUGIN_FILE', __FILE__ );
 define( 'MTMT_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
@@ -25,6 +25,7 @@ require_once MTMT_PLUGIN_DIR . 'includes/class-mtmt-api-client.php';
 require_once MTMT_PLUGIN_DIR . 'includes/class-mtmt-mapper.php';
 require_once MTMT_PLUGIN_DIR . 'includes/class-mtmt-publication-repository.php';
 require_once MTMT_PLUGIN_DIR . 'includes/class-mtmt-query-profile-repository.php';
+require_once MTMT_PLUGIN_DIR . 'includes/class-mtmt-topic-area-repository.php';
 require_once MTMT_PLUGIN_DIR . 'includes/class-mtmt-sync.php';
 require_once MTMT_PLUGIN_DIR . 'includes/class-mtmt-sync-log-repository.php';
 require_once MTMT_PLUGIN_DIR . 'includes/class-mtmt-notifier.php';
@@ -34,6 +35,7 @@ require_once MTMT_PLUGIN_DIR . 'admin/class-mtmt-list-table.php';
 require_once MTMT_PLUGIN_DIR . 'admin/class-mtmt-publications-page.php';
 require_once MTMT_PLUGIN_DIR . 'admin/class-mtmt-profiles-page.php';
 require_once MTMT_PLUGIN_DIR . 'admin/class-mtmt-settings-page.php';
+require_once MTMT_PLUGIN_DIR . 'admin/class-mtmt-topic-areas-page.php';
 
 register_activation_hook( __FILE__, array( 'Mtmt_Activator', 'activate' ) );
 register_activation_hook( __FILE__, array( 'Mtmt_Capabilities', 'activate' ) );
@@ -88,9 +90,11 @@ function mtmt_register_admin_pages(): void {
 
 	$publication_repo = new Mtmt_Publication_Repository( $wpdb );
 	$profile_repo      = new Mtmt_Query_Profile_Repository( $wpdb );
+	$topic_area_repo   = new Mtmt_Topic_Area_Repository( $wpdb );
 
-	( new Mtmt_Publications_Page( $publication_repo, $profile_repo ) )->add_menu_page();
+	( new Mtmt_Publications_Page( $publication_repo, $profile_repo, $topic_area_repo ) )->add_menu_page();
 	( new Mtmt_Profiles_Page( $profile_repo ) )->add_menu_page();
+	( new Mtmt_Topic_Areas_Page( $topic_area_repo ) )->add_menu_page();
 	( new Mtmt_Settings_Page( new Mtmt_Sync_Log_Repository( $wpdb ), $profile_repo ) )->add_menu_page();
 }
 add_action( 'admin_menu', 'mtmt_register_admin_pages' );
@@ -104,7 +108,11 @@ add_action( 'admin_menu', 'mtmt_register_admin_pages' );
 function mtmt_handle_admin_actions(): void {
 	global $wpdb;
 
-	( new Mtmt_Publications_Page( new Mtmt_Publication_Repository( $wpdb ), new Mtmt_Query_Profile_Repository( $wpdb ) ) )->maybe_handle_request();
+	( new Mtmt_Publications_Page(
+		new Mtmt_Publication_Repository( $wpdb ),
+		new Mtmt_Query_Profile_Repository( $wpdb ),
+		new Mtmt_Topic_Area_Repository( $wpdb )
+	) )->maybe_handle_request();
 }
 add_action( 'admin_init', 'mtmt_handle_admin_actions' );
 
