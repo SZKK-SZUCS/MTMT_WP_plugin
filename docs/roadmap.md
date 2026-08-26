@@ -32,12 +32,12 @@ automatikus futtatásba kerül (különben az első automata re-sync már a rég
 "csendes auto-apply" logikával futna approved rekordokon).
 
 - **MTMT-oldali tartalomváltozás → `pending`-be visszaállítás** (CLAUDE.md §14/7,
-  §4.3). Érinti: `Jkk_Mtmt_Publication_Repository::upsert()`. Kell egy
+  §4.3). Érinti: `Mtmt_Publication_Repository::upsert()`. Kell egy
   tartalom-diff lépés (mapped-row MTMT-forrású oszlopait a tárolt értékekkel
   összevetni, NEM a `raw_json`-t, ld. decisions.md #19), és ha van érdemi eltérés
   és a rekord `approved`/`rejected` volt, essen vissza `pending`-re.
-- **DOI-only query-opció** (CLAUDE.md §14/2). Érinti: `Jkk_Mtmt_Profiles_Page`
-  (checkbox az űrlapon) + `Jkk_Mtmt_Profile_Command::create()` (CLI-oldali
+- **DOI-only query-opció** (CLAUDE.md §14/2). Érinti: `Mtmt_Profiles_Page`
+  (checkbox az űrlapon) + `Mtmt_Profile_Command::create()` (CLI-oldali
   megfelelő). Cond: `identifiers.source.name;eq;DOI`, VERIFIKÁLVA. Profilonként
   kapcsolható, nem globális.
 
@@ -46,13 +46,13 @@ automatikus futtatásba kerül (különben az első automata re-sync már a rég
 létrehozva ténylegesen csak DOI-s rekordokat húz be.
 
 **Éles ellenőrzéshez** (Local site, Site Shell):
-1. `wp jkk-mtmt sync` — futtasd újra a JKK profilt, kézi teszthez jó, ha wp-adminban
+1. `wp mtmt sync` — futtasd újra a JKK profilt, kézi teszthez jó, ha wp-adminban
    előtte kézzel `approved`-re állítasz egy rekordot ($wpdb-n vagy közvetlen SQL-lel,
    admin UI még nincs Fázis 3-ig) — utána a `content_changed`/`reverted_to_pending`
    logikának NEM szabad visszaesnie, ha maga a tartalom nem változott (ez a
    kockázatosabb irány: hamis pozitív visszaesés minden héten).
-2. `wp jkk-mtmt profile create --label="JKK csak DOI" --cond='[{"field":"directInstitutes","op":"in","value":"19662"}]' --doi-only`
-   majd `wp jkk-mtmt sync --profile=<uj-id>` — várhatóan ~372 rekordot hoz be, nem 767-et.
+2. `wp mtmt profile create --label="JKK csak DOI" --cond='[{"field":"directInstitutes","op":"in","value":"19662"}]' --doi-only`
+   majd `wp mtmt sync --profile=<uj-id>` — várhatóan ~372 rekordot hoz be, nem 767-et.
 3. Ugyanez az admin "Új profil" űrlapon a "Csak DOI azonosítóval rendelkező rekordok"
    pipával — ellenőrizd, hogy a listában a cond JSON tartalmazza az
    `identifiers.source.name` feltételt.
@@ -62,7 +62,7 @@ létrehozva ténylegesen csak DOI-s rekordokat húz be.
 **KÓD KÉSZ, ág: `fazis-2-cron-log-email`, ÉLES ELLENŐRZÉS MÉG NEM TÖRTÉNT.**
 Eredeti scope (§6) + két új pont a megbeszélésből:
 
-- Heti `jkk_mtmt_weekly` cron + `wp jkk-mtmt sync` ugyanarra a logikára.
+- Heti `mtmt_weekly` cron + `wp mtmt sync` ugyanarra a logikára.
 - Kötegelt, folytatható sync; futás-napló (mikor, hány új/frissült/hiányzó/hibás).
 - **ÚJ: email-értesítés** a napló alapján, ha volt új/frissült tétel a futásban
   (§14/5). Globális, site-szintű címzett-lista egyelőre (nem profilonkénti).
@@ -77,7 +77,7 @@ rendszer-cronból is hívható, email megérkezik új tételnél, a gomb megnyom
 
 **Éles ellenőrzéshez** (Local site, Site Shell + wp-admin):
 1. **Regresszió a "frissített" számlálóra** (a legfontosabb, saját teszt közben
-   találtam hibát benne, most javítva): `wp jkk-mtmt sync --profile=<jkk-id>`
+   találtam hibát benne, most javítva): `wp mtmt sync --profile=<jkk-id>`
    kétszer egymás után, rövid időn belül. A MÁSODIK futásnak ~0 "frissítve"-t
    kell mutatnia (semmi nem változott MTMT-oldalon eközben) — ha 767-et (vagy
    közel ennyit) mutatna újra, az azt jelentené, hogy a fix nem működik és
@@ -85,13 +85,13 @@ rendszer-cronból is hívható, email megérkezik új tételnél, a gomb megnyom
 2. **Beállítások oldal** (JKK MTMT → Beállítások): adj meg egy valódi email-címet
    a "Címzettek" mezőben, mentsd el, majd wp-adminban "Szinkron most"-tal
    futtass egy syncet — MANUÁLIS triggernél NEM szabad emailnek mennie (csak
-   cronnál megy). `wp cron event run jkk_mtmt_weekly_sync` egy CLI-ből
+   cronnál megy). `wp cron event run mtmt_weekly_sync` egy CLI-ből
    szimulált cron-futás — ha van új/frissült tétel, ennél MENNIE kell az emailnek
    (ha a WP-oldal ki tud küldeni emailt — helyi fejlesztésnél ehhez kellhet
    pl. egy SMTP-plugin, ha a Local nem küld ki natívan leveleket).
 3. **Futás-napló** (JKK MTMT → Beállítások, alsó tábla): minden fenti futásnak
    meg kell jelennie egy sorban, helyes trigger-típussal (cli/manual/cron).
-4. **Cron-ütemezés**: `wp cron event list` — legyen benne `jkk_mtmt_weekly_sync`,
+4. **Cron-ütemezés**: `wp cron event list` — legyen benne `mtmt_weekly_sync`,
    "weekly" recurrence-szel.
 5. **Kézi gomb timeoutja**: a JKK profilon (767 rekord, ~24s) a "Szinkron most"
    gombnak simán le kell futnia böngészőből is, admin-notice-ban a helyes
@@ -109,7 +109,7 @@ Eredeti scope (§8) + két új mező a megbeszélésből:
   szerkesztő űrlapon, **saját be/ki plugin-beállítással** (§14/11) — ha ki van
   kapcsolva, a checkbox nem jelenik meg az űrlapon (ez a beállítás FÜGGETLEN a
   Fázis 4-es terület-toggle-től).
-- Két capability (`jkk_mtmt_moderate`, `jkk_mtmt_classify`), role→capability mapping.
+- Két capability (`mtmt_moderate`, `mtmt_classify`), role→capability mapping.
 - *Előkészítés Fázis 4-hez:* az űrlapot úgy érdemes építeni, hogy a "szakmai
   terület" választó egy Fázis 4-ben behúzható, feltételesen megjelenő blokk
   legyen (a toggle és az adatmodell csak Fázis 4-ben készül el, de a form-layout
@@ -126,7 +126,7 @@ Eredeti scope (§7), a megbeszélésen **megerősítve átnevezve** "Szakmai ter
 (docs/decisions.md #18) — NEM külön, második kategória-rendszer a kutatócsoport
 mellett, ugyanaz a mechanizmus.
 
-- `jkk_research_group`-szerű taxonómia (belső néven maradhat, UI-szövegben
+- `mtmt_research_group`-szerű taxonómia (belső néven maradhat, UI-szövegben
   "Szakmai terület"), pivot tábla a publikáció↔terület sokoldalú kapcsolathoz.
 - Terület↔aloldal párosítás (melyik területhez melyik WP-oldal tartozik).
 - **ÚJ: teljes funkció opt-in plugin-beállítás** (§14/1) — kikapcsolva: a Fázis 3

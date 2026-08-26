@@ -1,18 +1,18 @@
 <?php
 /**
- * WP-CLI parancsok: `wp jkk-mtmt sync`, `wp jkk-mtmt profile list|create`.
+ * WP-CLI parancsok: `wp mtmt sync`, `wp mtmt profile list|create`.
  *
  * Csak akkor töltődik be, ha WP-CLI fut (lásd bootstrap fájl).
  *
- * @package Jkk_Mtmt_Publications
+ * @package Mtmt_Sync
  */
 
 defined( 'ABSPATH' ) || exit;
 
 /**
- * `wp jkk-mtmt sync [--profile=<id>]`
+ * `wp mtmt sync [--profile=<id>]`
  */
-final class Jkk_Mtmt_Sync_Command {
+final class Mtmt_Sync_Command {
 
 	/**
 	 * Lefuttatja a szinkront egy adott profilra, vagy — ha nincs --profile —
@@ -25,18 +25,18 @@ final class Jkk_Mtmt_Sync_Command {
 	 *
 	 * ## EXAMPLES
 	 *
-	 *     wp jkk-mtmt sync
-	 *     wp jkk-mtmt sync --profile=1
+	 *     wp mtmt sync
+	 *     wp mtmt sync --profile=1
 	 *
 	 * @param array $args
 	 * @param array $assoc_args
 	 */
 	public function __invoke( array $args, array $assoc_args ): void {
 		$profile_id = ! empty( $assoc_args['profile'] ) ? (int) $assoc_args['profile'] : null;
-		$results    = Jkk_Mtmt_Sync_Runner::run( 'cli', $profile_id );
+		$results    = Mtmt_Sync_Runner::run( 'cli', $profile_id );
 
 		if ( empty( $results ) ) {
-			WP_CLI::warning( 'Nincs enabled query profil. Hozz létre egyet: wp jkk-mtmt profile create --label=... --cond=...' );
+			WP_CLI::warning( 'Nincs enabled query profil. Hozz létre egyet: wp mtmt profile create --label=... --cond=...' );
 			return;
 		}
 
@@ -76,16 +76,16 @@ final class Jkk_Mtmt_Sync_Command {
 }
 
 /**
- * `wp jkk-mtmt profile list|create`
+ * `wp mtmt profile list|create`
  */
-final class Jkk_Mtmt_Profile_Command {
+final class Mtmt_Profile_Command {
 
 	/**
 	 * Query profilok listázása.
 	 *
 	 * ## EXAMPLES
 	 *
-	 *     wp jkk-mtmt profile list
+	 *     wp mtmt profile list
 	 *
 	 * @param array $args
 	 * @param array $assoc_args
@@ -93,7 +93,7 @@ final class Jkk_Mtmt_Profile_Command {
 	public function list( array $args, array $assoc_args ): void {
 		global $wpdb;
 
-		$repo  = new Jkk_Mtmt_Query_Profile_Repository( $wpdb );
+		$repo  = new Mtmt_Query_Profile_Repository( $wpdb );
 		$items = $repo->get_all();
 
 		if ( empty( $items ) ) {
@@ -128,13 +128,14 @@ final class Jkk_Mtmt_Profile_Command {
 	 * : A cond_json tömb, pl. '[{"field":"directInstitutes","op":"in","value":"19662"}]'
 	 *
 	 * [--doi-only]
-	 * : Csak DOI azonosítóval rendelkező rekordokat húzzon be (a JKK profilon ez
-	 * a rekordok kb. 48%-a — ld. docs/decisions.md #16).
+	 * : Csak DOI azonosítóval rendelkező rekordokat húzzon be (tapasztalati
+	 * érték: egy tesztintézményen ez a rekordok kb. felét jelentette — ld.
+	 * docs/decisions.md #16).
 	 *
 	 * ## EXAMPLES
 	 *
-	 *     wp jkk-mtmt profile create --label="JKK" --cond='[{"field":"directInstitutes","op":"in","value":"19662"}]'
-	 *     wp jkk-mtmt profile create --label="JKK (csak DOI)" --cond='[{"field":"directInstitutes","op":"in","value":"19662"}]' --doi-only
+	 *     wp mtmt profile create --label="Kutatóintézet" --cond='[{"field":"directInstitutes","op":"in","value":"19662"}]'
+	 *     wp mtmt profile create --label="Kutatóintézet (csak DOI)" --cond='[{"field":"directInstitutes","op":"in","value":"19662"}]' --doi-only
 	 *
 	 * @param array $args
 	 * @param array $assoc_args
@@ -149,17 +150,17 @@ final class Jkk_Mtmt_Profile_Command {
 		}
 
 		$conditions = json_decode( $cond, true );
-		if ( ! is_array( $conditions ) || ! Jkk_Mtmt_Query_Profile_Repository::is_valid_cond_array( $conditions ) ) {
+		if ( ! is_array( $conditions ) || ! Mtmt_Query_Profile_Repository::is_valid_cond_array( $conditions ) ) {
 			WP_CLI::error( 'A --cond érvénytelen. Formátum: [{"field":"...","op":"...","value":"..."}]' );
 			return;
 		}
 
 		if ( ! empty( $assoc_args['doi-only'] ) ) {
-			$conditions[] = Jkk_Mtmt_Query_Profile_Repository::doi_only_condition();
+			$conditions[] = Mtmt_Query_Profile_Repository::doi_only_condition();
 		}
 
 		global $wpdb;
-		$repo = new Jkk_Mtmt_Query_Profile_Repository( $wpdb );
+		$repo = new Mtmt_Query_Profile_Repository( $wpdb );
 		$id   = $repo->create( $label, $conditions );
 
 		WP_CLI::success( sprintf( 'Profil létrehozva: #%d (%s)', $id, $label ) );

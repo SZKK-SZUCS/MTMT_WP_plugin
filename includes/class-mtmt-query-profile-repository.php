@@ -2,17 +2,17 @@
 /**
  * Query profil repository ("dobozos" scope-konfiguráció, docs/decisions.md #7, #12).
  *
- * @package Jkk_Mtmt_Publications
+ * @package Mtmt_Sync
  */
 
 defined( 'ABSPATH' ) || exit;
 
 /**
- * A wp_jkk_mtmt_query_profiles tábla minimál CRUD-ja. Sem intézmény-, sem
+ * A wp_mtmt_query_profiles tábla minimál CRUD-ja. Sem intézmény-, sem
  * szerző-mtid nincs sehol PHP-kódba hardcode-olva — az kizárólag itt,
  * telepítésenként konfigurálva él (admin oldal és WP-CLI is ezt hívja).
  */
-final class Jkk_Mtmt_Query_Profile_Repository {
+final class Mtmt_Query_Profile_Repository {
 
 	/**
 	 * @var wpdb
@@ -29,7 +29,7 @@ final class Jkk_Mtmt_Query_Profile_Repository {
 	 */
 	public function __construct( wpdb $wpdb ) {
 		$this->wpdb  = $wpdb;
-		$this->table = $wpdb->prefix . 'jkk_mtmt_query_profiles';
+		$this->table = $wpdb->prefix . 'mtmt_query_profiles';
 	}
 
 	/**

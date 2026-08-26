@@ -2,33 +2,33 @@
 /**
  * Admin oldal: query profilok — "dobozos" scope-konfiguráció UI-ból.
  *
- * @package Jkk_Mtmt_Publications
+ * @package Mtmt_Sync
  */
 
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Settings-szerű admin képernyő a wp_jkk_mtmt_query_profiles kezelésére.
+ * Settings-szerű admin képernyő a wp_mtmt_query_profiles kezelésére.
  *
- * `manage_options`-hoz kötve, KÜLÖN a jkk_mtmt_moderate/jkk_mtmt_classify
+ * `manage_options`-hoz kötve, KÜLÖN a mtmt_moderate/mtmt_classify
  * capability-któl (docs/decisions.md #12) — a scope beállítása site-config,
  * nem napi moderációs feladat.
  */
-final class Jkk_Mtmt_Profiles_Page {
+final class Mtmt_Profiles_Page {
 
 	private const CAPABILITY   = 'manage_options';
-	private const NONCE_ACTION = 'jkk_mtmt_profile_action';
-	private const PAGE_SLUG    = 'jkk-mtmt-profiles';
+	private const NONCE_ACTION = 'mtmt_profile_action';
+	private const PAGE_SLUG    = 'mtmt-profiles';
 
 	/**
-	 * @var Jkk_Mtmt_Query_Profile_Repository
+	 * @var Mtmt_Query_Profile_Repository
 	 */
 	private $profiles;
 
 	/**
-	 * @param Jkk_Mtmt_Query_Profile_Repository $profiles
+	 * @param Mtmt_Query_Profile_Repository $profiles
 	 */
-	public function __construct( Jkk_Mtmt_Query_Profile_Repository $profiles ) {
+	public function __construct( Mtmt_Query_Profile_Repository $profiles ) {
 		$this->profiles = $profiles;
 	}
 
@@ -37,8 +37,8 @@ final class Jkk_Mtmt_Profiles_Page {
 	 */
 	public function add_menu_page(): void {
 		add_menu_page(
-			__( 'JKK MTMT Publications', 'jkk-mtmt-publications' ),
-			__( 'JKK MTMT', 'jkk-mtmt-publications' ),
+			__( 'MTMT Publikációk', 'mtmt-sync' ),
+			__( 'MTMT', 'mtmt-sync' ),
 			self::CAPABILITY,
 			self::PAGE_SLUG,
 			array( $this, 'render' ),
@@ -51,7 +51,7 @@ final class Jkk_Mtmt_Profiles_Page {
 	 */
 	public function render(): void {
 		if ( ! current_user_can( self::CAPABILITY ) ) {
-			wp_die( esc_html__( 'Nincs jogosultságod ehhez az oldalhoz.', 'jkk-mtmt-publications' ) );
+			wp_die( esc_html__( 'Nincs jogosultságod ehhez az oldalhoz.', 'mtmt-sync' ) );
 		}
 
 		$notice       = $this->handle_request();
@@ -59,8 +59,8 @@ final class Jkk_Mtmt_Profiles_Page {
 		$nonce_action = self::NONCE_ACTION;
 		?>
 		<div class="wrap">
-			<h1><?php esc_html_e( 'JKK MTMT — Query profilok', 'jkk-mtmt-publications' ); ?></h1>
-			<p><?php esc_html_e( 'A query profilok határozzák meg, mely MTMT-publikációkat húzza be a szinkron. Intézmény- vagy szerző-azonosító sehol nincs kódba írva — az itt, profilonként adható meg.', 'jkk-mtmt-publications' ); ?></p>
+			<h1><?php esc_html_e( 'MTMT Publikációk — Query profilok', 'mtmt-sync' ); ?></h1>
+			<p><?php esc_html_e( 'A query profilok határozzák meg, mely MTMT-publikációkat húzza be a szinkron. Intézmény- vagy szerző-azonosító sehol nincs kódba írva — az itt, profilonként adható meg.', 'mtmt-sync' ); ?></p>
 
 			<?php if ( $notice ) : ?>
 				<div class="notice notice-<?php echo esc_attr( $notice['type'] ); ?>">
@@ -71,18 +71,18 @@ final class Jkk_Mtmt_Profiles_Page {
 			<table class="widefat striped">
 				<thead>
 					<tr>
-						<th><?php esc_html_e( 'ID', 'jkk-mtmt-publications' ); ?></th>
-						<th><?php esc_html_e( 'Név', 'jkk-mtmt-publications' ); ?></th>
-						<th><?php esc_html_e( 'Feltétel (cond)', 'jkk-mtmt-publications' ); ?></th>
-						<th><?php esc_html_e( 'Engedélyezve', 'jkk-mtmt-publications' ); ?></th>
-						<th><?php esc_html_e( 'Utolsó futás', 'jkk-mtmt-publications' ); ?></th>
-						<th><?php esc_html_e( 'Művelet', 'jkk-mtmt-publications' ); ?></th>
+						<th><?php esc_html_e( 'ID', 'mtmt-sync' ); ?></th>
+						<th><?php esc_html_e( 'Név', 'mtmt-sync' ); ?></th>
+						<th><?php esc_html_e( 'Feltétel (cond)', 'mtmt-sync' ); ?></th>
+						<th><?php esc_html_e( 'Engedélyezve', 'mtmt-sync' ); ?></th>
+						<th><?php esc_html_e( 'Utolsó futás', 'mtmt-sync' ); ?></th>
+						<th><?php esc_html_e( 'Művelet', 'mtmt-sync' ); ?></th>
 					</tr>
 				</thead>
 				<tbody>
 					<?php if ( empty( $profiles ) ) : ?>
 						<tr>
-							<td colspan="6"><?php esc_html_e( 'Még nincs egy profil sem.', 'jkk-mtmt-publications' ); ?></td>
+							<td colspan="6"><?php esc_html_e( 'Még nincs egy profil sem.', 'mtmt-sync' ); ?></td>
 						</tr>
 					<?php endif; ?>
 					<?php foreach ( $profiles as $profile ) : ?>
@@ -93,39 +93,39 @@ final class Jkk_Mtmt_Profiles_Page {
 							<td>
 								<?php
 								echo $profile['enabled']
-									? esc_html__( 'igen', 'jkk-mtmt-publications' )
-									: esc_html__( 'nem', 'jkk-mtmt-publications' );
+									? esc_html__( 'igen', 'mtmt-sync' )
+									: esc_html__( 'nem', 'mtmt-sync' );
 								?>
 							</td>
 							<td><?php echo esc_html( $profile['last_run_at'] ? $profile['last_run_at'] : '—' ); ?></td>
 							<td>
 								<form method="post" style="display:inline">
 									<?php wp_nonce_field( $nonce_action ); ?>
-									<input type="hidden" name="jkk_mtmt_action" value="sync_now">
+									<input type="hidden" name="mtmt_action" value="sync_now">
 									<input type="hidden" name="id" value="<?php echo esc_attr( (string) $profile['id'] ); ?>">
 									<button type="submit" class="button button-primary">
-										<?php esc_html_e( 'Szinkron most', 'jkk-mtmt-publications' ); ?>
+										<?php esc_html_e( 'Szinkron most', 'mtmt-sync' ); ?>
 									</button>
 								</form>
 								<form method="post" style="display:inline">
 									<?php wp_nonce_field( $nonce_action ); ?>
-									<input type="hidden" name="jkk_mtmt_action" value="toggle">
+									<input type="hidden" name="mtmt_action" value="toggle">
 									<input type="hidden" name="id" value="<?php echo esc_attr( (string) $profile['id'] ); ?>">
 									<input type="hidden" name="enabled" value="<?php echo $profile['enabled'] ? '0' : '1'; ?>">
 									<button type="submit" class="button">
 										<?php
 										echo $profile['enabled']
-											? esc_html__( 'Letiltás', 'jkk-mtmt-publications' )
-											: esc_html__( 'Engedélyezés', 'jkk-mtmt-publications' );
+											? esc_html__( 'Letiltás', 'mtmt-sync' )
+											: esc_html__( 'Engedélyezés', 'mtmt-sync' );
 										?>
 									</button>
 								</form>
-								<form method="post" style="display:inline" onsubmit="return confirm('<?php echo esc_js( __( 'Biztos törlöd?', 'jkk-mtmt-publications' ) ); ?>');">
+								<form method="post" style="display:inline" onsubmit="return confirm('<?php echo esc_js( __( 'Biztos törlöd?', 'mtmt-sync' ) ); ?>');">
 									<?php wp_nonce_field( $nonce_action ); ?>
-									<input type="hidden" name="jkk_mtmt_action" value="delete">
+									<input type="hidden" name="mtmt_action" value="delete">
 									<input type="hidden" name="id" value="<?php echo esc_attr( (string) $profile['id'] ); ?>">
 									<button type="submit" class="button button-link-delete">
-										<?php esc_html_e( 'Törlés', 'jkk-mtmt-publications' ); ?>
+										<?php esc_html_e( 'Törlés', 'mtmt-sync' ); ?>
 									</button>
 								</form>
 							</td>
@@ -134,43 +134,43 @@ final class Jkk_Mtmt_Profiles_Page {
 				</tbody>
 			</table>
 
-			<h2><?php esc_html_e( 'Új profil', 'jkk-mtmt-publications' ); ?></h2>
+			<h2><?php esc_html_e( 'Új profil', 'mtmt-sync' ); ?></h2>
 			<form method="post">
 				<?php wp_nonce_field( $nonce_action ); ?>
-				<input type="hidden" name="jkk_mtmt_action" value="create">
+				<input type="hidden" name="mtmt_action" value="create">
 				<table class="form-table">
 					<tr>
-						<th><label for="jkk-mtmt-label"><?php esc_html_e( 'Profil neve', 'jkk-mtmt-publications' ); ?></label></th>
-						<td><input type="text" id="jkk-mtmt-label" name="label" class="regular-text" required></td>
+						<th><label for="mtmt-label"><?php esc_html_e( 'Profil neve', 'mtmt-sync' ); ?></label></th>
+						<td><input type="text" id="mtmt-label" name="label" class="regular-text" required></td>
 					</tr>
 					<tr>
-						<th><?php esc_html_e( 'Scope típusa', 'jkk-mtmt-publications' ); ?></th>
+						<th><?php esc_html_e( 'Scope típusa', 'mtmt-sync' ); ?></th>
 						<td>
-							<label><input type="radio" name="scope_type" value="institute" checked> <?php esc_html_e( 'Intézmény MTID', 'jkk-mtmt-publications' ); ?></label><br>
-							<label><input type="radio" name="scope_type" value="authors"> <?php esc_html_e( 'Szerző MTID-lista (vesszővel elválasztva)', 'jkk-mtmt-publications' ); ?></label><br>
-							<label><input type="radio" name="scope_type" value="advanced"> <?php esc_html_e( 'Haladó — nyers cond JSON', 'jkk-mtmt-publications' ); ?></label>
+							<label><input type="radio" name="scope_type" value="institute" checked> <?php esc_html_e( 'Intézmény MTID', 'mtmt-sync' ); ?></label><br>
+							<label><input type="radio" name="scope_type" value="authors"> <?php esc_html_e( 'Szerző MTID-lista (vesszővel elválasztva)', 'mtmt-sync' ); ?></label><br>
+							<label><input type="radio" name="scope_type" value="advanced"> <?php esc_html_e( 'Haladó — nyers cond JSON', 'mtmt-sync' ); ?></label>
 						</td>
 					</tr>
 					<tr>
-						<th><label for="jkk-mtmt-value"><?php esc_html_e( 'Érték', 'jkk-mtmt-publications' ); ?></label></th>
+						<th><label for="mtmt-value"><?php esc_html_e( 'Érték', 'mtmt-sync' ); ?></label></th>
 						<td>
-							<input type="text" id="jkk-mtmt-value" name="scope_value" class="regular-text" placeholder="pl. 19662">
+							<input type="text" id="mtmt-value" name="scope_value" class="regular-text" placeholder="pl. 19662">
 							<p class="description">
-								<?php esc_html_e( 'Intézmény esetén az MTMT intézmény-MTID (pl. https://m2.mtmt.hu/api/institute/19662 -> 19662). Szerzőknél MTID-lista vesszővel. Haladónál: [{"field":"...","op":"...","value":"..."}]', 'jkk-mtmt-publications' ); ?>
+								<?php esc_html_e( 'Intézmény esetén az MTMT intézmény-MTID (pl. https://m2.mtmt.hu/api/institute/19662 -> 19662). Szerzőknél MTID-lista vesszővel. Haladónál: [{"field":"...","op":"...","value":"..."}]', 'mtmt-sync' ); ?>
 							</p>
 						</td>
 					</tr>
 					<tr>
-						<th><?php esc_html_e( 'Szűrés', 'jkk-mtmt-publications' ); ?></th>
+						<th><?php esc_html_e( 'Szűrés', 'mtmt-sync' ); ?></th>
 						<td>
-							<label><input type="checkbox" name="doi_only" value="1"> <?php esc_html_e( 'Csak DOI azonosítóval rendelkező rekordok', 'jkk-mtmt-publications' ); ?></label>
+							<label><input type="checkbox" name="doi_only" value="1"> <?php esc_html_e( 'Csak DOI azonosítóval rendelkező rekordok', 'mtmt-sync' ); ?></label>
 							<p class="description">
-								<?php esc_html_e( 'A JKK profilon ellenőrizve: a rekordok kb. 48%-ának van DOI-ja — ez kb. felére csökkenti a behúzott tételszámot.', 'jkk-mtmt-publications' ); ?>
+								<?php esc_html_e( 'Tapasztalati érték: egy tesztintézményen a rekordok kb. felének volt DOI-ja — ez kb. felére csökkentheti a behúzott tételszámot.', 'mtmt-sync' ); ?>
 							</p>
 						</td>
 					</tr>
 				</table>
-				<?php submit_button( __( 'Profil létrehozása', 'jkk-mtmt-publications' ) ); ?>
+				<?php submit_button( __( 'Profil létrehozása', 'mtmt-sync' ) ); ?>
 			</form>
 		</div>
 		<?php
@@ -180,17 +180,17 @@ final class Jkk_Mtmt_Profiles_Page {
 	 * @return array{type:string,message:string}|null
 	 */
 	private function handle_request(): ?array {
-		if ( empty( $_POST['jkk_mtmt_action'] ) ) {
+		if ( empty( $_POST['mtmt_action'] ) ) {
 			return null;
 		}
 
 		check_admin_referer( self::NONCE_ACTION );
 
 		if ( ! current_user_can( self::CAPABILITY ) ) {
-			wp_die( esc_html__( 'Nincs jogosultságod ehhez a művelethez.', 'jkk-mtmt-publications' ) );
+			wp_die( esc_html__( 'Nincs jogosultságod ehhez a művelethez.', 'mtmt-sync' ) );
 		}
 
-		$action = sanitize_key( wp_unslash( $_POST['jkk_mtmt_action'] ) );
+		$action = sanitize_key( wp_unslash( $_POST['mtmt_action'] ) );
 
 		switch ( $action ) {
 			case 'create':
@@ -218,7 +218,7 @@ final class Jkk_Mtmt_Profiles_Page {
 		if ( '' === $label ) {
 			return array(
 				'type'    => 'error',
-				'message' => __( 'A profil neve kötelező.', 'jkk-mtmt-publications' ),
+				'message' => __( 'A profil neve kötelező.', 'mtmt-sync' ),
 			);
 		}
 
@@ -231,14 +231,14 @@ final class Jkk_Mtmt_Profiles_Page {
 		}
 
 		if ( $doi_only ) {
-			$conditions[] = Jkk_Mtmt_Query_Profile_Repository::doi_only_condition();
+			$conditions[] = Mtmt_Query_Profile_Repository::doi_only_condition();
 		}
 
 		$this->profiles->create( $label, $conditions );
 
 		return array(
 			'type'    => 'success',
-			'message' => __( 'Profil létrehozva.', 'jkk-mtmt-publications' ),
+			'message' => __( 'Profil létrehozva.', 'mtmt-sync' ),
 		);
 	}
 
@@ -253,14 +253,14 @@ final class Jkk_Mtmt_Profiles_Page {
 		$value = trim( $value );
 
 		if ( '' === $value ) {
-			return new WP_Error( 'jkk_mtmt_empty_value', __( 'Add meg az értéket a választott típushoz.', 'jkk-mtmt-publications' ) );
+			return new WP_Error( 'mtmt_empty_value', __( 'Add meg az értéket a választott típushoz.', 'mtmt-sync' ) );
 		}
 
 		switch ( $scope_type ) {
 			case 'institute':
 				$mtid = absint( $value );
 				if ( ! $mtid ) {
-					return new WP_Error( 'jkk_mtmt_bad_mtid', __( 'Az intézmény MTID-nek pozitív egész számnak kell lennie.', 'jkk-mtmt-publications' ) );
+					return new WP_Error( 'mtmt_bad_mtid', __( 'Az intézmény MTID-nek pozitív egész számnak kell lennie.', 'mtmt-sync' ) );
 				}
 				return array(
 					array(
@@ -273,7 +273,7 @@ final class Jkk_Mtmt_Profiles_Page {
 			case 'authors':
 				$mtids = array_filter( array_map( 'absint', array_map( 'trim', explode( ',', $value ) ) ) );
 				if ( empty( $mtids ) ) {
-					return new WP_Error( 'jkk_mtmt_bad_authors', __( 'Adj meg legalább egy érvényes szerző-MTID-et, vesszővel elválasztva.', 'jkk-mtmt-publications' ) );
+					return new WP_Error( 'mtmt_bad_authors', __( 'Adj meg legalább egy érvényes szerző-MTID-et, vesszővel elválasztva.', 'mtmt-sync' ) );
 				}
 				return array(
 					array(
@@ -285,16 +285,16 @@ final class Jkk_Mtmt_Profiles_Page {
 
 			case 'advanced':
 				$decoded = json_decode( $value, true );
-				if ( ! is_array( $decoded ) || ! Jkk_Mtmt_Query_Profile_Repository::is_valid_cond_array( $decoded ) ) {
+				if ( ! is_array( $decoded ) || ! Mtmt_Query_Profile_Repository::is_valid_cond_array( $decoded ) ) {
 					return new WP_Error(
-						'jkk_mtmt_bad_json',
-						__( 'A haladó cond JSON érvénytelen. Formátum: [{"field":"...","op":"...","value":"..."}]', 'jkk-mtmt-publications' )
+						'mtmt_bad_json',
+						__( 'A haladó cond JSON érvénytelen. Formátum: [{"field":"...","op":"...","value":"..."}]', 'mtmt-sync' )
 					);
 				}
 				return $decoded;
 
 			default:
-				return new WP_Error( 'jkk_mtmt_bad_scope', __( 'Ismeretlen scope-típus.', 'jkk-mtmt-publications' ) );
+				return new WP_Error( 'mtmt_bad_scope', __( 'Ismeretlen scope-típus.', 'mtmt-sync' ) );
 		}
 	}
 
@@ -309,7 +309,7 @@ final class Jkk_Mtmt_Profiles_Page {
 
 		return array(
 			'type'    => 'success',
-			'message' => __( 'Állapot frissítve.', 'jkk-mtmt-publications' ),
+			'message' => __( 'Állapot frissítve.', 'mtmt-sync' ),
 		);
 	}
 
@@ -323,7 +323,7 @@ final class Jkk_Mtmt_Profiles_Page {
 
 		return array(
 			'type'    => 'success',
-			'message' => __( 'Profil törölve.', 'jkk-mtmt-publications' ),
+			'message' => __( 'Profil törölve.', 'mtmt-sync' ),
 		);
 	}
 
@@ -342,7 +342,7 @@ final class Jkk_Mtmt_Profiles_Page {
 		if ( ! $id ) {
 			return array(
 				'type'    => 'error',
-				'message' => __( 'Érvénytelen profil.', 'jkk-mtmt-publications' ),
+				'message' => __( 'Érvénytelen profil.', 'mtmt-sync' ),
 			);
 		}
 
@@ -350,13 +350,13 @@ final class Jkk_Mtmt_Profiles_Page {
 			@set_time_limit( 0 ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
 		}
 
-		$results = Jkk_Mtmt_Sync_Runner::run( 'manual', $id );
+		$results = Mtmt_Sync_Runner::run( 'manual', $id );
 		$result  = $results[0] ?? null;
 
 		if ( ! $result ) {
 			return array(
 				'type'    => 'error',
-				'message' => __( 'A szinkron nem futott le.', 'jkk-mtmt-publications' ),
+				'message' => __( 'A szinkron nem futott le.', 'mtmt-sync' ),
 			);
 		}
 
@@ -365,7 +365,7 @@ final class Jkk_Mtmt_Profiles_Page {
 				'type'    => 'error',
 				'message' => sprintf(
 					/* translators: %s: hibaüzenetek */
-					__( 'Hiba a szinkron közben: %s', 'jkk-mtmt-publications' ),
+					__( 'Hiba a szinkron közben: %s', 'mtmt-sync' ),
 					implode( '; ', $result['errors'] )
 				),
 			);
@@ -375,7 +375,7 @@ final class Jkk_Mtmt_Profiles_Page {
 			'type'    => 'success',
 			'message' => sprintf(
 				/* translators: 1: uj, 2: frissitett, 3: visszaesett, 4: hianyzo */
-				__( 'Szinkron lefutott: %1$d új, %2$d frissített (ebből %3$d visszaesett pending-be), %4$d hiányzóként jelölt.', 'jkk-mtmt-publications' ),
+				__( 'Szinkron lefutott: %1$d új, %2$d frissített (ebből %3$d visszaesett pending-be), %4$d hiányzóként jelölt.', 'mtmt-sync' ),
 				$result['inserted'],
 				$result['updated'],
 				$result['reverted_to_pending'],

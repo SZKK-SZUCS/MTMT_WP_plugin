@@ -1,4 +1,4 @@
-# CLAUDE.md — JKK MTMT Publications plugin (build brief)
+# CLAUDE.md — MTMT Sync plugin (build brief)
 
 > Ezt a fájlt a repo gyökerébe tedd `CLAUDE.md` néven. A Claude Code automatikusan beolvassa, és ez a mérvadó specifikáció. Ha bármi ütközik a kódban lévővel, ez a fájl nyer, amíg felül nem íratjuk.
 
@@ -25,8 +25,8 @@ A JKK (intézmény) publikációs listát akar a WordPress-oldalain, MTMT-ből a
 - **WordPress plugin**, PHP **8.1+**, WP **6.4+**.
 - **Elementor** widget (Elementor aktív; a widgetnél ellenőrizd a függőséget, és degradálj szépen, ha nincs).
 - **Nincs kötelező build lépés.** Vanilla PHP + vanilla JS + sima CSS. Ne hozz be Node/webpack build-pipeline-t, hacsak elkerülhetetlen. (A frontend szűrés mehet vanilla JS-ből vagy pici Alpine.js-ből CDN nélkül, bundle-özve.)
-- **WordPress Coding Standards** (WPCS). Prefix mindenhol: `jkk_mtmt_` (függvények), `Jkk_Mtmt_` (osztályok), text domain: `jkk-mtmt-publications`.
-- **i18n**: minden felhasználói szöveg `__()`/`esc_html__()` a `jkk-mtmt-publications` domainnel; `languages/` mappa + `.pot`.
+- **WordPress Coding Standards** (WPCS). Prefix mindenhol: `mtmt_` (függvények), `Mtmt_` (osztályok), text domain: `mtmt-sync`.
+- **i18n**: minden felhasználói szöveg `__()`/`esc_html__()` a `mtmt-sync` domainnel; `languages/` mappa + `.pot`.
 - Adatbázis: saját táblák (`$wpdb`), **nem** CPT (nagy, strukturált, `mtid`-kulcsos upsert miatt). A kutatócsoport viszont **taxonómia** (lásd 7).
 - Ne használj külső PHP-csomagkezelőt futásidőben; a PUC-ot **vendorold be** a repóba (lásd 10).
 
@@ -44,7 +44,7 @@ Három réteg:
 WP-Cron (heti) ─► Ingest ─► [MTMT REST API]
                     │  upsert (mtid kulcs, manuális mezők védve)
                     ▼
-        wp_jkk_mtmt_publications  (pending/approved/rejected)
+        wp_mtmt_publications  (pending/approved/rejected)
              │                                   │
              ▼                                   ▼
     Admin moderáció+gazdagítás          Elementor widget (approved)
@@ -54,10 +54,10 @@ WP-Cron (heti) ─► Ingest ─► [MTMT REST API]
 
 ## 4. Adatmodell
 
-### 4.1 `wp_jkk_mtmt_publications`
+### 4.1 `wp_mtmt_publications`
 
 ```sql
-CREATE TABLE {prefix}jkk_mtmt_publications (
+CREATE TABLE {prefix}mtmt_publications (
   id              BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   mtid            BIGINT UNSIGNED NOT NULL,
 
@@ -111,10 +111,10 @@ CREATE TABLE {prefix}jkk_mtmt_publications (
 
 A kutatócsoport **nem** oszlop itt, hanem taxonómia-hozzárendelés (lásd 7), hogy aloldal + szűrő olcsó legyen.
 
-### 4.2 `wp_jkk_mtmt_query_profiles`
+### 4.2 `wp_mtmt_query_profiles`
 
 ```sql
-CREATE TABLE {prefix}jkk_mtmt_query_profiles (
+CREATE TABLE {prefix}mtmt_query_profiles (
   id            BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   label         VARCHAR(255),       -- pl. "Autonóm járművek kutatócsoport"
   cond_json     LONGTEXT,           -- strukturált szűrőfeltételek (lásd 5.2)
@@ -214,7 +214,7 @@ Az azonosítóból előállítható: `https://m2.mtmt.hu/api/publication/<mtid>`
 
 ## 6. Ütemezés
 
-- Regisztrálj `jkk_mtmt_weekly` cron-eseményt (egyedi `weekly` intervallum) és egy `wp jkk-mtmt sync` **WP-CLI** parancsot ugyanarra a logikára.
+- Regisztrálj `mtmt_weekly` cron-eseményt (egyedi `weekly` intervallum) és egy `wp mtmt sync` **WP-CLI** parancsot ugyanarra a logikára.
 - **Kapcsold ki a látogató-vezérelt WP-cront a productionben** (`DISABLE_WP_CRON`), és valódi rendszer-cron/Swarm cron-service hívja a WP-CLI parancsot — determinisztikus heti futásért. Ezt dokumentáld a README-ben, ne a kódban kényszerítsd.
 - A sync legyen **kötegelt és folytatható**: profilonként + oldalanként, állapotmentéssel, timeout-biztosan.
 - Minden futásról napló (mikor, hány új/frissült/hiányzó/hibás), adminban megtekinthető.
@@ -223,7 +223,7 @@ Az azonosítóból előállítható: `https://m2.mtmt.hu/api/publication/<mtid>`
 
 ## 7. Kutatócsoport-taxonómia + szakmai aloldalak
 
-- Regisztrálj egy custom taxonómiát: `jkk_research_group` (pl. Autonóm, Robotika, Elektronika…). Mivel a publikáció nem post, a taxonómiát a saját táblához kötöd (pivot tábla `wp_jkk_mtmt_pub_group (pub_id, term_id)` VAGY `wp_set_object_terms` egy proxy objektumra — válaszd a pivot táblát az egyszerűségért és teljesítményért).
+- Regisztrálj egy custom taxonómiát: `mtmt_research_group` (pl. Autonóm, Robotika, Elektronika…). Mivel a publikáció nem post, a taxonómiát a saját táblához kötöd (pivot tábla `wp_mtmt_pub_group (pub_id, term_id)` VAGY `wp_set_object_terms` egy proxy objektumra — válaszd a pivot táblát az egyszerűségért és teljesítményért).
 - A besorolás **kézi**, a moderáció része, és **külön jogosultsághoz** kötött (lásd 8).
 - Minden csoporthoz tartozhat egy „szakmai aloldal": az Elementor widget kap egy **„csoportra szűkítés"** beállítást (term kiválasztása), így az aloldalon csak az adott csoport `approved` tételei jelennek meg.
 
@@ -251,8 +251,8 @@ A kézi mezők mentése **nem** indít MTMT-hívást, és a sync sosem írja fel
 
 ### 8.3 Jogosultságok (kétszintű)
 
-- `jkk_mtmt_moderate` — jóváhagyás/elutasítás, alap szerkesztés, indexkép. (Rita, Bogi, Csikor Dani, Koteczki Réka, Horváth Ernő.)
-- `jkk_mtmt_classify` — kutatócsoport-besorolás **és** projektazonosító-ellenőrzés. (Külön kör; náluk még egyeztetés alatt → tedd konfigurálhatóvá role→capability mappinggel.)
+- `mtmt_moderate` — jóváhagyás/elutasítás, alap szerkesztés, indexkép. (Rita, Bogi, Csikor Dani, Koteczki Réka, Horváth Ernő.)
+- `mtmt_classify` — kutatócsoport-besorolás **és** projektazonosító-ellenőrzés. (Külön kör; náluk még egyeztetés alatt → tedd konfigurálhatóvá role→capability mappinggel.)
 
 Minden admin-műveletnél: **capability check + nonce**. Semmilyen művelet ne fusson ezek nélkül.
 
@@ -285,8 +285,8 @@ Ezeket **ne** kezdd, amíg a Fázis 1 el nem készült és jóvá nem hagyták.
 ### 10.1 Repo-elrendezés
 
 ```
-jkk-mtmt-publications/
-├─ jkk-mtmt-publications.php     # főfájl (plugin header + bootstrap + PUC init)
+mtmt-sync/
+├─ mtmt-sync.php     # főfájl (plugin header + bootstrap + PUC init)
 ├─ readme.txt                    # WP.org formátum (PUC "View details" + verzió)
 ├─ CLAUDE.md                     # ez a fájl
 ├─ .gitignore
@@ -305,12 +305,12 @@ jkk-mtmt-publications/
 
 ```php
 /**
- * Plugin Name: JKK MTMT Publications
+ * Plugin Name: MTMT Sync
  * Description: MTMT-alapú publikációs lista jóváhagyással és Elementor megjelenítéssel.
  * Version: 0.1.0
  * Requires at least: 6.4
  * Requires PHP: 8.1
- * Text Domain: jkk-mtmt-publications
+ * Text Domain: mtmt-sync
  */
 ```
 
@@ -324,17 +324,17 @@ A **`Version` fejlécet minden kiadásnál növeld** (SemVer), és egyezzen a Gi
 require __DIR__ . '/lib/plugin-update-checker/plugin-update-checker.php';
 use YahnisElsts\PluginUpdateChecker\v5\PucFactory;
 
-$jkk_mtmt_update_checker = PucFactory::buildUpdateChecker(
-    'https://github.com/<user>/jkk-mtmt-publications/',
+$mtmt_update_checker = PucFactory::buildUpdateChecker(
+    'https://github.com/<user>/mtmt-sync/',
     __FILE__,
-    'jkk-mtmt-publications'
+    'mtmt-sync'
 );
 // A stabil kiadást tartalmazó ág:
-$jkk_mtmt_update_checker->setBranch('main');
+$mtmt_update_checker->setBranch('main');
 // Ha privát a repo:
-// $jkk_mtmt_update_checker->setAuthentication('<github-token>'); // NE kerüljön a repóba!
+// $mtmt_update_checker->setAuthentication('<github-token>'); // NE kerüljön a repóba!
 // GitHub Releases használata esetén, ha buildelt zip-et csatolsz:
-// $jkk_mtmt_update_checker->getVcsApi()->enableReleaseAssets();
+// $mtmt_update_checker->getVcsApi()->enableReleaseAssets();
 ```
 
 - **Kiadási workflow:** verzió bump a headerben + `readme.txt` → commit → GitHub **Release** (tag = verzió). Build lépés nincs, így a GitHub által generált forrás-zip elég; a PUC kezeli a mappa-wrappert. Ha később lesz build, csatolt asset + `enableReleaseAssets()`.
@@ -367,13 +367,13 @@ Node/IDE/OS szemét, `*.log`, lokális env; a `lib/plugin-update-checker/` **mar
 
 **Fázis 0 — Felderítés.** Élő minta-fetch (5.6), `docs/field-map.md` kész. *Kész, ha:* a valós JSON-ból dokumentált mezőtérkép van, benne a tiszta szerzőnév és az SJR feloldási útja.
 
-**Fázis 1 — Ingest mag.** API-kliens + mapper + repository + upsert/diff, WP-CLI `sync`. *Kész, ha:* egy profilra `wp jkk-mtmt sync` feltölti a táblát `pending`-be, újrafuttatva nem duplikál és nem írja felül a (még nem létező) kézi mezőket, lapozás működik.
+**Fázis 1 — Ingest mag.** API-kliens + mapper + repository + upsert/diff, WP-CLI `sync`. *Kész, ha:* egy profilra `wp mtmt sync` feltölti a táblát `pending`-be, újrafuttatva nem duplikál és nem írja felül a (még nem létező) kézi mezőket, lapozás működik.
 
 **Fázis 2 — Cron.** Heti ütemezés + napló. *Kész, ha:* ütemezetten fut, a napló látszik adminban, `DISABLE_WP_CRON`-os rendszer-cronból is hívható.
 
 **Fázis 3 — Moderáció + gazdagítás + jogosultságok.** List table, szerkesztő űrlap (indexkép, kutatócsoport, támogatás-override, projektellenőrzés), két capability. *Kész, ha:* jóváhagyás/elutasítás/visszavonás megy, a kézi mezők syncnél túlélnek, a jogosultságok elkülönülnek, nonce+capability mindenhol.
 
-**Fázis 4 — Taxonómia + aloldalak.** `jkk_research_group` + pivot + widget csoport-szűkítés. *Kész, ha:* egy csoport aloldalán csak az adott csoport tételei jönnek.
+**Fázis 4 — Taxonómia + aloldalak.** `mtmt_research_group` + pivot + widget csoport-szűkítés. *Kész, ha:* egy csoport aloldalán csak az adott csoport tételei jönnek.
 
 **Fázis 5 — Elementor widget (alap).** Évekre bontás, keresés, kártya-elrendezés, SJR-badge, DOI-link, beállítások. *Kész, ha:* csak `approved` jelenik meg, évekre bontva, keresés működik, csak a saját táblát hívja.
 
@@ -401,9 +401,9 @@ A Fázis 1 élesben igazolt (767/0/0, JKK profil) után tartott megbeszélésen 
 2. **Query-profil opció: csak DOI-val rendelkező rekordok.** Az admin profil-oldalon (és CLI-n) legyen egy checkbox/opció, ami hozzáadja a `cond=identifiers.source.name;eq;DOI` feltételt a profil cond-jaihoz. **VERIFIKÁLVA élesben**, JKK-profilon (`directInstitutes;in;19662&core;eq;true`): teljes halmaz 767, DOI-val rendelkezik **372** (≈48%), a komplementer `identifiers.source.name;ne;DOI` pontosan 395-öt ad (372+395=767, tehát a szűrés valós). **Ez fontos üzleti döntés, nem csak technikai**: a DOI-only bekapcsolása kb. a felére vágja a behúzott tételszámot — a megrendelővel egyeztetve dőljön el profilonként, nem globális kényszer.
 3. **PDF / Kód / Videó gombok törölve** a `docs/widget-design.md` korábbi mockup-referenciájából — nem kellenek.
 4. **Egyéb azonosítók → logó-gombok.** A `external_ids` mezőben (WoS/Scopus/PubMed/SZTAKI stb., forrás+idValue+realUrl hármasokkal, már ma is helyesen gyűjtve) minden elemhez egy kis logó-ikon, linkelve a `realUrl`-re. Ehhez Fázis 5-ben logó-asset-eket kell beszerezni (Scopus/WoS/PubMed stb. hivatalos ikonjai — bevett gyakorlat tudományos oldalakon, nem jogi aggály).
-5. **Email-értesítés heti sync után**, ha volt új/frissült tétel. Konfigurálható címzett-lista (globális beállítás, Fázis 2 kör: a `wp_jkk_mtmt_query_profiles`-tól független, egyetlen recipient-lista site-szinten, hacsak a megrendelő nem kér profilonkénti bontást). A meglévő futás-napló (§6) ad alapot a tartalomhoz (hány új/frissült/hiányzó).
+5. **Email-értesítés heti sync után**, ha volt új/frissült tétel. Konfigurálható címzett-lista (globális beállítás, Fázis 2 kör: a `wp_mtmt_query_profiles`-tól független, egyetlen recipient-lista site-szinten, hacsak a megrendelő nem kér profilonkénti bontást). A meglévő futás-napló (§6) ad alapot a tartalomhoz (hány új/frissült/hiányzó).
 6. **Kézi "Szinkron most" gomb** az adminban, bármikor megnyomható (nem csak cron/WP-CLI). Figyelem: egy teljes JKK-futás élesben ~24s volt 767 rekordra (lásd Fázis 1 teszt) — nagyobb intézménynél ez szinkron HTTP-request alatt PHP timeoutba futhat; Fázis 2-ben érdemben kezelni kell (pl. emelt `set_time_limit`, vagy async/AJAX-progress).
-7. **MTMT-oldali tartalomváltozás → vissza `pending`-be, NEM auto-apply.** Lásd fent, §4.3 frissítve. Ez a legérdemibb logikai változás — a `Jkk_Mtmt_Publication_Repository::upsert()`-öt bővíteni kell egy tartalom-diff lépéssel, mielőtt a kézi mezőkhöz (itt: `status`) nyúlna.
+7. **MTMT-oldali tartalomváltozás → vissza `pending`-be, NEM auto-apply.** Lásd fent, §4.3 frissítve. Ez a legérdemibb logikai változás — a `Mtmt_Publication_Repository::upsert()`-öt bővíteni kell egy tartalom-diff lépéssel, mielőtt a kézi mezőkhöz (itt: `status`) nyúlna.
 8. **Alapértelmezett placeholder-kép + rágenerált cím**, ha a rekordhoz nincs feltöltött indexkép (`thumbnail_id` üres). A placeholder-kép maga feltölthető/cserélhető beállításokban. **Nyitott implementációs döntés** (Fázis 5): CSS-alapú felirat-overlay a kártyán (egyszerű, nincs szerver-oldali képgenerálás) VAGY tényleges szerver-oldali (GD/Imagick) beégetett szöveg a képbe (nehezebb, de valódi képfájlt ad pl. OG-megosztáshoz). Ajánlott az első, amíg nincs konkrét igény a másodikra.
 9. **`is_featured` kézi mező** (lásd §4.1, hozzáadva) — "kiemelt cikk" jelölés a moderációs űrlapon.
 10. **Két widget típus (Fázis 5-ben mindkettő, nem csak az alap 9.1):**

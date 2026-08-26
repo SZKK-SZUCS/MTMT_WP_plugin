@@ -33,7 +33,7 @@ Ezek VÉGLEGES specifikációk a mappernek, nem feltételezések.
 
 7. Architektúra-elv: SEM intézmény-, SEM szerző-mtid nincs PHP-kódba hardcode-olva
    sehol (api-client, mapper, sync osztályokban sem). A scope kizárólag a
-   `wp_jkk_mtmt_query_profiles.cond_json`-ban él, telepítésenként konfigurálva.
+   `wp_mtmt_query_profiles.cond_json`-ban él, telepítésenként konfigurálva.
    Ez teszi a plugint "dobozosan" (több site-on, kódmódosítás nélkül) újrahasználhatóvá.
 
 8. `core;eq;true` és `published;eq;true` mindig kemény-kódolt, profil-független
@@ -52,13 +52,13 @@ Ezek VÉGLEGES specifikációk a mappernek, nem feltételezések.
     hibátlan lekérés után fut le) — megszakadt szinkron nem jelöl mindent hiányzónak.
 
 12. "Dobozos" query-konfiguráció: Fázis 1-ben admin settings oldal (nem csak
-    WP-CLI) a query profilokhoz, `admin/class-jkk-mtmt-profiles-page.php`,
+    WP-CLI) a query profilokhoz, `admin/class-mtmt-profiles-page.php`,
     `manage_options` kapabilitáshoz kötve (külön a moderációs
-    jkk_mtmt_moderate/classify capability-któl, mert ez site-config, nem
+    mtmt_moderate/classify capability-któl, mert ez site-config, nem
     napi moderáció). UX: mód-választó (Intézmény MTID / Szerző MTID-lista /
     Haladó nyers cond JSON) + egy érték-mező, a plugin építi belőle a
-    cond_json-t. Ugyanazt a Jkk_Mtmt_Query_Profile_Repository-t használja,
-    mint a `wp jkk-mtmt profile create` CLI parancs — nincs duplikált logika.
+    cond_json-t. Ugyanazt a Mtmt_Query_Profile_Repository-t használja,
+    mint a `wp mtmt profile create` CLI parancs — nincs duplikált logika.
 
 13. Fázis 1 alapkód elkészült (activator, api-client, mapper, két repository,
     sync, WP-CLI, admin profil-oldal, bootstrap). `php -l` mind tiszta.
@@ -66,7 +66,7 @@ Ezek VÉGLEGES specifikációk a mappernek, nem feltételezések.
     mtmt_pub_depth2.json mintán (37139647) — minden mező helyesen jött
     (authors_text sorrend+"and", SJR Best-Q=D1 a több rating közül,
     page_range fallback "Paper: 3975", DOI/Egyéb URL/external_ids szétválasztás).
-    Végigmenő WP+MySQL integrációs teszt (`wp jkk-mtmt sync` élesben, JKK
+    Végigmenő WP+MySQL integrációs teszt (`wp mtmt sync` élesben, JKK
     profillal, mtid=19662) MÉG NEM történt meg — nincs helyi WP-telepítés,
     csak XAMPP PHP/MySQL. Ha kell, felállítható egy helyi WP-instance a
     teljes Fázis 1 elfogadási kritérium (nem duplikál újrafuttatva, lapozás)
@@ -74,7 +74,7 @@ Ezek VÉGLEGES specifikációk a mappernek, nem feltételezések.
 
 14. Fázis 1 éles integrációs teszt SIKERES: Local WP-oldal (mtmt-wp-plugin),
     junction-nel bekötve, admin UI-n létrehozott JKK profil (mtid=19662),
-    `wp jkk-mtmt sync` -> 767 új / 0 frissített / 0 hiányzó, PONTOSAN a JKK
+    `wp mtmt sync` -> 767 új / 0 frissített / 0 hiányzó, PONTOSAN a JKK
     intézmény saját publicationCount-jával egyezik. A Fázis 1 elfogadási
     kritériuma (kész, ha egy profilra feltölti a táblát, lapozás működik)
     élesben igazolva.
@@ -166,7 +166,7 @@ dokumentálás közben, nem csak leírtam:
 ## Fázis 2 — cron, napló, email, kézi gomb (2026-08)
 
 27. **HIBA JAVÍTVA, saját teszt közben találtam meg, mielőtt élesedett volna**:
-    a `Jkk_Mtmt_Sync::run_profile()` eddig MINDEN meglévő (nem új) rekordot
+    a `Mtmt_Sync::run_profile()` eddig MINDEN meglévő (nem új) rekordot
     "frissítettként" számolt, függetlenül attól, hogy a tartalma tényleg
     változott-e (`else { ++$result['updated']; }` ág, `content_changed`
     figyelmen kívül hagyva). Ez azt jelentette volna, hogy egy stabil,
@@ -179,22 +179,22 @@ dokumentálás közben, nem csak leírtam:
 
 28. Új osztályok a futtatás egységesítésére, hogy cron/kézi gomb/CLI mind
     ugyanazon a logikán menjen át (naplózás + feltételes email):
-    `Jkk_Mtmt_Sync_Runner::run($trigger_type, $profile_id=null)` —
-    ezt hívja mindhárom belépési pont, NEM közvetlenül a `Jkk_Mtmt_Sync`-et.
+    `Mtmt_Sync_Runner::run($trigger_type, $profile_id=null)` —
+    ezt hívja mindhárom belépési pont, NEM közvetlenül a `Mtmt_Sync`-et.
     `$trigger_type`: 'cron'|'manual'|'cli' — csak 'cron'-nál megy email.
 
-29. Email-cimzettek: `wp_options` (`jkk_mtmt_notification_recipients`), NEM
+29. Email-cimzettek: `wp_options` (`mtmt_notification_recipients`), NEM
     külön tábla — egyetlen site-szintű, sorononkénti/vesszős lista, admin
-    "Beállítások" oldalon szerkeszthető (`admin/class-jkk-mtmt-settings-page.php`).
+    "Beállítások" oldalon szerkeszthető (`admin/class-mtmt-settings-page.php`).
 
-30. Futás-napló: ÚJ tábla `wp_jkk_mtmt_sync_log` (profilonkénti sor minden
-    futásból, trigger_type-tal), `JKK_MTMT_DB_VERSION` 1->2 emelve. Hozzá
-    ÚJ auto-upgrade check `plugins_loaded`-en (`jkk_mtmt_maybe_upgrade_db()`):
+30. Futás-napló: ÚJ tábla `wp_mtmt_sync_log` (profilonkénti sor minden
+    futásból, trigger_type-tal), `MTMT_DB_VERSION` 1->2 emelve. Hozzá
+    ÚJ auto-upgrade check `plugins_loaded`-en (`mtmt_maybe_upgrade_db()`):
     ha a tárolt db_version eltér, újrafuttatja a dbDelta-t reaktiválás
     nélkül is — enélkül egy sima fájl-frissítés (deaktiválás nélkül) nem
     hozta volna létre az új táblát.
 
-31. `is_featured` oszlop pótolva a TÉNYLEGES `Jkk_Mtmt_Activator` SQL-jében —
+31. `is_featured` oszlop pótolva a TÉNYLEGES `Mtmt_Activator` SQL-jében —
     korábban csak a CLAUDE.md §4.1 dokumentációba került be, az éles
     migrációs kódba nem (dokumentáció-kód drift, most zárva).
 
@@ -202,3 +202,46 @@ dokumentálás közben, nem csak leírtam:
     DE ez nem old meg webszerver/proxy-szintű timeoutot — ha ez élesben
     nagyobb intézménynél gondot okoz, async/AJAX-progress kell (lásd
     docs/roadmap.md, §14/6 eredeti figyelmeztetése).
+
+## Plugin átnevezés: JKK MTMT Publications -> MTMT Sync (2026-08)
+
+33. **Teljes rebrand, mert a plugint több szervezet is használni fogja**
+    (megrendelő explicit kérése) — a "JKK" korábban nemcsak adatban (már
+    korábban is kerülve, ld. #7 "dobozos" elv), hanem a KÓD SAJÁT
+    névterében is jelen volt (osztálynevek, függvények, táblanevek,
+    szövegdomain, WP-CLI namespace, admin menü), ami más szervezet
+    telepítésén zavaró/szakszerűtlen lett volna.
+    - Admin menü (top-level label): **"MTMT"** (rövid).
+    - Egyéb felhasználói szöveg (oldalcímek, readme leírás): **"MTMT
+      Publikációk"**.
+    - Plugin header/mappa/fő fájl neve: **"MTMT Sync"** / `mtmt-sync`.
+    - Kódszintű prefix (osztályok/függvények/táblák/opciók/cron-hook/
+      kapabilitások/WP-CLI namespace): rövidebb `Mtmt_`/`mtmt_` — NEM
+      `mtmt_sync_`, mert az feleslegesen ismételné a "sync"-et minden
+      azonosítóban (pl. `wp mtmt sync` olvashatóbb, mint `wp mtmt-sync sync`).
+    - Régi -> új: `Jkk_Mtmt_*` -> `Mtmt_*` (osztályok), `jkk_mtmt_*` ->
+      `mtmt_*` (függvények/táblák/opciók: pl. `wp_jkk_mtmt_publications` ->
+      `wp_mtmt_publications`), `JKK_MTMT_*` -> `MTMT_*` (konstansok),
+      `jkk-mtmt-publications` (text domain) -> `mtmt-sync`, `jkk-mtmt sync`/
+      `jkk-mtmt profile` (WP-CLI) -> `mtmt sync`/`mtmt profile`,
+      `jkk-mtmt-profiles`/`jkk-mtmt-settings` (admin slug) ->
+      `mtmt-profiles`/`mtmt-settings`, `jkk_research_group` (Fázis 4-es
+      taxonómia, még nem épült meg) -> `mtmt_research_group`.
+    - `jkk-mtmt-publications.php` -> `mtmt-sync.php`, minden `includes/`
+      és `admin/` fájl `class-jkk-mtmt-*` -> `class-mtmt-*`.
+    - Admin UI-szövegekből ("wp mtmt profile create --help" is idetartozik,
+      mert az minden telepítőnek megjelenik) kikerültek a konkrét "JKK"
+      példák, generikus "Kutatóintézet" placeholderre cserélve.
+    - **Amit SZÁNDÉKOSAN NEM cseréltem**: a CLAUDE.md és a docs/ fájlok
+      PRÓZÁJÁBAN maradó "JKK" említések (pl. "A JKK publikációs listát
+      akar...", changelog "élesben validálva JKK profillal") — ezek a
+      MEGRENDELŐ tényleges azonosítása/a valós tesztelés dokumentálása,
+      nem a plugin technikai brandingje, ezekben a kontextusokban helyénvaló
+      a valódi név.
+    - **KÖVETKEZMÉNY a Local teszt-site-on**: a régi `wp_jkk_mtmt_*` táblák
+      érintetlenül megmaradnak az adatbázisban (nem törölve), de a kód
+      mostantól `wp_mtmt_*`-re megy — a 767 teszt-rekordot újra be kell
+      húzni szinkronnal. Ez nem adatvesztés (semmi nem volt még kézzel
+      gazdagítva/jóváhagyva), de a WP plugin-mappát is át kellett linkelni
+      (`wp-content/plugins/jkk-mtmt-publications` -> `.../mtmt-sync`),
+      ami éles oldalon egy deaktiválás+újraaktiválást igényelne.

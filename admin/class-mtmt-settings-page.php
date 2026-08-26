@@ -2,7 +2,7 @@
 /**
  * Admin oldal: email-értesítés címzettjei + futás-napló (CLAUDE.md §6, §14/5).
  *
- * @package Jkk_Mtmt_Publications
+ * @package Mtmt_Sync
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -12,27 +12,27 @@ defined( 'ABSPATH' ) || exit;
  * napi moderáció. Jövőbeli fázisok globális kapcsolói (szakmai terület
  * opt-in, kiemelt cikk opt-in) is ide kerülnek majd.
  */
-final class Jkk_Mtmt_Settings_Page {
+final class Mtmt_Settings_Page {
 
 	private const CAPABILITY   = 'manage_options';
-	private const NONCE_ACTION = 'jkk_mtmt_settings_action';
-	private const PAGE_SLUG    = 'jkk-mtmt-settings';
+	private const NONCE_ACTION = 'mtmt_settings_action';
+	private const PAGE_SLUG    = 'mtmt-settings';
 
 	/**
-	 * @var Jkk_Mtmt_Sync_Log_Repository
+	 * @var Mtmt_Sync_Log_Repository
 	 */
 	private $log_repo;
 
 	/**
-	 * @var Jkk_Mtmt_Query_Profile_Repository
+	 * @var Mtmt_Query_Profile_Repository
 	 */
 	private $profile_repo;
 
 	/**
-	 * @param Jkk_Mtmt_Sync_Log_Repository       $log_repo
-	 * @param Jkk_Mtmt_Query_Profile_Repository  $profile_repo
+	 * @param Mtmt_Sync_Log_Repository       $log_repo
+	 * @param Mtmt_Query_Profile_Repository  $profile_repo
 	 */
-	public function __construct( Jkk_Mtmt_Sync_Log_Repository $log_repo, Jkk_Mtmt_Query_Profile_Repository $profile_repo ) {
+	public function __construct( Mtmt_Sync_Log_Repository $log_repo, Mtmt_Query_Profile_Repository $profile_repo ) {
 		$this->log_repo     = $log_repo;
 		$this->profile_repo = $profile_repo;
 	}
@@ -42,9 +42,9 @@ final class Jkk_Mtmt_Settings_Page {
 	 */
 	public function add_menu_page(): void {
 		add_submenu_page(
-			'jkk-mtmt-profiles',
-			__( 'JKK MTMT — Beállítások', 'jkk-mtmt-publications' ),
-			__( 'Beállítások', 'jkk-mtmt-publications' ),
+			'mtmt-profiles',
+			__( 'MTMT Publikációk — Beállítások', 'mtmt-sync' ),
+			__( 'Beállítások', 'mtmt-sync' ),
 			self::CAPABILITY,
 			self::PAGE_SLUG,
 			array( $this, 'render' )
@@ -56,11 +56,11 @@ final class Jkk_Mtmt_Settings_Page {
 	 */
 	public function render(): void {
 		if ( ! current_user_can( self::CAPABILITY ) ) {
-			wp_die( esc_html__( 'Nincs jogosultságod ehhez az oldalhoz.', 'jkk-mtmt-publications' ) );
+			wp_die( esc_html__( 'Nincs jogosultságod ehhez az oldalhoz.', 'mtmt-sync' ) );
 		}
 
 		$notice       = $this->handle_request();
-		$recipients   = get_option( Jkk_Mtmt_Notifier::OPTION_RECIPIENTS, '' );
+		$recipients   = get_option( Mtmt_Notifier::OPTION_RECIPIENTS, '' );
 		$logs         = $this->log_repo->get_recent( 20 );
 		$profile_labels = array();
 		foreach ( $this->profile_repo->get_all() as $profile ) {
@@ -69,7 +69,7 @@ final class Jkk_Mtmt_Settings_Page {
 		$nonce_action = self::NONCE_ACTION;
 		?>
 		<div class="wrap">
-			<h1><?php esc_html_e( 'JKK MTMT — Beállítások', 'jkk-mtmt-publications' ); ?></h1>
+			<h1><?php esc_html_e( 'MTMT Publikációk — Beállítások', 'mtmt-sync' ); ?></h1>
 
 			<?php if ( $notice ) : ?>
 				<div class="notice notice-<?php echo esc_attr( $notice['type'] ); ?>">
@@ -77,38 +77,38 @@ final class Jkk_Mtmt_Settings_Page {
 				</div>
 			<?php endif; ?>
 
-			<h2><?php esc_html_e( 'Email-értesítés', 'jkk-mtmt-publications' ); ?></h2>
+			<h2><?php esc_html_e( 'Email-értesítés', 'mtmt-sync' ); ?></h2>
 			<form method="post">
 				<?php wp_nonce_field( $nonce_action ); ?>
-				<input type="hidden" name="jkk_mtmt_action" value="save_recipients">
+				<input type="hidden" name="mtmt_action" value="save_recipients">
 				<p>
-					<label for="jkk-mtmt-recipients"><?php esc_html_e( 'Címzettek (soronként vagy vesszővel elválasztva):', 'jkk-mtmt-publications' ); ?></label><br>
-					<textarea id="jkk-mtmt-recipients" name="recipients" rows="4" class="large-text code"><?php echo esc_textarea( $recipients ); ?></textarea>
+					<label for="mtmt-recipients"><?php esc_html_e( 'Címzettek (soronként vagy vesszővel elválasztva):', 'mtmt-sync' ); ?></label><br>
+					<textarea id="mtmt-recipients" name="recipients" rows="4" class="large-text code"><?php echo esc_textarea( $recipients ); ?></textarea>
 				</p>
 				<p class="description">
-					<?php esc_html_e( 'Ha üres, nem megy ki email. Csak a heti automatikus (cron) futásról küld értesítést, ha volt új vagy frissült tétel — kézi/CLI szinkronnál nem, mert azt az admin úgyis a képernyőn látja.', 'jkk-mtmt-publications' ); ?>
+					<?php esc_html_e( 'Ha üres, nem megy ki email. Csak a heti automatikus (cron) futásról küld értesítést, ha volt új vagy frissült tétel — kézi/CLI szinkronnál nem, mert azt az admin úgyis a képernyőn látja.', 'mtmt-sync' ); ?>
 				</p>
-				<?php submit_button( __( 'Mentés', 'jkk-mtmt-publications' ) ); ?>
+				<?php submit_button( __( 'Mentés', 'mtmt-sync' ) ); ?>
 			</form>
 
-			<h2><?php esc_html_e( 'Futás-napló (utolsó 20)', 'jkk-mtmt-publications' ); ?></h2>
+			<h2><?php esc_html_e( 'Futás-napló (utolsó 20)', 'mtmt-sync' ); ?></h2>
 			<table class="widefat striped">
 				<thead>
 					<tr>
-						<th><?php esc_html_e( 'Időpont', 'jkk-mtmt-publications' ); ?></th>
-						<th><?php esc_html_e( 'Profil', 'jkk-mtmt-publications' ); ?></th>
-						<th><?php esc_html_e( 'Forrás', 'jkk-mtmt-publications' ); ?></th>
-						<th><?php esc_html_e( 'Új', 'jkk-mtmt-publications' ); ?></th>
-						<th><?php esc_html_e( 'Frissített', 'jkk-mtmt-publications' ); ?></th>
-						<th><?php esc_html_e( 'Visszaesett', 'jkk-mtmt-publications' ); ?></th>
-						<th><?php esc_html_e( 'Hiányzó', 'jkk-mtmt-publications' ); ?></th>
-						<th><?php esc_html_e( 'Státusz', 'jkk-mtmt-publications' ); ?></th>
+						<th><?php esc_html_e( 'Időpont', 'mtmt-sync' ); ?></th>
+						<th><?php esc_html_e( 'Profil', 'mtmt-sync' ); ?></th>
+						<th><?php esc_html_e( 'Forrás', 'mtmt-sync' ); ?></th>
+						<th><?php esc_html_e( 'Új', 'mtmt-sync' ); ?></th>
+						<th><?php esc_html_e( 'Frissített', 'mtmt-sync' ); ?></th>
+						<th><?php esc_html_e( 'Visszaesett', 'mtmt-sync' ); ?></th>
+						<th><?php esc_html_e( 'Hiányzó', 'mtmt-sync' ); ?></th>
+						<th><?php esc_html_e( 'Státusz', 'mtmt-sync' ); ?></th>
 					</tr>
 				</thead>
 				<tbody>
 					<?php if ( empty( $logs ) ) : ?>
 						<tr>
-							<td colspan="8"><?php esc_html_e( 'Még nem futott szinkron.', 'jkk-mtmt-publications' ); ?></td>
+							<td colspan="8"><?php esc_html_e( 'Még nem futott szinkron.', 'mtmt-sync' ); ?></td>
 						</tr>
 					<?php endif; ?>
 					<?php foreach ( $logs as $log ) : ?>
@@ -126,11 +126,11 @@ final class Jkk_Mtmt_Settings_Page {
 									<span style="color:#b32d2e;">
 										<?php
 										$errors = json_decode( (string) $log['errors'], true );
-										echo esc_html( is_array( $errors ) ? implode( '; ', $errors ) : __( 'hiba', 'jkk-mtmt-publications' ) );
+										echo esc_html( is_array( $errors ) ? implode( '; ', $errors ) : __( 'hiba', 'mtmt-sync' ) );
 										?>
 									</span>
 								<?php else : ?>
-									<?php esc_html_e( 'OK', 'jkk-mtmt-publications' ); ?>
+									<?php esc_html_e( 'OK', 'mtmt-sync' ); ?>
 								<?php endif; ?>
 							</td>
 						</tr>
@@ -145,25 +145,25 @@ final class Jkk_Mtmt_Settings_Page {
 	 * @return array{type:string,message:string}|null
 	 */
 	private function handle_request(): ?array {
-		if ( empty( $_POST['jkk_mtmt_action'] ) ) {
+		if ( empty( $_POST['mtmt_action'] ) ) {
 			return null;
 		}
 
 		check_admin_referer( self::NONCE_ACTION );
 
 		if ( ! current_user_can( self::CAPABILITY ) ) {
-			wp_die( esc_html__( 'Nincs jogosultságod ehhez a művelethez.', 'jkk-mtmt-publications' ) );
+			wp_die( esc_html__( 'Nincs jogosultságod ehhez a művelethez.', 'mtmt-sync' ) );
 		}
 
-		$action = sanitize_key( wp_unslash( $_POST['jkk_mtmt_action'] ) );
+		$action = sanitize_key( wp_unslash( $_POST['mtmt_action'] ) );
 
 		if ( 'save_recipients' === $action ) {
 			$raw = isset( $_POST['recipients'] ) ? sanitize_textarea_field( wp_unslash( $_POST['recipients'] ) ) : '';
-			update_option( Jkk_Mtmt_Notifier::OPTION_RECIPIENTS, $raw );
+			update_option( Mtmt_Notifier::OPTION_RECIPIENTS, $raw );
 
 			return array(
 				'type'    => 'success',
-				'message' => __( 'Mentve.', 'jkk-mtmt-publications' ),
+				'message' => __( 'Mentve.', 'mtmt-sync' ),
 			);
 		}
 

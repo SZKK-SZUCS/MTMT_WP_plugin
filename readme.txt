@@ -1,4 +1,4 @@
-=== JKK MTMT Publications ===
+=== MTMT Sync ===
 Contributors: Szurofka Márton, MFÜI
 Tags: mtmt, publications, elementor, publikaciok, tudomanyos
 Requires at least: 6.4
@@ -35,9 +35,9 @@ a `CLAUDE.md` és a `docs/roadmap.md` fájlokban vannak dokumentálva.
 
 1. Töltsd fel a plugint (vagy klónozd a repót) a `wp-content/plugins/` alá.
 2. Aktiváld a wp-admin Pluginok oldalán — ez létrehozza a szükséges táblákat.
-3. A "JKK MTMT" admin menüpontban hozz létre legalább egy query-profilt
+3. Az "MTMT" admin menüpontban hozz létre legalább egy query-profilt
    (intézmény-MTID, szerző-MTID-lista, vagy haladó cond JSON).
-4. Futtasd a szinkront: `wp jkk-mtmt sync` (WP-CLI), vagy várd meg a heti
+4. Futtasd a szinkront: `wp mtmt sync` (WP-CLI), vagy várd meg a heti
    automatikus futást (ha a cron-ütemezés már él).
 
 == Changelog ==
@@ -52,9 +52,15 @@ a `CLAUDE.md` és a `docs/roadmap.md` fájlokban vannak dokumentálva.
   `pending` státuszba — nincs csendes automatikus felülírás.
 * DOI-only profil-szűrési opció (`--doi-only` CLI flag, illetve checkbox az
   admin felületen).
-* Élesben validálva: JKK profil (SZE Járműipari Kutatóközpont, mtid 19662),
+* Élesben validálva: teszt-profil (SZE Járműipari Kutatóközpont, mtid 19662),
   767/0/0 (új/frissített/hiányzó), pontosan egyezik az MTMT saját nyilvántartott
   publikációszámával.
+* Heti WP-Cron ütemezés + futás-napló + email-értesítés (csak akkor, ha volt
+  valódi új/frissült tétel) + kézi "Szinkron most" gomb az adminban.
+* Plugin átnevezve "MTMT Sync"-re — a korábbi belső elnevezés az első
+  megrendelő szervezetre (JKK) utalt, de a plugint több szervezet is
+  használni fogja, ezért semmilyen szervezet-specifikus név nem maradhatott
+  a technikai névtérben (osztályok, táblák, szövegdomain, admin menü).
 
 = 0.1.0 =
 * Kezdeti bootstrap: plugin-header, aktivátor (tábla-migráció dbDelta-val).

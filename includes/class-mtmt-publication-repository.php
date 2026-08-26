@@ -2,7 +2,7 @@
 /**
  * Publikáció-tábla upsert/diff repository.
  *
- * @package Jkk_Mtmt_Publications
+ * @package Mtmt_Sync
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -13,11 +13,11 @@ defined( 'ABSPATH' ) || exit;
  * mezőkhöz (status, thumbnail_id, funding_override, project_*, query_profile_id
  * update-kor) nem nyúl.
  */
-final class Jkk_Mtmt_Publication_Repository {
+final class Mtmt_Publication_Repository {
 
 	/**
 	 * MTMT-forrású oszlopok — ezek íródnak update-kor. Bővebbet lásd
-	 * Jkk_Mtmt_Mapper::map_publication() kimenetét, ez pontosan azzal egyezik
+	 * Mtmt_Mapper::map_publication() kimenetét, ez pontosan azzal egyezik
 	 * (mtid nélkül, azt külön kezeljük insertkor).
 	 *
 	 * @var string[]
@@ -61,7 +61,7 @@ final class Jkk_Mtmt_Publication_Repository {
 	 */
 	public function __construct( wpdb $wpdb ) {
 		$this->wpdb  = $wpdb;
-		$this->table = $wpdb->prefix . 'jkk_mtmt_publications';
+		$this->table = $wpdb->prefix . 'mtmt_publications';
 	}
 
 	/**
@@ -73,7 +73,7 @@ final class Jkk_Mtmt_Publication_Repository {
 	private const REVERT_ON_CHANGE_STATUSES = array( 'approved', 'rejected' );
 
 	/**
-	 * @param array    $mapped_row       Jkk_Mtmt_Mapper::map_publication() kimenete.
+	 * @param array    $mapped_row       Mtmt_Mapper::map_publication() kimenete.
 	 * @param int|null $query_profile_id A futó szinkron profilja (csak insertkor íródik).
 	 * @return array{id:int,inserted:bool,content_changed:bool,reverted_to_pending:bool}
 	 */

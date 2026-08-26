@@ -2,7 +2,7 @@
 /**
  * Aktiváláskori tábla-migráció.
  *
- * @package Jkk_Mtmt_Publications
+ * @package Mtmt_Sync
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -10,7 +10,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * A plugin két saját tábláját hozza létre/frissíti dbDelta-val.
  */
-final class Jkk_Mtmt_Activator {
+final class Mtmt_Activator {
 
 	/**
 	 * Aktiváláskor lefutó migráció.
@@ -22,8 +22,8 @@ final class Jkk_Mtmt_Activator {
 
 		$charset_collate = $wpdb->get_charset_collate();
 
-		$publications_table = $wpdb->prefix . 'jkk_mtmt_publications';
-		$profiles_table     = $wpdb->prefix . 'jkk_mtmt_query_profiles';
+		$publications_table = $wpdb->prefix . 'mtmt_publications';
+		$profiles_table     = $wpdb->prefix . 'mtmt_query_profiles';
 
 		$sql_publications = "CREATE TABLE {$publications_table} (
   id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -81,7 +81,7 @@ final class Jkk_Mtmt_Activator {
   PRIMARY KEY  (id)
 ) {$charset_collate};";
 
-		$sync_log_table = $wpdb->prefix . 'jkk_mtmt_sync_log';
+		$sync_log_table = $wpdb->prefix . 'mtmt_sync_log';
 
 		$sql_sync_log = "CREATE TABLE {$sync_log_table} (
   id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -105,6 +105,6 @@ final class Jkk_Mtmt_Activator {
 		dbDelta( $sql_profiles );
 		dbDelta( $sql_sync_log );
 
-		update_option( 'jkk_mtmt_db_version', JKK_MTMT_DB_VERSION );
+		update_option( 'mtmt_db_version', MTMT_DB_VERSION );
 	}
 }

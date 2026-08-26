@@ -6,16 +6,16 @@
  * (CLAUDE.md §4.1) adja vissza; a kézi/housekeeping oszlopokhoz nem nyúl,
  * azokat a repository kezeli.
  *
- * @package Jkk_Mtmt_Publications
+ * @package Mtmt_Sync
  */
 
 defined( 'ABSPATH' ) || exit;
 
 /**
  * Állapot nélküli mapper: egy nyers MTMT publication-objektumból épít egy
- * asszociatív tömböt a wp_jkk_mtmt_publications MTMT-forrású oszlopaihoz.
+ * asszociatív tömböt a wp_mtmt_publications MTMT-forrású oszlopaihoz.
  */
-final class Jkk_Mtmt_Mapper {
+final class Mtmt_Mapper {
 
 	/**
 	 * Legjobb SJR-negyed sorrend (docs/field-map.md „ratings[] -> SJR").

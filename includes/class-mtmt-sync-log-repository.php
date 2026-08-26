@@ -2,16 +2,16 @@
 /**
  * Futás-napló repository (CLAUDE.md §6, §14/5-6).
  *
- * @package Jkk_Mtmt_Publications
+ * @package Mtmt_Sync
  */
 
 defined( 'ABSPATH' ) || exit;
 
 /**
  * Minden szinkron-futásról (cron/kézi/CLI) egy sor, profilonként — a
- * Jkk_Mtmt_Sync::run_profile() eredményét tárolja el, adminban megtekinthetőn.
+ * Mtmt_Sync::run_profile() eredményét tárolja el, adminban megtekinthetőn.
  */
-final class Jkk_Mtmt_Sync_Log_Repository {
+final class Mtmt_Sync_Log_Repository {
 
 	/**
 	 * @var wpdb
@@ -28,12 +28,12 @@ final class Jkk_Mtmt_Sync_Log_Repository {
 	 */
 	public function __construct( wpdb $wpdb ) {
 		$this->wpdb  = $wpdb;
-		$this->table = $wpdb->prefix . 'jkk_mtmt_sync_log';
+		$this->table = $wpdb->prefix . 'mtmt_sync_log';
 	}
 
 	/**
 	 * @param string $trigger_type 'cron'|'manual'|'cli'
-	 * @param array  $result       Jkk_Mtmt_Sync::run_profile() kimenete.
+	 * @param array  $result       Mtmt_Sync::run_profile() kimenete.
 	 * @return int Az új log-sor id-je.
 	 */
 	public function log_result( string $trigger_type, array $result ): int {
