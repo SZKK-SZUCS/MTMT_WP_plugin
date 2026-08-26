@@ -88,7 +88,7 @@ final class Mtmt_Settings_Page {
 					</label>
 				</p>
 				<p class="description">
-					<?php esc_html_e( 'Ha ki van kapcsolva: a gazdagító űrlapon nincs "kiemelt cikk" jelölő, és a Fázis 5-ös "B" (terület-aloldal) widget nem lesz elérhető Elementorban.', 'mtmt-sync' ); ?>
+					<?php esc_html_e( 'Kiemelt cikkeket lehet megjelölni a moderációs listán, és külön widgettel (szakmai terület aloldalakon) csak ezeket lehet majd kiemelten megjeleníteni. Ha ki van kapcsolva: a gazdagító űrlapon nincs "kiemelt cikk" jelölő, és a hozzá tartozó widget nem lesz elérhető Elementorban.', 'mtmt-sync' ); ?>
 				</p>
 				<?php submit_button( __( 'Mentés', 'mtmt-sync' ) ); ?>
 			</form>

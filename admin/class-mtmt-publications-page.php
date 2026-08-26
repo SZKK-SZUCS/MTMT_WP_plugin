@@ -156,7 +156,13 @@ final class Mtmt_Publications_Page {
 			$action = sanitize_key( wp_unslash( $_REQUEST['action2'] ) );
 		}
 
-		if ( ! in_array( $action, array( 'approve', 'reject' ), true ) ) {
+		$allowed_actions = array( 'approve', 'reject' );
+		if ( get_option( 'mtmt_enable_featured' ) ) {
+			$allowed_actions[] = 'feature';
+			$allowed_actions[] = 'unfeature';
+		}
+
+		if ( ! in_array( $action, $allowed_actions, true ) ) {
 			return;
 		}
 
@@ -170,8 +176,12 @@ final class Mtmt_Publications_Page {
 			return;
 		}
 
-		$status = 'approve' === $action ? 'approved' : 'rejected';
-		$this->repository->bulk_set_status( $ids, $status, get_current_user_id() );
+		if ( in_array( $action, array( 'feature', 'unfeature' ), true ) ) {
+			$this->repository->bulk_set_featured( $ids, 'feature' === $action );
+		} else {
+			$status = 'approve' === $action ? 'approved' : 'rejected';
+			$this->repository->bulk_set_status( $ids, $status, get_current_user_id() );
+		}
 
 		wp_safe_redirect(
 			add_query_arg(
@@ -324,6 +334,7 @@ final class Mtmt_Publications_Page {
 								<button type="button" class="button" id="mtmt-select-thumbnail"><?php esc_html_e( 'Kép kiválasztása', 'mtmt-sync' ); ?></button>
 								<button type="button" class="button" id="mtmt-remove-thumbnail"><?php esc_html_e( 'Eltávolítás', 'mtmt-sync' ); ?></button>
 							</p>
+							<p class="description"><?php esc_html_e( 'A publikáció mellett megjelenő kép a nyilvános listában (pl. kiadói logó vagy egyedi illusztráció). Az MTMT nem ad ilyet — ha üresen hagyod, a widget egy alapértelmezett képet fog mutatni a cím alapján.', 'mtmt-sync' ); ?></p>
 						</td>
 					</tr>
 					<tr>
@@ -333,6 +344,7 @@ final class Mtmt_Publications_Page {
 							<?php if ( ! empty( $item['funding_text'] ) ) : ?>
 								<p class="description"><?php esc_html_e( 'MTMT-ből importált (nem szerkeszthető, csak felülírható):', 'mtmt-sync' ); ?> <?php echo esc_html( $item['funding_text'] ); ?></p>
 							<?php endif; ?>
+							<p class="description"><?php esc_html_e( 'Milyen támogatás/pályázat állt a publikáció mögött. Az MTMT ezt jelenleg nem szolgáltatja automatikusan, ezért ez mindig kézi bevitel — ha kitöltöd, ez jelenik meg a nyilvános oldalon a publikáció mellett.', 'mtmt-sync' ); ?></p>
 						</td>
 					</tr>
 					<tr>
@@ -344,12 +356,16 @@ final class Mtmt_Publications_Page {
 							<?php elseif ( ! empty( $item['project_verified'] ) ) : ?>
 								<span class="description">✓ <?php esc_html_e( 'Ellenőrizve', 'mtmt-sync' ); ?></span>
 							<?php endif; ?>
+							<p class="description"><?php esc_html_e( 'Az NKFIH vagy más pályázati azonosító(k), amikhez a publikáció köthető (pl. "K 123456"). Az MTMT ezt sem adja automatikusan. Az "Ellenőrizve" pipa azt jelzi, hogy valaki kézzel leellenőrizte a fenti azonosító helyességét — ezt rögzíti, ki és mikor tette.', 'mtmt-sync' ); ?></p>
 						</td>
 					</tr>
 					<?php if ( $featured_enabled ) : ?>
 						<tr>
 							<th><?php esc_html_e( 'Kiemelt cikk', 'mtmt-sync' ); ?></th>
-							<td><label><input type="checkbox" name="is_featured" value="1" <?php checked( ! empty( $item['is_featured'] ) ); ?>> <?php esc_html_e( 'Megjelölés kiemelt cikkként', 'mtmt-sync' ); ?></label></td>
+							<td>
+								<label><input type="checkbox" name="is_featured" value="1" <?php checked( ! empty( $item['is_featured'] ) ); ?>> <?php esc_html_e( 'Megjelölés kiemelt cikkként', 'mtmt-sync' ); ?></label>
+								<p class="description"><?php esc_html_e( 'A kiemelt cikként megjelölt publikációk fognak megjelenni a szakmai terület aloldalak widgetjén (csak a kiemeltek, nem az összes jóváhagyott tétel).', 'mtmt-sync' ); ?></p>
+							</td>
 						</tr>
 					<?php endif; ?>
 				</table>

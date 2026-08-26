@@ -137,13 +137,17 @@ final class Mtmt_Profiles_Page {
 			</table>
 
 			<h2><?php esc_html_e( 'Új profil', 'mtmt-sync' ); ?></h2>
+			<p class="description"><?php esc_html_e( 'Egy profil határozza meg, mely MTMT-publikációkat kérdezze le a rendszer szinkronizáláskor. Egy site-on több profil is lehet (pl. kutatócsoportonként); a behúzott publikációk mindig "függőben" státusszal kerülnek be, jóváhagyás előtt nem jelennek meg nyilvánosan.', 'mtmt-sync' ); ?></p>
 			<form method="post">
 				<?php wp_nonce_field( $nonce_action ); ?>
 				<input type="hidden" name="mtmt_action" value="create">
 				<table class="form-table">
 					<tr>
 						<th><label for="mtmt-label"><?php esc_html_e( 'Profil neve', 'mtmt-sync' ); ?></label></th>
-						<td><input type="text" id="mtmt-label" name="label" class="regular-text" required></td>
+						<td>
+							<input type="text" id="mtmt-label" name="label" class="regular-text" required>
+							<p class="description"><?php esc_html_e( 'Csak belső azonosításra szolgál (pl. melyik kutatócsoport/intézmény profilja) — a nyilvános oldalon sehol nem jelenik meg.', 'mtmt-sync' ); ?></p>
+						</td>
 					</tr>
 					<tr>
 						<th><?php esc_html_e( 'Scope típusa', 'mtmt-sync' ); ?></th>
@@ -151,6 +155,7 @@ final class Mtmt_Profiles_Page {
 							<label><input type="radio" name="scope_type" value="institute" checked> <?php esc_html_e( 'Intézmény MTID', 'mtmt-sync' ); ?></label><br>
 							<label><input type="radio" name="scope_type" value="authors"> <?php esc_html_e( 'Szerző MTID-lista (vesszővel elválasztva)', 'mtmt-sync' ); ?></label><br>
 							<label><input type="radio" name="scope_type" value="advanced"> <?php esc_html_e( 'Haladó — nyers cond JSON', 'mtmt-sync' ); ?></label>
+							<p class="description"><?php esc_html_e( 'Melyik MTMT-mező alapján szűrjön: egy adott intézmény összes publikációja, egy konkrét szerző-lista publikációi, vagy (haladó felhasználóknak) egy tetszőleges, kézzel megadott feltétel-lista.', 'mtmt-sync' ); ?></p>
 						</td>
 					</tr>
 					<tr>

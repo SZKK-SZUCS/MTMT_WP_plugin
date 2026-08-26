@@ -346,6 +346,27 @@ final class Mtmt_Publication_Repository {
 	}
 
 	/**
+	 * Tömeges kiemelés / kiemelés visszavonása (CLAUDE.md §14/9, kézi mező).
+	 *
+	 * @param int[] $ids
+	 * @param bool  $featured
+	 * @return int Érintett sorok száma.
+	 */
+	public function bulk_set_featured( array $ids, bool $featured ): int {
+		$ids = array_values( array_unique( array_map( 'absint', $ids ) ) );
+
+		if ( empty( $ids ) ) {
+			return 0;
+		}
+
+		$placeholders = implode( ',', array_fill( 0, count( $ids ), '%d' ) );
+		$sql          = "UPDATE {$this->table} SET is_featured = %d WHERE id IN ({$placeholders})";
+		$params       = array_merge( array( $featured ? 1 : 0 ), $ids );
+
+		return (int) $this->wpdb->query( $this->wpdb->prepare( $sql, $params ) );
+	}
+
+	/**
 	 * Kézi gazdagítás mentése (CLAUDE.md §8.2) — SOSEM indít MTMT-hívást, és
 	 * a sync sosem írja felül ezeket a mezőket (lásd SOURCE_COLUMNS fent).
 	 *

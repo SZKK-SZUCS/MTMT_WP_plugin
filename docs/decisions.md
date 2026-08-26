@@ -295,3 +295,24 @@ dokumentálás közben, nem csak leírtam:
     "Ellenőrizve" pipa van elzárva — szerveroldalon védve (a mezőt egyszerűen
     nem veszi át a repository, ha a beküldő nem classify-jogú), NEM csak a
     form UI-ban elrejtve.
+
+## Fázis 3 PR előtti kiegészítés — mezőmagyarázatok + bulk kiemelés (2026-08)
+
+40. **Minden szerkeszthető mezőnél leíró szöveg** (megrendelői kérés) — a
+    gazdagító űrlap (indexkép, támogatás felülbírálás, projektazonosító+
+    ellenőrizve, kiemelt cikk) és a profil-létrehozó űrlap (profil neve,
+    scope típusa) mind kaptak egy `<p class="description">` magyarázatot,
+    plain-language stílusban (nem technikai zsargon — pl. nem "Fázis 5-ös
+    widget", hanem "külön widgettel... csak ezeket lehet majd kiemelten
+    megjeleníteni").
+
+41. **Bulk kiemelés/kiemelés-visszavonás** a moderációs listán — a meglévő
+    tömeges jóváhagyás/elutasítás mintájára. `Mtmt_Publication_Repository::
+    bulk_set_featured()`, a `Mtmt_List_Table` bulk-action listája és a
+    státusz-oszlop csak akkor mutatja/ajánlja fel, ha a "kiemelt cikk"
+    funkció be van kapcsolva (`mtmt_enable_featured`) — ugyanaz a
+    feltétel-mintázat, mint az egyes-tételes checkboxnál. A státusz oszlopban
+    egy ★ jelzi a már kiemelt tételeket, hogy lásd, mit pipálsz be
+    kiemelés-visszavonáshoz (enélkül a bulk unfeature-nek nem sok értelme
+    lenne — nem kérted külön, de e nélkül a funkció gyakorlatilag
+    használhatatlan lett volna).

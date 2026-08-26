@@ -91,10 +91,17 @@ final class Mtmt_List_Table extends WP_List_Table {
 	 * @return array
 	 */
 	public function get_bulk_actions(): array {
-		return array(
+		$actions = array(
 			'approve' => __( 'Jóváhagyás', 'mtmt-sync' ),
 			'reject'  => __( 'Elutasítás', 'mtmt-sync' ),
 		);
+
+		if ( get_option( 'mtmt_enable_featured' ) ) {
+			$actions['feature']   = __( 'Kiemelés', 'mtmt-sync' );
+			$actions['unfeature'] = __( 'Kiemelés visszavonása', 'mtmt-sync' );
+		}
+
+		return $actions;
 	}
 
 	/**
@@ -232,8 +239,13 @@ final class Mtmt_List_Table extends WP_List_Table {
 			'rejected' => __( 'Elutasítva', 'mtmt-sync' ),
 		);
 		$status = $item['status'] ?? 'pending';
+		$html   = esc_html( $labels[ $status ] ?? $status );
 
-		return esc_html( $labels[ $status ] ?? $status );
+		if ( get_option( 'mtmt_enable_featured' ) && ! empty( $item['is_featured'] ) ) {
+			$html .= ' <span title="' . esc_attr__( 'Kiemelt cikk', 'mtmt-sync' ) . '" style="color:#d98800;">★</span>';
+		}
+
+		return $html;
 	}
 
 	/**
