@@ -33,16 +33,18 @@ final class Mtmt_Profiles_Page {
 	}
 
 	/**
-	 * `admin_menu`-ből hívva.
+	 * `admin_menu`-ből hívva — a top-level "MTMT" (Mtmt_Publications_Page) alá,
+	 * almenüként. `manage_options`-hoz kötve, ezért a `mtmt_moderate`-only
+	 * felhasználók a top-level "MTMT" menüt látják, de ezt az almenüt nem.
 	 */
 	public function add_menu_page(): void {
-		add_menu_page(
-			__( 'MTMT Publikációk', 'mtmt-sync' ),
-			__( 'MTMT', 'mtmt-sync' ),
+		add_submenu_page(
+			Mtmt_Publications_Page::PAGE_SLUG,
+			__( 'MTMT — Query profilok', 'mtmt-sync' ),
+			__( 'Profilok', 'mtmt-sync' ),
 			self::CAPABILITY,
 			self::PAGE_SLUG,
-			array( $this, 'render' ),
-			'dashicons-media-document'
+			array( $this, 'render' )
 		);
 	}
 

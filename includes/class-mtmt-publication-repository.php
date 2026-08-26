@@ -192,4 +192,198 @@ final class Mtmt_Publication_Repository {
 
 		return (int) $this->wpdb->query( $this->wpdb->prepare( $sql, $params ) );
 	}
+
+	/**
+	 * @var string[]
+	 */
+	private const VALID_STATUSES = array( 'pending', 'approved', 'rejected' );
+
+	/**
+	 * Moderációs lista, szűrve/lapozva (CLAUDE.md §8.1).
+	 *
+	 * @param array $args status, year, profile_id, orderby, order, paged, per_page.
+	 * @return array{items:array[],total:int}
+	 */
+	public function get_list( array $args = array() ): array {
+		$args = array_merge(
+			array(
+				'status'     => '',
+				'year'       => 0,
+				'profile_id' => 0,
+				'orderby'    => 'published_year',
+				'order'      => 'DESC',
+				'paged'      => 1,
+				'per_page'   => 20,
+			),
+			$args
+		);
+
+		$where  = array( '1=1' );
+		$params = array();
+
+		if ( '' !== $args['status'] ) {
+			$where[]  = 'status = %s';
+			$params[] = $args['status'];
+		}
+		if ( $args['year'] ) {
+			$where[]  = 'published_year = %d';
+			$params[] = (int) $args['year'];
+		}
+		if ( $args['profile_id'] ) {
+			$where[]  = 'query_profile_id = %d';
+			$params[] = (int) $args['profile_id'];
+		}
+
+		$allowed_orderby = array( 'published_year', 'title', 'first_seen_at', 'last_synced_at' );
+		$orderby         = in_array( $args['orderby'], $allowed_orderby, true ) ? $args['orderby'] : 'published_year';
+		$order           = 'ASC' === strtoupper( (string) $args['order'] ) ? 'ASC' : 'DESC';
+		$where_sql       = implode( ' AND ', $where );
+
+		$per_page = max( 1, (int) $args['per_page'] );
+		$offset   = ( max( 1, (int) $args['paged'] ) - 1 ) * $per_page;
+
+		$count_sql = "SELECT COUNT(*) FROM {$this->table} WHERE {$where_sql}";
+		$total     = $params
+			? (int) $this->wpdb->get_var( $this->wpdb->prepare( $count_sql, $params ) )
+			: (int) $this->wpdb->get_var( $count_sql );
+
+		$list_sql    = "SELECT * FROM {$this->table} WHERE {$where_sql} ORDER BY {$orderby} {$order} LIMIT %d OFFSET %d";
+		$list_params = array_merge( $params, array( $per_page, $offset ) );
+		$items       = $this->wpdb->get_results( $this->wpdb->prepare( $list_sql, $list_params ), ARRAY_A );
+
+		return array(
+			'items' => $items ?: array(),
+			'total' => $total,
+		);
+	}
+
+	/**
+	 * Elérhető évek a lista-szűrőhöz, csökkenő sorrendben.
+	 *
+	 * @return int[]
+	 */
+	public function get_distinct_years(): array {
+		$rows = $this->wpdb->get_col(
+			"SELECT DISTINCT published_year FROM {$this->table} WHERE published_year IS NOT NULL ORDER BY published_year DESC"
+		);
+		return array_map( 'intval', $rows );
+	}
+
+	/**
+	 * @return array{pending:int,approved:int,rejected:int}
+	 */
+	public function count_by_status(): array {
+		$rows   = $this->wpdb->get_results( "SELECT status, COUNT(*) as cnt FROM {$this->table} GROUP BY status", ARRAY_A );
+		$counts = array(
+			'pending'  => 0,
+			'approved' => 0,
+			'rejected' => 0,
+		);
+		foreach ( (array) $rows as $row ) {
+			if ( isset( $counts[ $row['status'] ] ) ) {
+				$counts[ $row['status'] ] = (int) $row['cnt'];
+			}
+		}
+		return $counts;
+	}
+
+	/**
+	 * @param int $id
+	 * @return array|null
+	 */
+	public function find( int $id ): ?array {
+		$row = $this->wpdb->get_row( $this->wpdb->prepare( "SELECT * FROM {$this->table} WHERE id = %d", $id ), ARRAY_A );
+		return $row ?: null;
+	}
+
+	/**
+	 * Jóváhagyás/elutasítás/"elutasítás visszavonása" (utóbbi is ezt hívja,
+	 * `$status = 'pending'`-del) — CLAUDE.md §8.1 sor-műveletei.
+	 *
+	 * @param int    $id
+	 * @param string $status 'pending'|'approved'|'rejected'
+	 * @param int    $user_id
+	 * @return bool
+	 */
+	public function set_status( int $id, string $status, int $user_id ): bool {
+		if ( ! in_array( $status, self::VALID_STATUSES, true ) ) {
+			return false;
+		}
+
+		$result = $this->wpdb->update(
+			$this->table,
+			array(
+				'status'       => $status,
+				'moderated_by' => $user_id,
+				'moderated_at' => current_time( 'mysql' ),
+			),
+			array( 'id' => $id )
+		);
+
+		return false !== $result;
+	}
+
+	/**
+	 * Tömeges jóváhagyás/elutasítás.
+	 *
+	 * @param int[]  $ids
+	 * @param string $status
+	 * @param int    $user_id
+	 * @return int Érintett sorok száma.
+	 */
+	public function bulk_set_status( array $ids, string $status, int $user_id ): int {
+		$ids = array_values( array_unique( array_map( 'absint', $ids ) ) );
+
+		if ( empty( $ids ) || ! in_array( $status, self::VALID_STATUSES, true ) ) {
+			return 0;
+		}
+
+		$placeholders = implode( ',', array_fill( 0, count( $ids ), '%d' ) );
+		$sql          = "UPDATE {$this->table} SET status = %s, moderated_by = %d, moderated_at = %s WHERE id IN ({$placeholders})";
+		$params       = array_merge( array( $status, $user_id, current_time( 'mysql' ) ), $ids );
+
+		return (int) $this->wpdb->query( $this->wpdb->prepare( $sql, $params ) );
+	}
+
+	/**
+	 * Kézi gazdagítás mentése (CLAUDE.md §8.2) — SOSEM indít MTMT-hívást, és
+	 * a sync sosem írja felül ezeket a mezőket (lásd SOURCE_COLUMNS fent).
+	 *
+	 * @param int   $id
+	 * @param array $fields thumbnail_id, funding_override, project_ids,
+	 *                      project_verified, is_featured — csak a ténylegesen
+	 *                      átadott kulcsok íródnak.
+	 * @param int   $user_id A "Ellenőrizve" pipa esetén verified_by/at-hez.
+	 * @return bool
+	 */
+	public function save_enrichment( int $id, array $fields, int $user_id ): bool {
+		$data = array();
+
+		if ( array_key_exists( 'thumbnail_id', $fields ) ) {
+			$data['thumbnail_id'] = $fields['thumbnail_id'] ? absint( $fields['thumbnail_id'] ) : null;
+		}
+		if ( array_key_exists( 'funding_override', $fields ) ) {
+			$data['funding_override'] = $fields['funding_override'];
+		}
+		if ( array_key_exists( 'project_ids', $fields ) ) {
+			$data['project_ids'] = $fields['project_ids'];
+		}
+		if ( array_key_exists( 'is_featured', $fields ) ) {
+			$data['is_featured'] = ! empty( $fields['is_featured'] ) ? 1 : 0;
+		}
+		if ( array_key_exists( 'project_verified', $fields ) ) {
+			$verified                 = ! empty( $fields['project_verified'] );
+			$data['project_verified'] = $verified ? 1 : 0;
+			$data['verified_by']      = $verified ? $user_id : null;
+			$data['verified_at']      = $verified ? current_time( 'mysql' ) : null;
+		}
+
+		if ( empty( $data ) ) {
+			return false;
+		}
+
+		$result = $this->wpdb->update( $this->table, $data, array( 'id' => $id ) );
+
+		return false !== $result;
+	}
 }
