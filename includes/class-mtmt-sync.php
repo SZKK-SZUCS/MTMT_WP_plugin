@@ -2,7 +2,7 @@
 /**
  * Ingest orchestrátor: profil -> fetch + map + upsert + diff.
  *
- * @package Jkk_Mtmt_Publications
+ * @package Mtmt_Sync
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -14,34 +14,34 @@ defined( 'ABSPATH' ) || exit;
  * `core;eq;true` és `published;eq;true` mindig kemény-kódolt (idéző-rekord
  * kizárás), `depth=1` mindig kemény-kódolt (authors/SJR enélkül hiányozna).
  */
-final class Jkk_Mtmt_Sync {
+final class Mtmt_Sync {
 
 	private const PAGE_SIZE = 100;
 
 	/**
-	 * @var Jkk_Mtmt_Api_Client
+	 * @var Mtmt_Api_Client
 	 */
 	private $client;
 
 	/**
-	 * @var Jkk_Mtmt_Publication_Repository
+	 * @var Mtmt_Publication_Repository
 	 */
 	private $publications;
 
 	/**
-	 * @var Jkk_Mtmt_Query_Profile_Repository
+	 * @var Mtmt_Query_Profile_Repository
 	 */
 	private $profiles;
 
 	/**
-	 * @param Jkk_Mtmt_Api_Client                $client
-	 * @param Jkk_Mtmt_Publication_Repository     $publications
-	 * @param Jkk_Mtmt_Query_Profile_Repository   $profiles
+	 * @param Mtmt_Api_Client                $client
+	 * @param Mtmt_Publication_Repository     $publications
+	 * @param Mtmt_Query_Profile_Repository   $profiles
 	 */
 	public function __construct(
-		Jkk_Mtmt_Api_Client $client,
-		Jkk_Mtmt_Publication_Repository $publications,
-		Jkk_Mtmt_Query_Profile_Repository $profiles
+		Mtmt_Api_Client $client,
+		Mtmt_Publication_Repository $publications,
+		Mtmt_Query_Profile_Repository $profiles
 	) {
 		$this->client       = $client;
 		$this->publications = $publications;
@@ -69,7 +69,7 @@ final class Jkk_Mtmt_Sync {
 		if ( ! $profile ) {
 			$result['errors'][] = sprintf(
 				/* translators: %d: profil azonosító */
-				__( 'Profil #%d nem található.', 'jkk-mtmt-publications' ),
+				__( 'Profil #%d nem található.', 'mtmt-sync' ),
 				$profile_id
 			);
 			$result['duration_s'] = round( microtime( true ) - $started, 2 );
@@ -93,7 +93,7 @@ final class Jkk_Mtmt_Sync {
 
 		$on_page = function ( array $records ) use ( &$seen_mtids, &$max_mtid, &$result, $profile_id ) {
 			foreach ( $records as $raw ) {
-				$mapped = Jkk_Mtmt_Mapper::map_publication( $raw );
+				$mapped = Mtmt_Mapper::map_publication( $raw );
 
 				if ( ! $mapped['mtid'] ) {
 					continue;
@@ -103,7 +103,12 @@ final class Jkk_Mtmt_Sync {
 
 				if ( $upsert['inserted'] ) {
 					++$result['inserted'];
-				} else {
+				} elseif ( ! empty( $upsert['content_changed'] ) ) {
+					// Csak akkor "frissített", ha a tartalom ténylegesen eltért —
+					// egy változatlan, csak újra lekérdezett rekord NEM az
+					// (különben minden heti sync "frissítettnek" jelentene
+					// mindent, és az email-értesítés mindig kimenne, lásd
+					// docs/decisions.md).
 					++$result['updated'];
 				}
 
@@ -147,7 +152,7 @@ final class Jkk_Mtmt_Sync {
 	}
 
 	/**
-	 * @return array[] Jkk_Mtmt_Sync::run_profile() eredmények listája.
+	 * @return array[] Mtmt_Sync::run_profile() eredmények listája.
 	 */
 	public function run_all(): array {
 		$results = array();

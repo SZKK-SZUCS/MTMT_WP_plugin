@@ -2,7 +2,7 @@
 /**
  * Generikus MTMT REST API kliens.
  *
- * @package Jkk_Mtmt_Publications
+ * @package Mtmt_Sync
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -14,7 +14,7 @@ defined( 'ABSPATH' ) || exit;
  * institute, author, …) használható, hogy Fázis 3-ban a szerző-autocomplete
  * is ugyanezt tudja hívni.
  */
-final class Jkk_Mtmt_Api_Client {
+final class Mtmt_Api_Client {
 
 	private const BASE_URL = 'https://m2.mtmt.hu/api/';
 
@@ -72,8 +72,8 @@ final class Jkk_Mtmt_Api_Client {
 
 		if ( ! is_array( $decoded ) || ! array_key_exists( 'content', $decoded ) ) {
 			return new WP_Error(
-				'jkk_mtmt_bad_response',
-				__( 'Váratlan MTMT API válasz (hiányzó content mező).', 'jkk-mtmt-publications' )
+				'mtmt_bad_response',
+				__( 'Váratlan MTMT API válasz (hiányzó content mező).', 'mtmt-sync' )
 			);
 		}
 
@@ -157,7 +157,7 @@ final class Jkk_Mtmt_Api_Client {
 	 * @return array|WP_Error wp_remote_get() nyers válasza.
 	 */
 	private function request_with_retry( string $url ) {
-		$last_error = new WP_Error( 'jkk_mtmt_unknown_error', __( 'Ismeretlen MTMT API hiba.', 'jkk-mtmt-publications' ) );
+		$last_error = new WP_Error( 'mtmt_unknown_error', __( 'Ismeretlen MTMT API hiba.', 'mtmt-sync' ) );
 
 		for ( $attempt = 1; $attempt <= $this->max_retries; $attempt++ ) {
 			$response = wp_remote_get(
@@ -180,10 +180,10 @@ final class Jkk_Mtmt_Api_Client {
 				// Csak 429/5xx retry-elendő; egyéb 4xx kliens hiba, nincs értelme újrapróbálni.
 				if ( 429 !== $code && $code < 500 ) {
 					return new WP_Error(
-						'jkk_mtmt_http_error',
+						'mtmt_http_error',
 						sprintf(
 							/* translators: %d: HTTP státuszkód */
-							__( 'MTMT API hiba: HTTP %d', 'jkk-mtmt-publications' ),
+							__( 'MTMT API hiba: HTTP %d', 'mtmt-sync' ),
 							$code
 						),
 						array( 'status' => $code )
@@ -191,10 +191,10 @@ final class Jkk_Mtmt_Api_Client {
 				}
 
 				$last_error = new WP_Error(
-					'jkk_mtmt_http_error',
+					'mtmt_http_error',
 					sprintf(
 						/* translators: %d: HTTP státuszkód */
-						__( 'MTMT API hiba: HTTP %d', 'jkk-mtmt-publications' ),
+						__( 'MTMT API hiba: HTTP %d', 'mtmt-sync' ),
 						$code
 					),
 					array( 'status' => $code )
@@ -213,7 +213,7 @@ final class Jkk_Mtmt_Api_Client {
 	 * @return string
 	 */
 	private function default_user_agent(): string {
-		$version = defined( 'JKK_MTMT_VERSION' ) ? JKK_MTMT_VERSION : '0.0.0';
-		return 'JKK-MTMT-Publications-Plugin/' . $version . ' (+' . home_url( '/' ) . ')';
+		$version = defined( 'MTMT_VERSION' ) ? MTMT_VERSION : '0.0.0';
+		return 'MTMT-Sync-WP-Plugin/' . $version . ' (+' . home_url( '/' ) . ')';
 	}
 }

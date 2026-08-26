@@ -2,7 +2,7 @@
 /**
  * Aktiváláskori tábla-migráció.
  *
- * @package Jkk_Mtmt_Publications
+ * @package Mtmt_Sync
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -10,7 +10,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * A plugin két saját tábláját hozza létre/frissíti dbDelta-val.
  */
-final class Jkk_Mtmt_Activator {
+final class Mtmt_Activator {
 
 	/**
 	 * Aktiváláskor lefutó migráció.
@@ -22,8 +22,8 @@ final class Jkk_Mtmt_Activator {
 
 		$charset_collate = $wpdb->get_charset_collate();
 
-		$publications_table = $wpdb->prefix . 'jkk_mtmt_publications';
-		$profiles_table     = $wpdb->prefix . 'jkk_mtmt_query_profiles';
+		$publications_table = $wpdb->prefix . 'mtmt_publications';
+		$profiles_table     = $wpdb->prefix . 'mtmt_query_profiles';
 
 		$sql_publications = "CREATE TABLE {$publications_table} (
   id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -54,6 +54,7 @@ final class Jkk_Mtmt_Activator {
   funding_override TEXT NULL,
   project_ids TEXT NULL,
   project_verified TINYINT(1) NOT NULL DEFAULT 0,
+  is_featured TINYINT(1) NOT NULL DEFAULT 0,
   verified_by BIGINT UNSIGNED NULL,
   verified_at DATETIME NULL,
   moderated_by BIGINT UNSIGNED NULL,
@@ -80,9 +81,30 @@ final class Jkk_Mtmt_Activator {
   PRIMARY KEY  (id)
 ) {$charset_collate};";
 
+		$sync_log_table = $wpdb->prefix . 'mtmt_sync_log';
+
+		$sql_sync_log = "CREATE TABLE {$sync_log_table} (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  profile_id BIGINT UNSIGNED NULL,
+  trigger_type VARCHAR(20) NOT NULL,
+  started_at DATETIME NOT NULL,
+  duration_s DECIMAL(8,2) NULL,
+  inserted INT UNSIGNED NOT NULL DEFAULT 0,
+  updated INT UNSIGNED NOT NULL DEFAULT 0,
+  reverted_to_pending INT UNSIGNED NOT NULL DEFAULT 0,
+  missing INT UNSIGNED NOT NULL DEFAULT 0,
+  total_fetched INT UNSIGNED NOT NULL DEFAULT 0,
+  has_errors TINYINT(1) NOT NULL DEFAULT 0,
+  errors LONGTEXT NULL,
+  PRIMARY KEY  (id),
+  KEY idx_started (started_at),
+  KEY idx_profile (profile_id)
+) {$charset_collate};";
+
 		dbDelta( $sql_publications );
 		dbDelta( $sql_profiles );
+		dbDelta( $sql_sync_log );
 
-		update_option( 'jkk_mtmt_db_version', JKK_MTMT_DB_VERSION );
+		update_option( 'mtmt_db_version', MTMT_DB_VERSION );
 	}
 }
