@@ -245,3 +245,74 @@ dokumentálás közben, nem csak leírtam:
       gazdagítva/jóváhagyva), de a WP plugin-mappát is át kellett linkelni
       (`wp-content/plugins/jkk-mtmt-publications` -> `.../mtmt-sync`),
       ami éles oldalon egy deaktiválás+újraaktiválást igényelne.
+
+## Fázis 3 — moderáció, gazdagítás, jogosultságok (2026-08)
+
+34. Capability→role mapping **döntés a megrendelőtől**: `mtmt_moderate` ÉS
+    `mtmt_classify` is alapból az Editor + Administrator szerepkörre kerül
+    aktiváláskor (`Mtmt_Capabilities::activate()`). Nincs még finomabb
+    role→capability admin UI — ha kell (pl. csak bizonyos személyek kapják a
+    classify-t), az külön kör.
+
+35. **Auto-upgrade minta kiterjesztve a capability-kre is** — ugyanaz a hiba
+    fenyegetett, mint a #30-as DB-tábla esetén: ha valaki a plugint fájlszinten
+    frissíti (nincs deaktiválás/reaktiválás), egy ÚJ capability sosem kerülne
+    fel a szerepkörökre, mert `register_activation_hook` csak aktiváláskor fut.
+    Megoldás: `mtmt_caps_version` opció + `plugins_loaded`-es ellenőrzés,
+    ugyanaz a minta, mint `mtmt_db_version`-nél.
+
+36. **Admin menü átrendezve**: a top-level "MTMT" mostantól a moderációs lista
+    (`Mtmt_Publications_Page`, `mtmt_moderate` capability), NEM a Profilok
+    oldal. Ok: a moderátorok (Editor-ok) ezt használják nap mint nap, a
+    Profilok/Beállítások site-config, ritkán nyúlnak hozzá. A top-level menü
+    capabilityjét a LEGALACSONYABB alatta lévő submenü-capabilityre kell
+    állítani, hogy a moderate-only user egyáltalán lássa a menüt — a
+    Profilok/Beállítások almenü `manage_options`-maradt, ezért azokat a
+    moderate-only user nem is látja, csak a listát.
+
+37. **Kritikus timing-szabály minden mutáló admin-műveletnél**: a
+    jóváhagyás/elutasítás/tömeges-művelet/mentés `admin_init`-en fut
+    (`Mtmt_Publications_Page::maybe_handle_request()`), NEM a page-callbackban
+    (`render()`). Ok: mire a `add_menu_page()`-hez regisztrált callback lefut,
+    a WP admin fejlécek (benne a HTML `<head>`) már elmentek — egy
+    `wp_safe_redirect()` ott már "headers already sent" hibát adna. Az
+    `admin_init` a fejlécek előtt fut, ott még működik a Post/Redirect/Get minta.
+
+38. **Lista-form `method="get"`, NEM `post`**, annak ellenére, hogy WP core
+    listák (pl. edit.php) POST-ot használnak. Ok: a WP_List_Table saját
+    lapozó-linkjei (`pagination()`) a JELENLEGI URL query-argjaiból épülnek —
+    ha a szűrők (státusz/év/profil) csak POST-ban mennének át, a 2. oldalra
+    lapozáskor elveszne a szűrés. GET-tel a szűrők a URL-ben maradnak, a
+    lapozás megőrzi őket. A tömeges műveletek (jóváhagyás/elutasítás) emiatt
+    technikailag GET-kérésként mennek — ez ELFOGADHATÓ, mert a mutációt a
+    nonce (`check_admin_referer`) védi CSRF ellen, nem a HTTP-ige; a
+    single-row/bulk-action megkülönböztetés `$_REQUEST['id']` array-e vagy
+    scalar (nem a metóduson múlik).
+
+39. **`project_verified` pipa `mtmt_classify`-hoz kötve**, NEM `mtmt_moderate`-hoz
+    (CLAUDE.md §8.3 szó szerint: "projektazonosító-ellenőrzés" = classify).
+    A `project_ids` SZÖVEG bármelyik moderate-jogú usernek menthető, csak az
+    "Ellenőrizve" pipa van elzárva — szerveroldalon védve (a mezőt egyszerűen
+    nem veszi át a repository, ha a beküldő nem classify-jogú), NEM csak a
+    form UI-ban elrejtve.
+
+## Fázis 3 PR előtti kiegészítés — mezőmagyarázatok + bulk kiemelés (2026-08)
+
+40. **Minden szerkeszthető mezőnél leíró szöveg** (megrendelői kérés) — a
+    gazdagító űrlap (indexkép, támogatás felülbírálás, projektazonosító+
+    ellenőrizve, kiemelt cikk) és a profil-létrehozó űrlap (profil neve,
+    scope típusa) mind kaptak egy `<p class="description">` magyarázatot,
+    plain-language stílusban (nem technikai zsargon — pl. nem "Fázis 5-ös
+    widget", hanem "külön widgettel... csak ezeket lehet majd kiemelten
+    megjeleníteni").
+
+41. **Bulk kiemelés/kiemelés-visszavonás** a moderációs listán — a meglévő
+    tömeges jóváhagyás/elutasítás mintájára. `Mtmt_Publication_Repository::
+    bulk_set_featured()`, a `Mtmt_List_Table` bulk-action listája és a
+    státusz-oszlop csak akkor mutatja/ajánlja fel, ha a "kiemelt cikk"
+    funkció be van kapcsolva (`mtmt_enable_featured`) — ugyanaz a
+    feltétel-mintázat, mint az egyes-tételes checkboxnál. A státusz oszlopban
+    egy ★ jelzi a már kiemelt tételeket, hogy lásd, mit pipálsz be
+    kiemelés-visszavonáshoz (enélkül a bulk unfeature-nek nem sok értelme
+    lenne — nem kérted külön, de e nélkül a funkció gyakorlatilag
+    használhatatlan lett volna).

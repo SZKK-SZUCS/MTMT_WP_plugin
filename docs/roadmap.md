@@ -100,28 +100,58 @@ rendszer-cronból is hívható, email megérkezik új tételnél, a gomb megnyom
    gombnak simán le kell futnia böngészőből is, admin-notice-ban a helyes
    számokkal.
 
-## Fázis 3 — Moderáció + gazdagítás + jogosultságok
+## 🔜 Fázis 3 — Moderáció + gazdagítás + jogosultságok
 
+**KÓD KÉSZ, ág: `fazis-3-moderation`, ÉLES ELLENŐRZÉS MÉG NEM TÖRTÉNT.**
 Eredeti scope (§8) + két új mező a megbeszélésből:
 
-- `WP_List_Table` lista (indexkép, cím, szerzők, forrás, év, típus, SJR, MTMT-státusz,
-  DOI-link, MTMT-link, kutatócsoport/terület, státusz), sor- és tömeges műveletek.
-- Szerkesztő/gazdagító űrlap: indexkép, kutatócsoport, támogatás-override,
-  projektazonosító + ellenőrizve pipa.
-- **ÚJ: "Kiemelt cikk" checkbox** (§14/9, `is_featured` — már a sémában) a
-  szerkesztő űrlapon, **saját be/ki plugin-beállítással** (§14/11) — ha ki van
-  kapcsolva, a checkbox nem jelenik meg az űrlapon (ez a beállítás FÜGGETLEN a
-  Fázis 4-es terület-toggle-től).
-- Két capability (`mtmt_moderate`, `mtmt_classify`), role→capability mapping.
-- *Előkészítés Fázis 4-hez:* az űrlapot úgy érdemes építeni, hogy a "szakmai
-  terület" választó egy Fázis 4-ben behúzható, feltételesen megjelenő blokk
-  legyen (a toggle és az adatmodell csak Fázis 4-ben készül el, de a form-layout
-  már itt számoljon vele).
+- `WP_List_Table` lista (indexkép, cím+szerzők egy oszlopban, forrás, év, típus,
+  SJR-badge, MTMT-státusz, DOI/MTMT linkek, státusz — a kutatócsoport/terület
+  oszlop Fázis 4-ig kimarad, addig nincs mihez kötni), sor- és tömeges műveletek.
+- Szerkesztő/gazdagító űrlap: indexkép (WP média-feltöltő), támogatás-override,
+  projektazonosító + ellenőrizve pipa (utóbbi `mtmt_classify`-hoz kötve).
+- **ÚJ: "Kiemelt cikk" checkbox** (§14/9, `is_featured`) a szerkesztő űrlapon,
+  **saját be/ki plugin-beállítással** (§14/11, Beállítások oldal "Funkciók"
+  szakasza) — ha ki van kapcsolva, a checkbox nem jelenik meg.
+- Két capability (`mtmt_moderate`, `mtmt_classify`) — **döntés a megrendelőtől**:
+  mindkettő alapból Editor+Administrator szerepkörre kerül aktiváláskor, nincs
+  még finomabb role→capability admin UI.
+- **Menü-átrendezés**: a top-level "MTMT" mostantól a moderációs lista
+  (`mtmt_moderate` capability — ezt látják a moderátorok), a Profilok/
+  Beállítások `manage_options`-hoz kötött almenükké váltak (a moderátorok nem
+  is látják őket). Menü-badge: függőben lévők száma piros buborékban.
+- *Előkészítve Fázis 4-hez, de még nem építve*: a "szakmai terület" választó
+  helye a formban egyelőre nincs is jelen (nem csak elrejtve) — Fázis 4
+  fogja ténylegesen hozzáadni a feltételes blokkot.
 
-*Kész, ha:* jóváhagyás/elutasítás/visszavonás megy, kézi mezők (thumbnail,
-funding_override, project_*, is_featured) syncnél túlélnek, jogosultságok
-elkülönülnek, nonce+capability mindenhol, a kiemelt-cikk toggle ki/bekapcsolva
+*Kész, ha:* jóváhagyás/elutasítás/visszavonás megy (sor-műveletként ÉS a
+szerkesztő űrlapon is), tömeges jóváhagyás/elutasítás a listából, kézi mezők
+(thumbnail, funding_override, project_*, is_featured) syncnél túlélnek,
+jogosultságok elkülönülnek (moderate-only user nem tudja a projekt-ellenőrzés
+pipát állítani), nonce+capability mindenhol, a kiemelt-cikk toggle ki/bekapcsolva
 tényleg elrejti/mutatja a checkboxot.
+
+**Éles ellenőrzéshez** (Local site, wp-admin):
+1. A bal oldali admin menüben most már **"MTMT"** a top-level tétel a
+   moderációs listával landol, és ha van függőben lévő tétel, piros
+   buborékban mutatja a darabszámot. "Profilok" és "Beállítások" almenüként
+   jelenik meg alatta.
+2. Nyisd meg egy tétel "Szerkesztés/Gazdagítás" linkjét — tölts fel egy
+   indexképet (WP média-könyvtárból), adj meg egy projektazonosítót, pipáld
+   be az "Ellenőrizve"-t, mentsd el — töltsön be újra a mentett értékekkel.
+3. A lista tetején lévő sor-műveletekkel jóváhagyj/utasíts el egy-egy tételt
+   közvetlenül a listából (nem kell megnyitni a szerkesztőt).
+4. Pipálj be 2-3 sort, válaszd a "Jóváhagyás" tömeges műveletet a lenyílóból,
+   "Alkalmaz" — mindegyik váltson `approved`-ra egyszerre.
+5. Szűrd a listát státusz/év/profil szerint felül.
+6. Beállítások oldalon kapcsold be a "Kiemelt cikk" funkciót — a szerkesztő
+   űrlapon jelenjen meg a checkbox; kapcsold ki — tűnjön el.
+7. Ha van egy másodlagos (nem admin) teszt-user Editor szerepkörrel: jelentkezz
+   be azzal, nézd meg, hogy látja-e a moderációs listát, és NE tudja beállítani
+   a projekt-ellenőrzés pipát, ha esetleg nincs rajta a `mtmt_classify` (ebben
+   a körben Editor mindkettőt megkapja alapból, szóval ez inkább csak a
+   capability-szétválasztás elvi ellenőrzése, nem éles korlátozás — a
+   finomabb role-mapping később, ha kell).
 
 ## Fázis 4 — Taxonómia + aloldalak ("Szakmai terület")
 

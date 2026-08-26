@@ -38,11 +38,11 @@ final class Mtmt_Settings_Page {
 	}
 
 	/**
-	 * `admin_menu`-ből hívva — a Profilok oldal alá, almenüként.
+	 * `admin_menu`-ből hívva — a top-level "MTMT" (Mtmt_Publications_Page) alá, almenüként.
 	 */
 	public function add_menu_page(): void {
 		add_submenu_page(
-			'mtmt-profiles',
+			Mtmt_Publications_Page::PAGE_SLUG,
 			__( 'MTMT Publikációk — Beállítások', 'mtmt-sync' ),
 			__( 'Beállítások', 'mtmt-sync' ),
 			self::CAPABILITY,
@@ -76,6 +76,22 @@ final class Mtmt_Settings_Page {
 					<p><?php echo esc_html( $notice['message'] ); ?></p>
 				</div>
 			<?php endif; ?>
+
+			<h2><?php esc_html_e( 'Funkciók', 'mtmt-sync' ); ?></h2>
+			<form method="post">
+				<?php wp_nonce_field( $nonce_action ); ?>
+				<input type="hidden" name="mtmt_action" value="save_features">
+				<p>
+					<label>
+						<input type="checkbox" name="enable_featured" value="1" <?php checked( (bool) get_option( 'mtmt_enable_featured' ) ); ?>>
+						<?php esc_html_e( '„Kiemelt cikk" funkció engedélyezése', 'mtmt-sync' ); ?>
+					</label>
+				</p>
+				<p class="description">
+					<?php esc_html_e( 'Kiemelt cikkeket lehet megjelölni a moderációs listán, és külön widgettel (szakmai terület aloldalakon) csak ezeket lehet majd kiemelten megjeleníteni. Ha ki van kapcsolva: a gazdagító űrlapon nincs "kiemelt cikk" jelölő, és a hozzá tartozó widget nem lesz elérhető Elementorban.', 'mtmt-sync' ); ?>
+				</p>
+				<?php submit_button( __( 'Mentés', 'mtmt-sync' ) ); ?>
+			</form>
 
 			<h2><?php esc_html_e( 'Email-értesítés', 'mtmt-sync' ); ?></h2>
 			<form method="post">
@@ -160,6 +176,15 @@ final class Mtmt_Settings_Page {
 		if ( 'save_recipients' === $action ) {
 			$raw = isset( $_POST['recipients'] ) ? sanitize_textarea_field( wp_unslash( $_POST['recipients'] ) ) : '';
 			update_option( Mtmt_Notifier::OPTION_RECIPIENTS, $raw );
+
+			return array(
+				'type'    => 'success',
+				'message' => __( 'Mentve.', 'mtmt-sync' ),
+			);
+		}
+
+		if ( 'save_features' === $action ) {
+			update_option( 'mtmt_enable_featured', ! empty( $_POST['enable_featured'] ) ? 1 : 0 );
 
 			return array(
 				'type'    => 'success',
