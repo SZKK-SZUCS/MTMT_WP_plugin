@@ -23,10 +23,9 @@ egyezik. Admin "dobozos" profil-beállító oldal is elkészült és élesben te
 (nem volt eredetileg a Fázis 1 elfogadási kritériumban, de a "több site-on
 újrahasználható" elv miatt idekerült).
 
-## 🔜 Fázis 1.5 — Utólagos kiegészítés a meglévő ingest-kódhoz
+## ✅ Fázis 1.5 — Utólagos kiegészítés a meglévő ingest-kódhoz
 
-**KÓD KÉSZ + unit-tesztelve (WP-független stub-harnessben, 17/17 assertion zöld),
-ÉLES WP-ellenőrzés MÉG NEM TÖRTÉNT.** Két pont a megbeszélésből közvetlenül a már megírt Fázis 1
+**KÉSZ, mergelve (PR #1), élesben validálva.** Két pont a megbeszélésből közvetlenül a már megírt Fázis 1
 fájlokat módosítja — érdemes ezeket lezárni, MIELŐTT a Fázis 2 cronja éles,
 automatikus futtatásba kerül (különben az első automata re-sync már a régi,
 "csendes auto-apply" logikával futna approved rekordokon).
@@ -57,9 +56,13 @@ létrehozva ténylegesen csak DOI-s rekordokat húz be.
    pipával — ellenőrizd, hogy a listában a cond JSON tartalmazza az
    `identifiers.source.name` feltételt.
 
-## 🔜 Fázis 2 — Cron + napló + email + kézi szinkron
+## ✅ Fázis 2 — Cron + napló + email + kézi szinkron
 
-**KÓD KÉSZ, ág: `fazis-2-cron-log-email`, ÉLES ELLENŐRZÉS MÉG NEM TÖRTÉNT.**
+**KÉSZ, mergelve (PR #1).** Élesben validálva a Local site-on: kézi "Szinkron
+most" gombbal a DOI-only profil 372/767-et hozott be (egyezik az élő
+API-verifikációval), a "frissített" számláló regressziója javítva és
+ellenőrizve. A cron-triggerelt email tényleges kiküldése SMTP-plugin nélküli
+helyi Local-oldalon nem volt tesztelhető — élesedéskor validálandó.
 Eredeti scope (§6) + két új pont a megbeszélésből:
 
 - Heti `mtmt_weekly` cron + `wp mtmt sync` ugyanarra a logikára.
