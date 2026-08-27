@@ -456,12 +456,12 @@ megrendelő megerősítette, hogy a javítás után a szinkron sikeres.
 6. ✅ Kézi szinkron a #90-es javítás után — a tábla ténylegesen feltöltődik
    (a korábbi "372 új, üres tábla" tünet elhárult).
 
-**Még nyitott:**
-- Egyéb azonosítós SVG-ikonok betöltve (`assets/img/icons/{wos,scopus,sztaki,pubmed}.svg`)
-  — élesben még nincs ellenőrizve, lásd lent az új szakaszt.
-- **A megrendelő központi cron-pinger job-ját át kell nézni** — jelezte, hogy
-  szerinte "nem jó" (a README-ben dokumentált A) opció mintája alapján
-  állította össze); a pontos kódot külön küldi el egyeztetésre.
+**Frissítve (2026-08-27):** az itt korábban listázott két pont lezárva —
+az egyéb azonosítós SVG-ikonok élesben betöltve és a widget-kártyákon
+ténylegesen megjelennek (lásd lent, "Egyéb azonosítós ikonok" szakasz +
+docs/decisions.md #91-92); a központi cron-pinger job egyeztetése és
+javítása folyamatban/lezárva, lásd a legalsó, "Kritikus javítás: sosem
+beütemezett heti cron" szakaszt.
 
 ## ✅ Egyéb azonosítós ikonok — megjelenítési mód + stílus-vezérlők
 
