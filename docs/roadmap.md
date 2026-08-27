@@ -391,11 +391,13 @@ létrehozása" gomb ezután is működik ugyanazokkal a mezőértékekkel.
 4. Előnézet után nyomj "Profil létrehozása"-t (a mezők már ki vannak töltve)
    — jöjjön létre a profil a beírt értékekkel, ugyanúgy mint eddig.
 
-## 🔜 0.9 előkészítés
+## ✅ Fázis 8 — 0.9.0 előkészítés
 
-**KÓD KÉSZ, ÉLES ELLENŐRZÉS MÉG NEM TÖRTÉNT.** A megrendelővel egyeztetett
-lista arra, mi kerüljön a 0.9-es kiadásba az "alpha" verzió előtt
-(docs/decisions.md #83-85, #82, #81):
+**KÉSZ, mergelve, élesben validálva. 0.9.0-ban kiadva.** A megrendelővel
+egyeztetett lista arra, mi kerüljön a 0.9-es kiadásba az "alpha" verzió előtt
+(docs/decisions.md #83-85, #82, #81, #89-90). A menet közben, élő tesztelés
+alatt talált kritikus szinkron-hiba (#89-90) is ebbe a kiadásba került, a
+megrendelő megerősítette, hogy a javítás után a szinkron sikeres.
 
 - **i18n pótlás** (CLAUDE.md §0/§2 eddig hiányzó előírása): `languages/`
   mappa + `.pot` sablon + becsomagolt ANGOL fordítás (`mtmt-sync-en_US.po`/`.mo`)
