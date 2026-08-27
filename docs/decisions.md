@@ -749,3 +749,50 @@ set_areas_for_publication()`/`delete()`, és EGYSZER egy teljes
     (test-reset.php), lefedve az 5 tábla helyes TRUNCATE-jét, a pivot tábla
     elsőbbségét, a widget-cache bump-olását, és a jogosultság-alapú
     link-megjelenítést.
+89. **Kritikus hiba: a kézi/cron szinkron hamis sikert jelentett, miközben a
+    tábla üres maradt** (megrendelői jelzés éles tesztelés közben: "kiírja
+    hogy 372 új elem, de nem kerül be a táblába"). Kiváltó ok:
+    `Mtmt_Publication_Repository::upsert()` sosem ellenőrizte a
+    `$wpdb->insert()`/`$wpdb->update()` visszatérési értékét — a metódus
+    MINDIG `'inserted' => true`-t (ill. sikeres update-et) adott vissza az
+    insert-ágon, akkor is, ha a tényleges SQL-írás meghiúsult (`$wpdb->insert()`
+    `false`-t ad vissza sikertelen írásnál, pl. hiányzó jogosultság vagy
+    adat-integritási hiba esetén — ezt sosem néztük meg). `Mtmt_Sync::
+    run_profile()` `on_page` callbackje ezt vakon elhitte, és minden
+    meghiúsult írást is "sikeresen beszúrt új rekordként" számolt el — innen
+    a "372 új", miközben a tábla ténylegesen üres maradt. Ugyanez a
+    hibaosztály (visszatérési érték nem ellenőrzött) megvolt a `Mtmt_Reset::
+    reset_now()`-ban is: MySQL-ben a `TRUNCATE TABLE` `DROP`-jogosultságot
+    igényel (nem elég a DELETE/INSERT/UPDATE), egy korlátozott jogú DB-
+    felhasználónál ez hiányozhat, és a hívás csendben `false`-t ad vissza.
+    Javítás mindhárom helyen:
+    - `Mtmt_Publication_Repository::upsert()` — az insert- és update-ágon is
+      elmenti és megnézi a `$wpdb` hívás visszatérési értékét, a visszaadott
+      tömb új `error` kulccsal bővült (`?string`, `null` ha sikeres, a valódi
+      `$wpdb->last_error` ha nem). Docblock kiemeli: a hívónak az `error`-t
+      kell ELŐSZÖR néznie, nem feltételezheti, hogy `inserted === false`
+      automatikusan sikeres update-et jelent.
+    - `Mtmt_Sync::run_profile()` — az `on_page` callback most az `error`
+      mezőt nézi meg elsőként (mielőtt `inserted`/`content_changed` alapján
+      számolna), sikertelen íráskor számlál (`write_failures`) és max 5 minta
+      hibaüzenetet gyűjt, amit a futás végén egy összesítő hibaüzenetben
+      (`$result['errors']`) jelenít meg a hívónak/adminnak.
+    - `Mtmt_Reset::reset_now()` visszatérési típusa `void`-ból
+      `array{failed: array<string,string>}`-re változott (tábla => valódi
+      MySQL-hibaüzenet, csak azokra, ahol a TRUNCATE ténylegesen meghiúsult).
+      `maybe_handle_reset()` egy per-user rövid életű tranziensben viszi át
+      az eredményt a redirecten (a query-string nem alkalmas egy
+      hibaüzenet-tömb átadására), `maybe_show_notice()` valódi siker- vagy
+      hiba-notice-ot mutat ez alapján, tranziens hiányában nem feltételez
+      hamis sikert.
+    Fontos: ez a javítás MAGÁT a mögöttes DB-írási hibát nem szünteti meg —
+    azt élesben, a most már felszínre kerülő valódi `$wpdb->last_error`
+    szöveg alapján kell diagnosztizálni a megrendelő következő tesztjéből.
+    A javítás célja kettős: (a) ne jelentsünk hamis sikert, (b) adjunk elég
+    diagnosztikai infót a tényleges ok megtalálásához. Regresszió: 26
+    assertion `test-repository.php`-ban (8-10. tesztesetek, insert- és
+    update-hiba szimulációval), 20 assertion `test-reset.php`-ban (4.
+    teszteset, egy tábla szimulált TRUNCATE-hibájával) — a korábbi
+    tesztesetek (17, ill. 13 assertion) változatlanul, hamis pozitív nélkül
+    futnak tovább, mert a hand-rolled `wpdb`-stubok alapból sikeres írást
+    szimulálnak.

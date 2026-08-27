@@ -75,7 +75,12 @@ final class Mtmt_Publication_Repository {
 	/**
 	 * @param array    $mapped_row       Mtmt_Mapper::map_publication() kimenete.
 	 * @param int|null $query_profile_id A futó szinkron profilja (csak insertkor íródik).
-	 * @return array{id:int,inserted:bool,content_changed:bool,reverted_to_pending:bool}
+	 * @return array{id:int,inserted:bool,content_changed:bool,reverted_to_pending:bool,error:?string}
+	 *         `error` NEM null, ha a tényleges INSERT/UPDATE meghiúsult — ilyenkor
+	 *         `inserted` mindig `false`, FÜGGETLENÜL attól, hogy insert- vagy
+	 *         update-ágon futottunk (a hívónak az `error`-t kell figyelnie, nem
+	 *         feltételezheti, hogy `inserted === false` automatikusan "sikeres
+	 *         update"-et jelent).
 	 */
 	public function upsert( array $mapped_row, ?int $query_profile_id ): array {
 		$mtid = absint( $mapped_row['mtid'] ?? 0 );
@@ -108,13 +113,18 @@ final class Mtmt_Publication_Repository {
 				$reverted_to_pending = true;
 			}
 
-			$this->wpdb->update( $this->table, $data, array( 'id' => (int) $existing['id'] ) );
+			// $wpdb->update() FALSE-t ad vissza valódi DB-hiba esetén (NEM azonos
+			// a "0 sor változott" esettel, ami sikeres, csak nem volt tényleges
+			// eltérés) — ezt korábban nem ellenőriztük, így egy sikertelen írás is
+			// "sikeres frissítésként" jelentkezett volna a hívó felé.
+			$update_result = $this->wpdb->update( $this->table, $data, array( 'id' => (int) $existing['id'] ) );
 
 			return array(
 				'id'                  => (int) $existing['id'],
 				'inserted'            => false,
 				'content_changed'     => $content_changed,
 				'reverted_to_pending' => $reverted_to_pending,
+				'error'               => false === $update_result ? ( $this->wpdb->last_error ?: 'UPDATE failed.' ) : null,
 			);
 		}
 
@@ -125,13 +135,30 @@ final class Mtmt_Publication_Repository {
 		$data['first_seen_at']    = $now;
 		$data['last_synced_at']   = $now;
 
-		$this->wpdb->insert( $this->table, $data );
+		// KRITIKUS: $wpdb->insert() FALSE-t ad vissza, ha a tényleges SQL-írás
+		// meghiúsul (pl. hiányzó jogosultság, adat-integritási hiba). Korábban
+		// EZT NEM ellenőriztük, és a metódus MINDIG 'inserted' => true-t adott
+		// vissza — a hívó (Mtmt_Sync) ezért "sikeresen beszúrt" rekordként
+		// számolta el azt is, ami valójában sosem került be a táblába (élesben
+		// talált hiba, docs/decisions.md #89: "372 új", de a tábla üres maradt).
+		$insert_result = $this->wpdb->insert( $this->table, $data );
+
+		if ( false === $insert_result ) {
+			return array(
+				'id'                  => 0,
+				'inserted'            => false,
+				'content_changed'     => false,
+				'reverted_to_pending' => false,
+				'error'               => $this->wpdb->last_error ?: 'INSERT failed.',
+			);
+		}
 
 		return array(
 			'id'                  => (int) $this->wpdb->insert_id,
 			'inserted'            => true,
 			'content_changed'     => true,
 			'reverted_to_pending' => false,
+			'error'               => null,
 		);
 	}
 

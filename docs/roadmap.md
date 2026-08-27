@@ -425,6 +425,16 @@ lista arra, mi kerüljön a 0.9-es kiadásba az "alpha" verzió előtt
 - **"Adatok törlése / alaphelyzet" gomb a Pluginok listaoldalon** — a plugin
   sorában (Aktiválás/Deaktiválás mellett), az 5 saját táblát üríti
   (`TRUNCATE`), a beállításokat nem érinti. Megrendelői kérés, docs/decisions.md #88.
+- **Kritikus javítás: hamis "sikeres" szinkron-jelentés üres tábla mellett**
+  — élő tesztelés közben derült ki ("372 új elem", de a tábla üres maradt).
+  Az `upsert()` mostantól ellenőrzi a `$wpdb->insert()`/`update()` valódi
+  visszatérési értékét, és egy sikertelen írás a hívó felé is hibaként (nem
+  "beszúrt új rekordként") jelentkezik, a valódi MySQL-hibaüzenettel együtt.
+  Ugyanez a javítás a reset-gombban is (a `TRUNCATE TABLE` `DROP`-jogosultságot
+  igényel, nem csak DELETE/INSERT/UPDATE-et — korábban ez is csendben
+  meghiúsulhatott). A mögöttes DB-írási hiba TÉNYLEGES oka még nyitott — ez a
+  javítás azt teszi lehetővé, hogy a következő éles teszt már a valódi
+  hibaüzenetet mutassa. Részletek: docs/decisions.md #89.
 
 **Éles ellenőrzéshez** (Local site, wp-admin):
 1. Állítsd a WordPress nyelvét angolra (Beállítások → Általános → Site
@@ -446,6 +456,12 @@ lista arra, mi kerüljön a 0.9-es kiadásba az "alpha" verzió előtt
    `confirm()` dialog; OK után a moderációs lista, a Profilok, a Területek
    ürüljön ki, a futás-napló is legyen üres — a Beállítások (címzettek,
    funkció-kapcsolók, Jogosultságok oldal) viszont maradjon változatlan.
+6. Futtasd újra a kézi szinkront (Beállítások → "Teljes szinkron most", vagy
+   Profilok oldal → "Szinkron most") azon a profilon/site-on, ahol korábban
+   "372 új" jelent meg, de a tábla üres maradt. Ha most is meghiúsul az írás,
+   az admin-notice-ban/futás-naplóban mostantól a VALÓDI MySQL-hibaüzenetnek
+   kell megjelennie (nem hamis sikernek) — ez a szöveg kell a tényleges ok
+   (pl. hiányzó jogosultság, adat-integritási hiba) diagnosztizálásához.
 
 ## Backlog — még nincs fázishoz kötve
 

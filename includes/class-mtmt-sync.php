@@ -88,10 +88,12 @@ final class Mtmt_Sync {
 			'value' => 'true',
 		);
 
-		$seen_mtids = array();
-		$max_mtid   = (int) ( $profile['last_max_mtid'] ?? 0 );
+		$seen_mtids    = array();
+		$max_mtid      = (int) ( $profile['last_max_mtid'] ?? 0 );
+		$write_errors  = array(); // mtid => hibaüzenet, csak az elsők, lásd lent.
+		$write_failures = 0;
 
-		$on_page = function ( array $records ) use ( &$seen_mtids, &$max_mtid, &$result, $profile_id ) {
+		$on_page = function ( array $records ) use ( &$seen_mtids, &$max_mtid, &$result, &$write_errors, &$write_failures, $profile_id ) {
 			foreach ( $records as $raw ) {
 				$mapped = Mtmt_Mapper::map_publication( $raw );
 
@@ -101,7 +103,19 @@ final class Mtmt_Sync {
 
 				$upsert = $this->publications->upsert( $mapped, $profile_id );
 
-				if ( $upsert['inserted'] ) {
+				// KRITIKUS: az `error` mezőt MINDIG előbb kell nézni, mint az
+				// `inserted`/`content_changed`-et — egy sikertelen INSERT/UPDATE
+				// esetén ezek az értékek nem jelentenek tényleges perzisztált
+				// változást, csak azt, amit MEGPRÓBÁLTUNK volna. Élesben talált
+				// hiba (docs/decisions.md #89): korábban ez a check hiányzott,
+				// és egy meghiúsult INSERT is "sikeresen beszúrt új rekordként"
+				// lett elszámolva.
+				if ( ! empty( $upsert['error'] ) ) {
+					++$write_failures;
+					if ( count( $write_errors ) < 5 ) {
+						$write_errors[] = sprintf( 'mtid %d: %s', $mapped['mtid'], $upsert['error'] );
+					}
+				} elseif ( $upsert['inserted'] ) {
 					++$result['inserted'];
 				} elseif ( ! empty( $upsert['content_changed'] ) ) {
 					// Csak akkor "frissített", ha a tartalom ténylegesen eltért —
@@ -139,6 +153,15 @@ final class Mtmt_Sync {
 			$result['duration_s'] = round( microtime( true ) - $started, 2 );
 			// Hibás/megszakadt lapozásnál NINCS missing-diff — lásd docs/decisions.md #11.
 			return $result;
+		}
+
+		if ( $write_failures > 0 ) {
+			$result['errors'][] = sprintf(
+				/* translators: 1: sikertelen mentések száma, 2: pár minta hibaüzenet */
+				__( '%1$d rekord mentése sikertelen (adatbázis-hiba). Minta: %2$s', 'mtmt-sync' ),
+				$write_failures,
+				implode( '; ', $write_errors )
+			);
 		}
 
 		$active_mtids       = $this->publications->get_active_mtids_for_profile( $profile_id );

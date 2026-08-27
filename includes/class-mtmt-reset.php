@@ -71,14 +71,24 @@ final class Mtmt_Reset {
 		}
 
 		global $wpdb;
-		self::reset_now( $wpdb );
+		$result = self::reset_now( $wpdb );
+
+		// A TRUNCATE-eredményt (különösen egy esetleges hibát) rövid életű
+		// tranziensben visszük át a redirecten — a query-string nem alkalmas
+		// egy hibaüzenet-tömb átadására, és úgyis csak egyszer, a következő
+		// oldalbetöltéskor kell elolvasni (lásd maybe_show_notice()). Élesben
+		// derült ki, hogy ez a fajta "csendben lenyelt hiba" ugyanaz a
+		// hibaosztály volt, mint a szinkron insert/update hibáinál — lásd
+		// docs/decisions.md #89.
+		set_transient( 'mtmt_reset_result_' . get_current_user_id(), $result, MINUTE_IN_SECONDS );
 
 		wp_safe_redirect( add_query_arg( array( 'mtmt_reset' => '1' ), admin_url( 'plugins.php' ) ) );
 		exit;
 	}
 
 	/**
-	 * `admin_notices`-ből hívva — sikeres reset után egyszeri visszajelzés.
+	 * `admin_notices`-ből hívva — a reset tényleges kimenetelét mutatja (nem
+	 * feltételezi, hogy minden tábla sikeresen kiürült).
 	 */
 	public static function maybe_show_notice(): void {
 		if ( ! isset( $_GET['mtmt_reset'] ) || '1' !== $_GET['mtmt_reset'] ) {
@@ -87,7 +97,27 @@ final class Mtmt_Reset {
 		if ( ! current_user_can( 'manage_options' ) ) {
 			return;
 		}
-		echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'Az MTMT Sync összes tábla-adata törölve — a szinkron a legközelebbi futáskor mindent újnak fog látni.', 'mtmt-sync' ) . '</p></div>';
+
+		$transient_key = 'mtmt_reset_result_' . get_current_user_id();
+		$result        = get_transient( $transient_key );
+		delete_transient( $transient_key );
+
+		if ( ! is_array( $result ) ) {
+			// Nincs tranziens (pl. lejárt, vagy valaki csak rányitotta a
+			// query-stringet) — ne állítsunk hamis sikert.
+			return;
+		}
+
+		if ( empty( $result['failed'] ) ) {
+			echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'Az MTMT Sync összes tábla-adata törölve — a szinkron a legközelebbi futáskor mindent újnak fog látni.', 'mtmt-sync' ) . '</p></div>';
+			return;
+		}
+
+		$lines = array();
+		foreach ( $result['failed'] as $table => $error ) {
+			$lines[] = esc_html( $table . ': ' . $error );
+		}
+		echo '<div class="notice notice-error"><p><strong>' . esc_html__( 'Az MTMT Sync adatai NEM törlődtek (teljesen vagy részben) — adatbázis-hiba:', 'mtmt-sync' ) . '</strong></p><ul style="list-style:disc;padding-left:1.5em;"><li>' . implode( '</li><li>', $lines ) . '</li></ul></div>';
 	}
 
 	/**
@@ -100,9 +130,16 @@ final class Mtmt_Reset {
 	 * teszttel is hívható legyen (`exit`-et hívó kódot nem lehet biztonságosan
 	 * tesztelni ugyanabban a PHP-processzben).
 	 *
+	 * KRITIKUS: a `$wpdb->query()` visszatérési értékét ELLENŐRIZNI kell —
+	 * `TRUNCATE TABLE` MySQL-ben `DROP`-jogosultságot igényel (nem elég a
+	 * DELETE/INSERT/UPDATE), sok korlátozott jogú DB-felhasználónál ez
+	 * hiányzik, és a hívás csendben `false`-t adna vissza, ha nem néznénk meg.
+	 *
 	 * @param wpdb $wpdb
+	 * @return array{failed:array<string,string>} table => hibaüzenet, azokra
+	 *         a táblákra, amiknél a TRUNCATE ténylegesen meghiúsult.
 	 */
-	public static function reset_now( wpdb $wpdb ): void {
+	public static function reset_now( wpdb $wpdb ): array {
 		$tables = array(
 			$wpdb->prefix . 'mtmt_pub_topic_area', // pivot tábla elsőként
 			$wpdb->prefix . 'mtmt_publications',
@@ -111,17 +148,25 @@ final class Mtmt_Reset {
 			$wpdb->prefix . 'mtmt_sync_log',
 		);
 
+		$failed = array();
+
 		foreach ( $tables as $table ) {
 			// A táblanév a $wpdb->prefix-ből + fejlesztő által rögzített
 			// (nem felhasználói input) utótagból épül — nem paraméterezhető
 			// $wpdb->prepare()-rel (az csak ÉRTÉKEKET escape-el, nem
 			// azonosítókat), ugyanaz a minta, mint minden repository-osztály
 			// FROM/WHERE-jében a $this->table használatakor.
-			$wpdb->query( "TRUNCATE TABLE {$table}" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+			$query_result = $wpdb->query( "TRUNCATE TABLE {$table}" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+
+			if ( false === $query_result ) {
+				$failed[ $table ] = $wpdb->last_error ?: __( 'Ismeretlen adatbázis-hiba.', 'mtmt-sync' );
+			}
 		}
 
 		if ( class_exists( 'Mtmt_Widget_Cache' ) ) {
 			Mtmt_Widget_Cache::bump();
 		}
+
+		return array( 'failed' => $failed );
 	}
 }
