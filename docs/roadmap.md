@@ -269,10 +269,27 @@ widget-design.md szerint működik.
     (pl. "Kiemelő szín", "Kártya-cím" tipográfia) — látszódjon a változás a
     frontenden (kiemelő szín pl. az aktív év-fülön/hover-en, kártya-cím betűtípus/méret).
 
-## Fázis 6 — GitHub + PUC
+## 🔜 Fázis 6 — GitHub + PUC
 
-Változatlan (§10): header/verzió bump, `readme.txt`, PUC v5 init, első GitHub
-Release. *Kész, ha:* egy teszt-oldal a GitHub release-ből frissülést lát a PUC-on át.
+**KÓD KÉSZ, ÉLES ELLENŐRZÉS MÉG NEM TÖRTÉNT.** PUC v5.7 bevendorolva
+(`lib/plugin-update-checker/`, GitHub-ról letöltve, nem git-almodulként —
+`docs/decisions.md` #61), inicializálva `mtmt-sync.php`-ban, `is_admin()`
+mögé kötve (frontendnek nincs köze a frissítés-ellenőrzéshez). Repo publikus
+(`SZKK-SZUCS/MTMT_WP_plugin`), nincs token. `setBranch('main')`, nincs
+`enableReleaseAssets()` (nincs build-lépés, a GitHub forrás-zip elég).
+
+*Kész, ha:* egy teszt-oldal (pl. a Local site) a Pluginok oldalon frissülést
+lát, amikor egy ÚJABB verziójú GitHub Release kerül ki, mint ami a site-on
+fut — ehhez a teszthez egy KÖVETKEZŐ release szükséges (a jelenlegi release
+kiadásakor a site még ugyanazt a verziót futtatja, amit a PUC lát, tehát nem
+mutatna frissítést — ez nem hiba, csak a teszt sorrendje).
+
+**Éles ellenőrzéshez** (Local site):
+1. Aktiváld/frissítsd a plugint a Local site-on erre a verzióra.
+2. wp-admin → Pluginok — NE legyen PHP hiba/fatal a plugin-listánál (a PUC
+   betöltése ne törje el az oldalt Elementor/egyéb pluginok mellett sem).
+3. Egy KÖVETKEZŐ verzióbump + GitHub Release után: Pluginok oldalon jelenjen
+   meg az "Új verzió érhető el" sáv, "View version X.Y.Z details" linkkel.
 
 ## Fázis 7 (opcionális) — nice-to-have-ek
 

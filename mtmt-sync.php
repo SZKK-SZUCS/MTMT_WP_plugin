@@ -20,6 +20,38 @@ define( 'MTMT_PLUGIN_FILE', __FILE__ );
 define( 'MTMT_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'MTMT_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 
+// A `use` importáló deklarációnak a fájl felső szintjén kell lennie — NEM
+// tehető feltétel (if) belsejébe, az PHP parse errort adna. Maga az alias
+// önmagában ártalmatlan (nem tölt be semmit, nem is kell hozzá, hogy a
+// PucFactory osztály ténylegesen létezzen); a tényleges betöltés/hívás
+// lent, `is_admin()` mögött történik.
+use YahnisElsts\PluginUpdateChecker\v5\PucFactory;
+
+/**
+ * Fázis 6 — GitHub-alapú frissítés a Plugin Update Checker (PUC) v5-tel
+ * (CLAUDE.md §10.3). A könyvtár a repóba bevendorolva (`lib/plugin-update-checker/`),
+ * nem külső csomagkezelőből töltődik be futásidőben. Csak admin-kontextusban
+ * kell — a frontendnek semmi köze a frissítés-ellenőrzéshez, ezért `is_admin()`
+ * mögé kötve, hogy ne terheljen minden nyilvános oldalbetöltést.
+ *
+ * A repo PUBLIKUS (`SZKK-SZUCS/MTMT_WP_plugin`), nem kell hitelesítő token.
+ * Ha valaha privátra váltana: `setAuthentication(<token>)`, a tokent SOHA ne
+ * commitold — konstansként (wp-config.php) vagy szűrőn keresztül add át.
+ */
+if ( is_admin() ) {
+	require_once MTMT_PLUGIN_DIR . 'lib/plugin-update-checker/plugin-update-checker.php';
+
+	$mtmt_update_checker = PucFactory::buildUpdateChecker(
+		'https://github.com/SZKK-SZUCS/MTMT_WP_plugin/',
+		__FILE__,
+		'mtmt-sync'
+	);
+	$mtmt_update_checker->setBranch( 'main' );
+	// Nincs build-lépés (CLAUDE.md §2) -> a GitHub-generált forrás-zip elég,
+	// a PUC kezeli a mappa-wrappert. Ha valaha build kerülne a workflow-ba és
+	// csatolt asset-tel adnánk ki release-t, itt kellene: enableReleaseAssets().
+}
+
 require_once MTMT_PLUGIN_DIR . 'includes/class-mtmt-activator.php';
 require_once MTMT_PLUGIN_DIR . 'includes/class-mtmt-capabilities.php';
 require_once MTMT_PLUGIN_DIR . 'includes/class-mtmt-api-client.php';
