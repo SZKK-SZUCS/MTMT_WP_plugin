@@ -497,3 +497,32 @@ lásd ott. Az alábbiak az eziutáni implementációs döntések.
       (a `.mtmt-widget-controls`/`.mtmt-year-tabs` blokk sosem cserélődik,
       csak a `.mtmt-widget-list`/`.mtmt-widget-pagination`), ezért azokhoz elég
       a kezdeti szerver-oldali render().
+
+## Fázis 6 — GitHub + PUC (2026-08)
+
+61. **PUC v5.7 bevendorolva egyszerű másolással, NEM git-almodulként** —
+    a GitHub-repó release-zip-jét (`YahnisElsts/plugin-update-checker`
+    v5.7 tag) töltöttem le és csomagoltam ki `lib/plugin-update-checker/`-be,
+    a `.git`-independens forrás-fájlokkal (nincs benne `.git`/`.github`,
+    teszt- vagy composer-lock fájl). Indoklás: CLAUDE.md §10.4 mindkét utat
+    megengedi ("verziózva marad, kivéve ha git-almodulként húzod be") — a
+    sima másolás egyszerűbb, nem igényel almodul-kezelést a klónozóktól
+    (`git clone` + `git submodule update` extra lépés lenne, könnyen elfelejthető).
+62. **`use YahnisElsts\PluginUpdateChecker\v5\PucFactory;` a fájl TETEJÉN,
+    NEM az `is_admin()` if-ág belsejében** — élesben derült ki tesztelés
+    közben (nem a végfelhasználónál, saját ellenőrzés során): PHP parse
+    errort ad, ha egy `use`-importáló deklaráció feltételes blokk belsejében
+    szerepel ("syntax error, unexpected token 'use'"). Az import maga
+    ártalmatlan feltétel nélkül is (nem tölt be semmit, csak aliast rendel
+    egy osztálynévhez) — a tényleges `require`/`PucFactory::buildUpdateChecker()`
+    hívás marad az `is_admin()` mögött.
+63. **`is_admin()` mögé kötve a teljes PUC-init.** A frissítés-ellenőrzésnek
+    nincs frontend-relevanciája, ezért nem éri meg minden nyilvános
+    oldalbetöltésnél betölteni a ~120 fájlos, 700+ KB-os könyvtárat.
+64. **Nincs `setAuthentication()`/token** — a repo publikus
+    (`SZKK-SZUCS/MTMT_WP_plugin`), a CLAUDE.md §10.3 explicit tiltja a token
+    commitolását; ha a repo valaha privátra váltana, ez wp-config.php
+    konstansként vagy szűrőn keresztül adandó át, nem a kódba írva.
+65. **Nincs `enableReleaseAssets()`** — a plugin nem használ build-lépést
+    (CLAUDE.md §2, §10.3), a GitHub által automatikusan generált forrás-zip
+    elég a PUC-nak, a mappa-wrappelést maga a PUC kezeli.
