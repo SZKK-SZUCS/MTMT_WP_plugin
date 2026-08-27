@@ -54,22 +54,33 @@ angolul jelenik meg, külön beállítás nélkül. Új nyelvi fordítás a
 A WordPress alapértelmezett ("látogató-vezérelt") cron-je csak akkor fut le,
 ha éppen érkezik egy oldalbetöltés — kis forgalmú vagy időszakosan látogatott
 oldalon ez azt jelentheti, hogy a heti szinkron KÉSVE, vagy egyáltalán nem
-indul el. Éles oldalon ezért ajánlott:
+indul el. Két bevett megoldás, bármelyik jó:
 
-1. Tedd hozzá a `wp-config.php`-hoz: `define( 'DISABLE_WP_CRON', true );`
-   — ez kikapcsolja a látogató-vezérelt automatikus cron-futtatást.
-2. Ehelyett egy VALÓDI rendszer-cron (pl. cPanel Cron Jobs, Plesk
-   ütemezett feladat, vagy szerver-szintű crontab) hívja meg hetente a
-   WP-CLI parancsot közvetlenül:
-   `wp mtmt sync --path=/eleres/az/adott/wordpress/gyokerehez`
-   (vagy ugyanerre a célra a natív WP-cron eseményt is meghívhatod:
-   `wp cron event run mtmt_weekly_sync`).
-3. Így a heti futás DETERMINISZTIKUS időpontban megy, függetlenül az
-   oldal tényleges látogatottságától.
+**A) Rendszeres külső "poke" a `wp-cron.php`-ra** (nem igényel
+`DISABLE_WP_CRON`-t, egyszerűen kiváltja a látogató-vezérelt triggert egy
+megbízható, rendszeres HTTP-hívással):
 
-Ez a lépés NINCS a kódba kényszerítve (a plugin `DISABLE_WP_CRON` nélkül is
-működik, csak akkor a látogató-vezérelt cron szabályait követi) — tisztán
-üzemeltetési/konfigurációs döntés, telepítésenként eltérhet.
+`curl -s -A 'valami-egyedi-user-agent' 'https://<a-site-domainje>/wp-cron.php?doing_wp_cron'`
+
+Ha már van egy központi cron-pinger szolgáltatásod más WP-oldalakhoz
+(pl. egy Docker-konténer, ami rendszeres időközönként végigmegy egy
+domain-listán), ide a plugint futtató oldal domainje simán felvehető —
+nem kell hozzá semmilyen plugin-specifikus paraméter, a sima
+`wp-cron.php?doing_wp_cron` hívás minden esedékes WP-cron eseményt
+(a heti MTMT-szinkront is) elindít, amikor esedékes. 5 perces
+gyakoriság bőven elég egy heti futáshoz.
+
+**B) `DISABLE_WP_CRON` + közvetlen WP-CLI hívás** (determinisztikusabb
+időpont, de rendszer-cron hozzáférést igényel a szerveren):
+
+1. `wp-config.php`: `define( 'DISABLE_WP_CRON', true );`
+2. Egy VALÓDI rendszer-cron (cPanel Cron Jobs, Plesk ütemezett feladat,
+   szerver-szintű crontab) hetente hívja: `wp mtmt sync --path=...`
+   (vagy: `wp cron event run mtmt_weekly_sync`).
+
+Egyik módszer sincs a kódba kényszerítve — a plugin mindkettővel (vagy akár
+egyikkel sem, csak a látogató-vezérelt alapbeállítással) működik, tisztán
+üzemeltetési döntés, telepítésenként eltérhet.
 
 == Changelog ==
 

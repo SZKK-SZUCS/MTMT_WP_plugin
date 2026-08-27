@@ -706,3 +706,14 @@ set_areas_for_publication()`/`delete()`, és EGYSZER egy teljes
     (nem a fejlécre támaszkodva), de a `Domain Path` fejléc-mező a WPCS/
     wp.org-i18n-eszközök konvenciója, hiánya esetén egyes scannerek
     hibásan jeleznék, hogy a plugin nem i18n-kompatibilis.
+86. **README cron-szakasz bővítve két elfogadott megoldással**, nem csak a
+    `DISABLE_WP_CRON`+WP-CLI úttal. A megrendelőnek már van egy központi,
+    Docker-alapú cron-pinger szolgáltatása (más site-okhoz), ami
+    rendszeresen (5 percenként) meghívja a `wp-cron.php?doing_wp_cron`
+    végpontot — ez ÖNMAGÁBAN elég megbízható triggerelést ad a heti
+    MTMT-szinkronhoz is, `DISABLE_WP_CRON` NÉLKÜL: a sima `wp-cron.php`
+    hívás minden esedékes WP-cron eseményt elindít (nem csak egy
+    plugin-specifikusat), a plugint futtató site domainje egyszerűen
+    felvehető a meglévő pinger-listára. A `DISABLE_WP_CRON`+WP-CLI út
+    megmaradt B) opcióként (determinisztikusabb időzítés, de rendszer-cron
+    hozzáférést igényel) — egyik módszer sincs kikényszerítve a kódban.
