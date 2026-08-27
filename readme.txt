@@ -4,7 +4,7 @@ Tags: mtmt, publications, elementor, publikaciok, tudomanyos
 Requires at least: 6.4
 Tested up to: 6.7
 Requires PHP: 8.1
-Stable tag: 0.4.0
+Stable tag: 0.5.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -41,6 +41,25 @@ a `CLAUDE.md` és a `docs/roadmap.md` fájlokban vannak dokumentálva.
    automatikus futást (ha a cron-ütemezés már él).
 
 == Changelog ==
+
+= 0.5.0 =
+* Elementor widgetek: "A" — összesítő publikációs lista (év-fülek, kereső,
+  opcionális szakmai terület-szűrő), "B" — egy szakmai területre vagy
+  lekérdezési profilra szűkített kiemelt-publikációs lista (csak a "Kiemelt
+  cikk" funkció bekapcsolva jelenik meg Elementorban).
+* Kártya-mezők: cím, szerzők (5 fölött rövidítve), szakmai terület-badge,
+  forrás, DOI, kiadványtípus-badge, megjelenés éve, SJR-negyed-badge, egyéb
+  azonosítós gombok. Teljes kártya kattintható (DOI, vagy DOI hiányában az
+  MTMT nyilvános oldala).
+* Szerver-oldali (GD) placeholder-kép indexkép hiányában, a publikáció
+  címével beégetve (magyar ékezetekkel is), becsomagolt Open Sans Bold
+  fonttal; GD/font hiányában automatikusan CSS-overlay-re esik vissza.
+* Widget-szinten szerkeszthető feliratok (Tartalom fül) + Elementor Stílus
+  fül (színek, tipográfia, kártya-megjelenés).
+* Keresés/év-váltás/lapozás/terület-szűrés AJAX-fragmenttel, teljes
+  oldal-újratöltés nélkül; a widgetek kizárólag a saját táblát olvassák.
+* Cache-verziószámláló: egy jóváhagyás/gazdagítás/szinkron után a widget
+  azonnal (nem csak a korábbi 5 perces cache-lejárat után) friss adatot mutat.
 
 = 0.4.0 =
 * "Szakmai terület" taxonómia (a korábbi "kutatócsoport" fogalom átnevezve,
@@ -94,6 +113,12 @@ a `CLAUDE.md` és a `docs/roadmap.md` fájlokban vannak dokumentálva.
 * Kezdeti bootstrap: plugin-header, aktivátor (tábla-migráció dbDelta-val).
 
 == Upgrade Notice ==
+
+= 0.5.0 =
+Elementor widgetek (összesítő + terület/profil-szűkített), placeholder-kép,
+widget-szintű szöveg/stílus-testreszabás. A plugin továbbra is 0.x
+verziószámon fejlődik — 1.0.0-t csak akkor kap, ha a megrendelő explicit
+jóváhagyja, hogy a rendszer kész (lásd CLAUDE.md §10.2).
 
 = 0.4.0 =
 "Szakmai terület" taxonómia + aloldal-előkészítés, opt-in beállítással. A plugin

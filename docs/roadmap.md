@@ -199,9 +199,9 @@ repository-metódus már készen áll a Fázis 5-ös widget számára.
    tűnjön el a terület-UI (a korábban elmentett hozzárendelés a DB-ben marad,
    csak nem látszik/szerkeszthető, amíg vissza nem kapcsolod).
 
-## 🔜 Fázis 5 — Elementor widget (A + B)
+## ✅ Fázis 5 — Elementor widget (A + B)
 
-**KÓD KÉSZ, ág: `fazis-5-elementor-widgets`, ÉLES ELLENŐRZÉS MÉG NEM TÖRTÉNT.**
+**KÉSZ, mergelve (PR #4), élesben validálva. 0.5.0-ban kiadva.**
 Eredeti "Fázis 5 — alap" (§9.1) helyett **két widget** (§14/10), a
 `docs/widget-design.md`-ben rögzített, megrendelő által megerősített
 mezőkészlettel és linkviselkedéssel. A 3 nyitott döntés (szerzőnév-forma,
