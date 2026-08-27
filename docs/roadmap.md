@@ -308,10 +308,9 @@ Megrendelői döntés (2026-08):
   tud BibTeX-et exportálni közvetlenül (`export=1&exportFormat=BIBTEX`,
   CLAUDE.md §5.3) — nem feltétlenül kell nekünk generálni.
 
-## 🔜 Profil-előnézet ("Preview")
+## ✅ Profil-előnézet ("Preview")
 
-**KÓD KÉSZ, ÉLES ELLENŐRZÉS MÉG NEM TÖRTÉNT.** A megrendelő megerősítette: ez
-mindenképp kell. A "Profilok" oldal "Új profil" űrlapja kapott egy "Előnézet"
+**KÉSZ, mergelve (PR #6), élesben validálva ("a preview fasza"). 0.7.0-ban kiadva.** A "Profilok" oldal "Új profil" űrlapja kapott egy "Előnézet"
 gombot ("Profil létrehozása" mellett, attól függetlenül) — a beírt scope-ból
 (intézmény/szerző/haladó + DOI-only) összeépített `cond_json`-nal kimegy az
 MTMT API-hoz `size=5`, `depth=1` paraméterrel (NEM menti el a profilt, NEM
