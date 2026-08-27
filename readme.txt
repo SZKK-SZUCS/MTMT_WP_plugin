@@ -4,7 +4,7 @@ Tags: mtmt, publications, elementor, publikaciok, tudomanyos
 Requires at least: 6.4
 Tested up to: 6.7
 Requires PHP: 8.1
-Stable tag: 0.7.0
+Stable tag: 0.8.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -41,6 +41,14 @@ a `CLAUDE.md` és a `docs/roadmap.md` fájlokban vannak dokumentálva.
    automatikus futást (ha a cron-ütemezés már él).
 
 == Changelog ==
+
+= 0.8.0 =
+* Email-értesítő újratervezve: HTML-email (a korábbi sima szöveg helyett),
+  világos, designolt háttérrel és a pluginba becsomagolt kiadói logóval
+  (`assets/img/mfui-logo.png`) — minden site-on ugyanaz a fejléc-kép megy
+  ki, nem site-onkénti admin-beállítás.
+* A profil `#ID` helyett a profil neve olvasható az email törzsében.
+* Hibás futásnál kiemelt (piros) blokk az email-törzsben.
 
 = 0.7.0 =
 * Profil-előnézet ("Előnézet" gomb az "Új profil" űrlapon): a beírt
@@ -129,6 +137,11 @@ a `CLAUDE.md` és a `docs/roadmap.md` fájlokban vannak dokumentálva.
 * Kezdeti bootstrap: plugin-header, aktivátor (tábla-migráció dbDelta-val).
 
 == Upgrade Notice ==
+
+= 0.8.0 =
+Email-értesítő újratervezve: HTML + kiadói logó. A plugin továbbra is 0.x
+verziószámon fejlődik — 1.0.0-t csak akkor kap, ha a megrendelő explicit
+jóváhagyja, hogy a rendszer kész (lásd CLAUDE.md §10.2).
 
 = 0.7.0 =
 Profil-előnézet ("Előnézet" gomb az "Új profil" űrlapon), mentés előtti

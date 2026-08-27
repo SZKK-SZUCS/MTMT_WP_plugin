@@ -299,9 +299,12 @@ verzióbump+release-nél adódik magától, a rendes munkamenet részeként.
    lezárásakor): Pluginok oldalon jelenjen meg az "Új verzió érhető el" sáv,
    "View version X.Y.Z details" linkkel.
 
-## 🔜 Email-értesítő újratervezése
+## ✅ Email-értesítő újratervezése
 
-**KÓD KÉSZ, ÉLES ELLENŐRZÉS MÉG NEM TÖRTÉNT.** Megrendelői kérés (2026-08) a
+**KÉSZ, mergelve (PR #7), 0.8.0-ban kiadva. A design-előnézetet a megrendelő
+jóváhagyta ("fasza nagyon minden") — a tényleges cron-kézbesítés (Easy WP
+SMTP-n át) élesben még nincs kipróbálva, ld. a teszt-lista 2. pontját.**
+Megrendelői kérés (2026-08) a
 Fázis 2-es sima szöveges email javítására: HTML-email, logóval. A logó a
 PLUGINBA becsomagolt statikus fájl (`assets/img/mfui-logo.png`, `.jpg` vagy
 `.jpeg`), NEM site-onkénti admin-beállítás — a megrendelő megerősítette:
