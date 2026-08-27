@@ -631,3 +631,78 @@ set_areas_for_publication()`/`delete()`, és EGYSZER egy teljes
     "kártya" körül, a logó saját navy/teal színvilágához igazított
     paletta — enélkül egy sötét emailkliens-háttéren (dark mode) a sötét
     felirat olvashatatlanná válna.
+
+## 0.9 előkészítés — megrendelői döntések (2026-08)
+
+79. **Dimensions idézettség-badge — mi ez, elmagyarázva a megrendelőnek.**
+    A [Dimensions.ai](https://www.dimensions.ai) egy ingyenes, DOI-alapú
+    idézettség-adatbázis; a `badge.dimensions.ai/badge.js` script egy kis
+    beágyazott jelvényt rajzol ki (`<span class="__dimensions_badge_embed__"
+    data-doi="10.xxxx/...">`), ami mutatja, hányszor idézték az adott
+    publikációt, és rákattintva a Dimensions saját oldalára visz (ott
+    listázva az idéző műveket is). Előnye az MTMT saját idézettség-számával
+    szemben: a Dimensions adatbázisa folyamatosan, automatikusan frissül a
+    látogatóban (nem csak a heti MTMT-szinkronnal), és szélesebb/gyakran
+    naprakészebb forrásból számol. Hátránya: külső script fut le a látogató
+    böngészőjében (a `badge.dimensions.ai`-hoz megy ki egy kérés DOI-nkénti
+    bontásban) — ez egy apró adatvédelmi megfontolás, amit érdemes jelezni
+    a látogatónak, és lazy-load-dal érdemes betölteni, hogy ne lassítsa az
+    oldalt. **Döntés még nem született** — a megrendelő megkérdezte, mi ez,
+    a BibTeX-szel ellentétben itt nem érkezett "nem kell" válasz.
+80. **BibTeX lenyíló — ELVETVE**, lásd docs/roadmap.md Fázis 7 szakasz.
+81. **Egyéb azonosítós SVG-ikonok: becsomagolt, inline-olt, fill-mentesített.**
+    A megrendelő maga szerzi be a logókat, egyszínű SVG-ként — a kód oldala
+    a `docs/external-id-icons.md`-ben rögzített fájlnév-konvenció szerint
+    (`assets/img/icons/{slug}.svg`) automatikusan felismeri és inline-olja
+    őket (`Mtmt_External_Id_Icons::get_icon_svg()`), ikon hiányában szépen
+    visszaesik a meglévő feliratos pill-badge-re. Az SVG-t NEM `<img
+    src="...">`-ként, hanem közvetlenül a HTML-markupba ágyazva adjuk ki,
+    mert csak így tud a CSS `fill: currentColor`-ral színt váltani rajta —
+    egy `<img>`-be ágyazott SVG-t a böngésző nem engedi CSS-ből színezni. Az
+    esetleges explicit `fill="..."` attribútumokat betöltéskor eltávolítjuk
+    (reguláris kifejezéssel), hogy ne kelljen "CSS-re felkészített", speciális
+    exportot kérni a megrendelőtől — bármilyen szokásos monokróm SVG-export
+    működik. A fájl tartalma a fejlesztő/kiadó által elhelyezett, megbízható
+    erőforrás (nem látogatói input), ezért nincs futásidejű `wp_kses`-szerű
+    sanitizálás — ugyanaz a bizalmi szint, mint a placeholder-kép/email-logó
+    fájloknál.
+82. **Role→capability admin UI, tetszőleges WP-szerepkörre** (a megrendelő
+    kérése: "role capability mindenképp kell"). Új "Jogosultságok" almenü
+    (`Mtmt_Capabilities_Page`, `manage_options`), táblázat MINDEN létező
+    WP-szerepkörrel (nem csak Editor/Administrator), két pipa oszloppal
+    (Moderálás = `mtmt_moderate`, Besorolás = `mtmt_classify`). A tárolt
+    leképzés (`mtmt_moderate_roles`/`mtmt_classify_roles` option) mentéskor
+    AZONNAL rá is vetül a WP_Role objektumokra, `add_cap()`-pel ÉS
+    `remove_cap()`-pel is (nem csak hozzáadás — egy kivett pipa ténylegesen
+    el is veszi a jogot). `Mtmt_Capabilities::activate()` `add_option()`-t
+    használ `update_option()` helyett, hogy egy már testreszabott
+    telepítésen egy újraaktiválás/frissítés NE írja felül az admin saját
+    beállítását az eredeti Editor+Administrator alapértelmezésre — unit-
+    teszttel külön ellenőrizve (lásd test-capabilities.php #4).
+83. **`languages/` + `.pot`/angol `.po`/`.mo` pótolva** (CLAUDE.md §0/§2 eddig
+    hiányzó előírása). Saját, kis PHP-tokenizeres kinyerő eszköz
+    (`bin/i18n/build.php`) — WP-CLI i18n parancs vagy Node-alapú i18n-tooling
+    NEM kellett hozzá (CLAUDE.md §2 "nincs build-lépés" elve), sima `php
+    bin/i18n/build.php` a teljes folyamat. A 228 kinyert string mindegyikéhez
+    kézzel felvett angol fordítás van (`bin/i18n/translations-en.php`, a
+    kézzel karbantartott igazságforrás) — ha egy stringhez nincs fordítás,
+    a szkript listázza és HIBÁVAL kilép, nem generál hiányos fájlokat.
+84. **A `.mo` bináris fájlt saját PHP-writer állítja elő**, nem külső
+    `msgfmt` binárist hív (ami nem biztos, hogy elérhető minden fejlesztői
+    gépen) — a GNU MO formátum-specifikációt követi (fejléc, rendezett
+    eredeti-string tábla binális kereséshez, offset-táblák). Kétféleképp
+    ellenőrizve: (a) egy teljesen független, saját bájt-szintű MO-olvasóval
+    (nem a writerrel megosztott kóddal) visszaolvasva néhány ismert
+    kulcs→fordítás párt, (b) PHP natív `gettext` kiterjesztésével is
+    próbálva — utóbbi Windows-on NEM adta vissza a fordítást (ismert,
+    dokumentált Windows-specifikus `LC_MESSAGES` korlátozás a PHP gettext
+    kiterjesztésben), DE ez NEM releváns éles WordPress-környezetre: a WP
+    a saját, tiszta PHP-s MO-parserét használja (`wp-includes/pomo/`), nem
+    az OS gettext-jét/`setlocale()`-t — pont ezért nem is bízhat az OS
+    gettext-ben WP soha. A saját bájt-szintű olvasós teszt pontosan azt az
+    utat validálja, amit WP is használ.
+85. **`Domain Path: /languages` felvéve a plugin fejlécbe** — a
+    `load_plugin_textdomain()`-t már eddig is explicit útvonallal hívtuk
+    (nem a fejlécre támaszkodva), de a `Domain Path` fejléc-mező a WPCS/
+    wp.org-i18n-eszközök konvenciója, hiánya esetén egyes scannerek
+    hibásan jeleznék, hogy a plugin nem i18n-kompatibilis.

@@ -7,6 +7,7 @@
  * Requires at least: 6.4
  * Requires PHP: 8.1
  * Text Domain: mtmt-sync
+ * Domain Path: /languages
  *
  * @package Mtmt_Sync
  */
@@ -76,6 +77,7 @@ require_once MTMT_PLUGIN_DIR . 'admin/class-mtmt-publications-page.php';
 require_once MTMT_PLUGIN_DIR . 'admin/class-mtmt-profiles-page.php';
 require_once MTMT_PLUGIN_DIR . 'admin/class-mtmt-settings-page.php';
 require_once MTMT_PLUGIN_DIR . 'admin/class-mtmt-topic-areas-page.php';
+require_once MTMT_PLUGIN_DIR . 'admin/class-mtmt-capabilities-page.php';
 require_once MTMT_PLUGIN_DIR . 'elementor/class-mtmt-elementor-loader.php';
 
 register_activation_hook( __FILE__, array( 'Mtmt_Activator', 'activate' ) );
@@ -137,6 +139,7 @@ function mtmt_register_admin_pages(): void {
 	( new Mtmt_Profiles_Page( $profile_repo ) )->add_menu_page();
 	( new Mtmt_Topic_Areas_Page( $topic_area_repo ) )->add_menu_page();
 	( new Mtmt_Settings_Page( new Mtmt_Sync_Log_Repository( $wpdb ), $profile_repo ) )->add_menu_page();
+	( new Mtmt_Capabilities_Page() )->add_menu_page();
 }
 add_action( 'admin_menu', 'mtmt_register_admin_pages' );
 

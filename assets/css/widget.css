@@ -262,6 +262,27 @@
 	color: var(--mtmt-accent);
 }
 
+/* Ha van becsomagolt SVG-ikon a forráshoz (Mtmt_External_Id_Icons), a badge
+   ikon+szöveg elrendezésű lesz; az ikon `fill`-je a badge szövegszínét követi
+   (currentColor) — a betöltött SVG-kből az explicit fill-eket a PHP eltávolítja. */
+.mtmt-ext-id-badge-icon {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.35em;
+}
+
+.mtmt-ext-id-icon {
+	display: inline-flex;
+	width: 1em;
+	height: 1em;
+}
+
+.mtmt-ext-id-icon svg {
+	width: 1em;
+	height: 1em;
+	fill: currentColor;
+}
+
 .mtmt-pagination {
 	display: flex;
 	align-items: center;

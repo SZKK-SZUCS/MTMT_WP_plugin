@@ -1,0 +1,926 @@
+# Copyright (C) 2026 MTMT Sync
+# This file is distributed under the GPLv2 or later.
+msgid ""
+msgstr ""
+"Project-Id-Version: MTMT Sync 0.9.0\n"
+"Report-Msgid-Bugs-To: https://github.com/SZKK-SZUCS/MTMT_WP_plugin/issues\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2026-08-27T12:51:54+00:00\n"
+"X-Generator: bin/i18n/build.php\n"
+"X-Domain: mtmt-sync\n"
+#: includes/class-mtmt-notifier.php:170
+msgid "%1$d új · %2$d frissítve (ebből %3$d visszaesett pending-be) · %4$d hiányzóként jelölve"
+msgstr ""
+
+#: includes/class-mtmt-widget-ajax.php:141
+msgid "%1$d. / %2$d oldal"
+msgstr ""
+
+#: admin/class-mtmt-list-table.php:215 admin/class-mtmt-profiles-page.php:212 admin/class-mtmt-publications-page.php:316
+msgid "(cím nélkül)"
+msgstr ""
+
+#: elementor/class-mtmt-widget-topic-publications.php:204 elementor/class-mtmt-widget-topic-publications.php:212
+msgid "(nincs elérhető profil)"
+msgstr ""
+
+#: elementor/class-mtmt-widget-topic-publications.php:196
+msgid "(nincs elérhető terület — hozz létre egyet a Területek oldalon)"
+msgstr ""
+
+#: elementor/class-mtmt-widget-topic-publications.php:188
+msgid "(nincs elérhető terület)"
+msgstr ""
+
+#: admin/class-mtmt-profiles-page.php:478
+msgid "A haladó cond JSON érvénytelen. Formátum: [{\"field\":\"...\",\"op\":\"...\",\"value\":\"...\"}]"
+msgstr ""
+
+#: admin/class-mtmt-publications-page.php:428
+msgid "A kiemelt cikként megjelölt publikációk fognak megjelenni a szakmai terület aloldalak widgetjén (csak a kiemeltek, nem az összes jóváhagyott tétel)."
+msgstr ""
+
+#: admin/class-mtmt-profiles-page.php:329
+msgid "A profil neve kötelező."
+msgstr ""
+
+#: admin/class-mtmt-publications-page.php:357
+msgid "A publikáció mellett megjelenő kép a nyilvános listában (pl. kiadói logó vagy egyedi illusztráció). Az MTMT nem ad ilyet — ha üresen hagyod, a widget egy alapértelmezett képet fog mutatni a cím alapján."
+msgstr ""
+
+#: admin/class-mtmt-publications-page.php:293
+msgid "A publikáció nem található."
+msgstr ""
+
+#: admin/class-mtmt-profiles-page.php:103
+msgid "A query profilok határozzák meg, mely MTMT-publikációkat húzza be a szinkron. Intézmény- vagy szerző-azonosító sehol nincs kódba írva — az itt, profilonként adható meg."
+msgstr ""
+
+#: admin/class-mtmt-profiles-page.php:546
+msgid "A szinkron nem futott le."
+msgstr ""
+
+#: admin/class-mtmt-profiles-page.php:198
+msgid "A találatszám nem állapítható meg a válaszból (a profil még NINCS elmentve)."
+msgstr ""
+
+#: admin/class-mtmt-topic-areas-page.php:171
+msgid "A terület neve kötelező."
+msgstr ""
+
+#: includes/class-mtmt-notifier.php:150
+msgid "A(z) %s oldalon lezajlott heti MTMT-szinkron az alábbi eredménnyel futott le:"
+msgstr ""
+
+#: admin/class-mtmt-profiles-page.php:443
+msgid "Add meg az értéket a választott típushoz."
+msgstr ""
+
+#: admin/class-mtmt-profiles-page.php:463
+msgid "Adj meg legalább egy érvényes szerző-MTID-et, vesszővel elválasztva."
+msgstr ""
+
+#: admin/class-mtmt-settings-page.php:114
+msgid "Alap placeholder-kép"
+msgstr ""
+
+#: admin/class-mtmt-profiles-page.php:278
+msgid "Az \"Előnézet\" a beírt szűrésből lekér 5 mintarekordot az MTMT-től (mentés és szinkron-indítás nélkül) — így ellenőrizhető, hogy tényleg a várt publikációk jönnének-e, mielőtt elmented a profilt."
+msgstr ""
+
+#: admin/class-mtmt-publications-page.php:379
+msgid "Az NKFIH vagy más pályázati azonosító(k), amikhez a publikáció köthető (pl. \"K 123456\"). Az MTMT ezt sem adja automatikusan. Az \"Ellenőrizve\" pipa azt jelzi, hogy valaki kézzel leellenőrizte a fenti azonosító helyességét — ezt rögzíti, ki és mikor tette."
+msgstr ""
+
+#: admin/class-mtmt-profiles-page.php:450
+msgid "Az intézmény MTID-nek pozitív egész számnak kell lennie."
+msgstr ""
+
+#: admin/class-mtmt-profiles-page.php:194
+msgid "Becsült találatszám: kb. %d (az MTMT csak becslést adott vissza; a profil még NINCS elmentve)."
+msgstr ""
+
+#: admin/class-mtmt-capabilities-page.php:67 admin/class-mtmt-capabilities-page.php:83 admin/class-mtmt-capabilities-page.php:101
+msgid "Besorolás"
+msgstr ""
+
+#: admin/class-mtmt-settings-page.php:47
+msgid "Beállítások"
+msgstr ""
+
+#: admin/class-mtmt-profiles-page.php:163
+msgid "Biztos törlöd?"
+msgstr ""
+
+#: admin/class-mtmt-topic-areas-page.php:101
+msgid "Biztos törlöd? A hozzá rendelt publikációk elveszítik ezt a besorolást."
+msgstr ""
+
+#: admin/class-mtmt-profiles-page.php:263
+msgid "Csak DOI azonosítóval rendelkező rekordok"
+msgstr ""
+
+#: elementor/class-mtmt-widget-all-publications.php:91
+msgid "Csak akkor jelenik meg ténylegesen, ha a \"Szakmai terület\" funkció be van kapcsolva a plugin Beállítások oldalán."
+msgstr ""
+
+#: admin/class-mtmt-profiles-page.php:239
+msgid "Csak belső azonosításra szolgál (pl. melyik kutatócsoport/intézmény profilja) — a nyilvános oldalon sehol nem jelenik meg."
+msgstr ""
+
+#: admin/class-mtmt-list-table.php:81
+msgid "Cím / szerzők"
+msgstr ""
+
+#: admin/class-mtmt-settings-page.php:175
+msgid "Címzettek (soronként vagy vesszővel elválasztva):"
+msgstr ""
+
+#: elementor/class-mtmt-widget-all-publications.php:125
+msgid "DOI hiányában ez dönti el, hogy a teljes kártya az MTMT nyilvános oldalára linkeljen-e (CLAUDE.md §14/12)."
+msgstr ""
+
+#: elementor/class-mtmt-widget-all-publications.php:122 elementor/class-mtmt-widget-topic-publications.php:152
+msgid "DOI megjelenítése"
+msgstr ""
+
+#: admin/class-mtmt-profiles-page.php:178
+msgid "Egy profil határozza meg, mely MTMT-publikációkat kérdezze le a rendszer szinkronizáláskor. Egy site-on több profil is lehet (pl. kutatócsoportonként); a behúzott publikációk mindig \"függőben\" státusszal kerülnek be, jóváhagyás előtt nem jelennek meg nyilvánosan."
+msgstr ""
+
+#: admin/class-mtmt-publications-page.php:375 admin/class-mtmt-publications-page.php:377
+msgid "Ellenőrizve"
+msgstr ""
+
+#: admin/class-mtmt-publications-page.php:355
+msgid "Eltávolítás"
+msgstr ""
+
+#: admin/class-mtmt-list-table.php:282 admin/class-mtmt-list-table.php:336 admin/class-mtmt-publications-page.php:308
+msgid "Elutasítva"
+msgstr ""
+
+#: admin/class-mtmt-list-table.php:115 admin/class-mtmt-list-table.php:227 admin/class-mtmt-publications-page.php:332
+msgid "Elutasítás"
+msgstr ""
+
+#: admin/class-mtmt-list-table.php:230 admin/class-mtmt-publications-page.php:334
+msgid "Elutasítás visszavonása"
+msgstr ""
+
+#: admin/class-mtmt-profiles-page.php:272
+msgid "Előnézet (nem menti el)"
+msgstr ""
+
+#: admin/class-mtmt-profiles-page.php:182
+msgid "Előnézet eredménye"
+msgstr ""
+
+#: elementor/class-mtmt-widget-all-publications.php:148 elementor/class-mtmt-widget-topic-publications.php:174 includes/class-mtmt-widget-ajax.php:81 includes/class-mtmt-widget-ajax.php:129
+msgid "Előző"
+msgstr ""
+
+#: admin/class-mtmt-settings-page.php:170
+msgid "Email-értesítés"
+msgstr ""
+
+#: admin/class-mtmt-profiles-page.php:117
+msgid "Engedélyezve"
+msgstr ""
+
+#: admin/class-mtmt-profiles-page.php:159
+msgid "Engedélyezés"
+msgstr ""
+
+#: admin/class-mtmt-settings-page.php:129
+msgid "Ez a kép jelenik meg a widget-kártyán azoknál a jóváhagyott publikációknál, amelyekhez nincs feltöltve egyedi indexkép — a publikáció címe automatikusan rákerül a kép aljára (CLAUDE.md §14/8). Ha üresen hagyod, a pluginhoz csomagolt alapértelmezett képet használja."
+msgstr ""
+
+#: admin/class-mtmt-settings-page.php:94
+msgid "Ezen a site-on kategorizálod-e a publikációkat szakmai terület szerint (pl. \"Autonóm járművek\", \"Robotika\"), mindegyik területhez egy külön WP-aloldallal. Nem minden telepítésen kell — ha kikapcsolod: a gazdagító űrlapon nincs terület-választó, a widgeteken nincs terület-badge/szűrő. A területek listáját a \"Területek\" almenüben szerkesztheted."
+msgstr ""
+
+#: includes/class-mtmt-notifier.php:188
+msgid "Ezt az emailt a MTMT Sync plugin küldte automatikusan a(z) %s oldalról."
+msgstr ""
+
+#: elementor/trait-mtmt-widget-common-controls.php:45
+msgid "Felső kiskapitális felirat"
+msgstr ""
+
+#: admin/class-mtmt-profiles-page.php:116
+msgid "Feltétel (cond)"
+msgstr ""
+
+#: admin/class-mtmt-list-table.php:82 admin/class-mtmt-settings-page.php:190
+msgid "Forrás"
+msgstr ""
+
+#: admin/class-mtmt-settings-page.php:192
+msgid "Frissített"
+msgstr ""
+
+#: admin/class-mtmt-settings-page.php:83
+msgid "Funkciók"
+msgstr ""
+
+#: admin/class-mtmt-settings-page.php:184
+msgid "Futás-napló (utolsó 20)"
+msgstr ""
+
+#: admin/class-mtmt-list-table.php:280 admin/class-mtmt-list-table.php:334 admin/class-mtmt-publications-page.php:306
+msgid "Függőben"
+msgstr ""
+
+#: includes/class-mtmt-notifier.php:160
+msgid "HIBA a futás közben"
+msgstr ""
+
+#: admin/class-mtmt-settings-page.php:179
+msgid "Ha üres, nem megy ki email. Csak a heti automatikus (cron) futásról küld értesítést, ha volt új vagy frissült tétel — kézi/CLI szinkronnál nem, mert azt az admin úgyis a képernyőn látja. Az email fejlécében megjelenő logó a pluginba van beégetve (kiadói/rendszer-email), nem site-onként állítható — lásd assets/img/mfui-logo.png."
+msgstr ""
+
+#: admin/class-mtmt-profiles-page.php:247
+msgid "Haladó — nyers cond JSON"
+msgstr ""
+
+#: elementor/trait-mtmt-widget-common-controls.php:116
+msgid "Halvány háttérszín"
+msgstr ""
+
+#: includes/class-mtmt-cron.php:33
+msgid "Hetente"
+msgstr ""
+
+#: admin/class-mtmt-profiles-page.php:555
+msgid "Hiba a szinkron közben: %s"
+msgstr ""
+
+#: admin/class-mtmt-profiles-page.php:401
+msgid "Hiba az előnézet lekérésekor: %s"
+msgstr ""
+
+#: elementor/class-mtmt-widget-all-publications.php:109 elementor/class-mtmt-widget-topic-publications.php:139
+msgid "Hivatkozás-stílus"
+msgstr ""
+
+#: admin/class-mtmt-settings-page.php:194
+msgid "Hiányzó"
+msgstr ""
+
+#: admin/class-mtmt-topic-areas-page.php:77 admin/class-mtmt-topic-areas-page.php:126
+msgid "Hozzárendelt aloldal"
+msgstr ""
+
+#: admin/class-mtmt-profiles-page.php:114
+msgid "ID"
+msgstr ""
+
+#: admin/class-mtmt-settings-page.php:188
+msgid "Időpont"
+msgstr ""
+
+#: admin/class-mtmt-publications-page.php:345
+msgid "Indexkép"
+msgstr ""
+
+#: admin/class-mtmt-publications-page.php:450
+msgid "Indexkép kiválasztása"
+msgstr ""
+
+#: admin/class-mtmt-profiles-page.php:245
+msgid "Intézmény MTID"
+msgstr ""
+
+#: admin/class-mtmt-profiles-page.php:256
+msgid "Intézmény esetén az MTMT intézmény-MTID (pl. https://m2.mtmt.hu/api/institute/19662 -> 19662). Szerzőknél MTID-lista vesszővel. Haladónál: [{\"field\":\"...\",\"op\":\"...\",\"value\":\"...\"}]"
+msgstr ""
+
+#: includes/class-mtmt-api-client.php:160
+msgid "Ismeretlen MTMT API hiba."
+msgstr ""
+
+#: admin/class-mtmt-profiles-page.php:484
+msgid "Ismeretlen scope-típus."
+msgstr ""
+
+#: admin/class-mtmt-capabilities-page.php:50
+msgid "Itt állítható be, mely WordPress-szerepkörök kapják meg a plugin két kapabilitását. A pipák azonnal érvénybe lépnek mentéskor — nem kell újra aktiválni a plugint."
+msgstr ""
+
+#: admin/class-mtmt-publications-page.php:323
+msgid "Jelenlegi státusz: %s"
+msgstr ""
+
+#: admin/class-mtmt-capabilities-page.php:27
+msgid "Jogosultságok"
+msgstr ""
+
+#: admin/class-mtmt-list-table.php:281 admin/class-mtmt-list-table.php:335 admin/class-mtmt-publications-page.php:307
+msgid "Jóváhagyva"
+msgstr ""
+
+#: admin/class-mtmt-list-table.php:114 admin/class-mtmt-list-table.php:224 admin/class-mtmt-publications-page.php:329
+msgid "Jóváhagyás"
+msgstr ""
+
+#: includes/class-mtmt-notifier.php:181
+msgid "Jóváhagyás megnyitása"
+msgstr ""
+
+#: elementor/class-mtmt-widget-all-publications.php:144 elementor/class-mtmt-widget-topic-publications.php:171
+msgid "Keresés cím, szerző vagy forrás szerint…"
+msgstr ""
+
+#: elementor/trait-mtmt-widget-common-controls.php:47
+msgid "Kereső mező helyőrző szövege"
+msgstr ""
+
+#: elementor/class-mtmt-widget-all-publications.php:79 elementor/class-mtmt-widget-topic-publications.php:119
+msgid "Kereső mező megjelenítése"
+msgstr ""
+
+#: admin/class-mtmt-list-table.php:288 admin/class-mtmt-publications-page.php:425
+msgid "Kiemelt cikk"
+msgstr ""
+
+#: admin/class-mtmt-settings-page.php:103
+msgid "Kiemelt cikkeket lehet megjelölni a moderációs listán, és külön widgettel (szakmai terület aloldalakon) csak ezeket lehet majd kiemelten megjeleníteni. Ha ki van kapcsolva: a gazdagító űrlapon nincs \"kiemelt cikk\" jelölő, és a hozzá tartozó widget nem lesz elérhető Elementorban."
+msgstr ""
+
+#: admin/class-mtmt-list-table.php:119
+msgid "Kiemelés"
+msgstr ""
+
+#: admin/class-mtmt-list-table.php:120
+msgid "Kiemelés visszavonása"
+msgstr ""
+
+#: elementor/trait-mtmt-widget-common-controls.php:92
+msgid "Kiemelő szín"
+msgstr ""
+
+#: elementor/class-mtmt-widget-all-publications.php:114 elementor/class-mtmt-widget-topic-publications.php:144
+msgid "Kompakt"
+msgstr ""
+
+#: elementor/trait-mtmt-widget-common-controls.php:162
+msgid "Kártya"
+msgstr ""
+
+#: elementor/trait-mtmt-widget-common-controls.php:188
+msgid "Kártya belső margó"
+msgstr ""
+
+#: elementor/trait-mtmt-widget-common-controls.php:170
+msgid "Kártya háttérszíne"
+msgstr ""
+
+#: elementor/trait-mtmt-widget-common-controls.php:178
+msgid "Kártya lekerekítés"
+msgstr ""
+
+#: elementor/trait-mtmt-widget-common-controls.php:144
+msgid "Kártya-cím"
+msgstr ""
+
+#: admin/class-mtmt-publications-page.php:354 admin/class-mtmt-settings-page.php:125
+msgid "Kép kiválasztása"
+msgstr ""
+
+#: elementor/class-mtmt-widget-all-publications.php:149 elementor/class-mtmt-widget-topic-publications.php:175 includes/class-mtmt-widget-ajax.php:84 includes/class-mtmt-widget-ajax.php:132
+msgid "Következő"
+msgstr ""
+
+#: elementor/trait-mtmt-widget-common-controls.php:51
+msgid "Lapozó \"előző\" felirata"
+msgstr ""
+
+#: elementor/trait-mtmt-widget-common-controls.php:52
+msgid "Lapozó \"következő\" felirata"
+msgstr ""
+
+#: elementor/class-mtmt-widget-all-publications.php:143
+msgid "Lektorált publikációk"
+msgstr ""
+
+#: elementor/class-mtmt-widget-topic-publications.php:81 elementor/class-mtmt-widget-topic-publications.php:99
+msgid "Lekérdezési profil"
+msgstr ""
+
+#: admin/class-mtmt-profiles-page.php:158
+msgid "Letiltás"
+msgstr ""
+
+#: admin/class-mtmt-list-table.php:87
+msgid "Linkek"
+msgstr ""
+
+#: admin/class-mtmt-publications-page.php:54 elementor/class-mtmt-elementor-loader.php:56
+msgid "MTMT"
+msgstr ""
+
+#: includes/class-mtmt-api-client.php:186 includes/class-mtmt-api-client.php:197
+msgid "MTMT API hiba: HTTP %d"
+msgstr ""
+
+#: admin/class-mtmt-publications-page.php:64 admin/class-mtmt-publications-page.php:275
+msgid "MTMT Publikációk"
+msgstr ""
+
+#: admin/class-mtmt-settings-page.php:46 admin/class-mtmt-settings-page.php:75
+msgid "MTMT Publikációk — Beállítások"
+msgstr ""
+
+#: admin/class-mtmt-capabilities-page.php:49
+msgid "MTMT Publikációk — Jogosultságok"
+msgstr ""
+
+#: admin/class-mtmt-profiles-page.php:102
+msgid "MTMT Publikációk — Query profilok"
+msgstr ""
+
+#: elementor/class-mtmt-widget-topic-publications.php:36
+msgid "MTMT publikációk – szakmai terület"
+msgstr ""
+
+#: elementor/class-mtmt-widget-all-publications.php:40
+msgid "MTMT publikációk – összesítő"
+msgstr ""
+
+#: includes/class-mtmt-notifier.php:134
+msgid "MTMT szinkron-értesítő"
+msgstr ""
+
+#: admin/class-mtmt-capabilities-page.php:26
+msgid "MTMT — Jogosultságok"
+msgstr ""
+
+#: admin/class-mtmt-profiles-page.php:81
+msgid "MTMT — Query profilok"
+msgstr ""
+
+#: admin/class-mtmt-topic-areas-page.php:41 admin/class-mtmt-topic-areas-page.php:62
+msgid "MTMT — Szakmai területek"
+msgstr ""
+
+#: admin/class-mtmt-publications-page.php:365
+msgid "MTMT-ből importált (nem szerkeszthető, csak felülírható):"
+msgstr ""
+
+#: admin/class-mtmt-list-table.php:86
+msgid "MTMT-státusz"
+msgstr ""
+
+#: admin/class-mtmt-publications-page.php:427
+msgid "Megjelölés kiemelt cikkként"
+msgstr ""
+
+#: admin/class-mtmt-profiles-page.php:248
+msgid "Melyik MTMT-mező alapján szűrjön: egy adott intézmény összes publikációja, egy konkrét szerző-lista publikációi, vagy (haladó felhasználóknak) egy tetszőleges, kézzel megadott feltétel-lista."
+msgstr ""
+
+#: admin/class-mtmt-topic-areas-page.php:138
+msgid "Melyik WP-oldalon jelenjen meg ennek a területnek a widgetje. Utólag is módosítható (törlés + újra létrehozás)."
+msgstr ""
+
+#: admin/class-mtmt-publications-page.php:418
+msgid "Melyik szakmai terület aloldalán jelenjen meg ez a publikáció. Több is választható, vagy egy sem."
+msgstr ""
+
+#: admin/class-mtmt-publications-page.php:484 admin/class-mtmt-settings-page.php:256 admin/class-mtmt-settings-page.php:266
+msgid "Mentve."
+msgstr ""
+
+#: admin/class-mtmt-capabilities-page.php:149
+msgid "Mentve. A jogosultságok azonnal érvénybe léptek."
+msgstr ""
+
+#: admin/class-mtmt-settings-page.php:275
+msgid "Mentve. Az újonnan generált placeholder-képek már az új alapképet használják — a korábban legenerált (cache-elt) képek a lemezen maradnak, de a widget nem hivatkozik rájuk többé."
+msgstr ""
+
+#: admin/class-mtmt-capabilities-page.php:110 admin/class-mtmt-publications-page.php:434 admin/class-mtmt-settings-page.php:105 admin/class-mtmt-settings-page.php:134 admin/class-mtmt-settings-page.php:181
+msgid "Mentés"
+msgstr ""
+
+#: admin/class-mtmt-publications-page.php:367
+msgid "Milyen támogatás/pályázat állt a publikáció mögött. Az MTMT ezt jelenleg nem szolgáltatja automatikusan, ezért ez mindig kézi bevitel — ha kitöltöd, ez jelenik meg a nyilvános oldalon a publikáció mellett."
+msgstr ""
+
+#: admin/class-mtmt-topic-areas-page.php:64
+msgid "Minden \"szakmai terület\" egy WP-aloldalhoz van párosítva — a moderációs szerkesztő űrlapon (ha a funkció be van kapcsolva a Beállításokban) minden publikációhoz kiválasztható, melyik terület(ek)hez tartozik. Fázis 5-ben ez alapján fog szűrni a terület-aloldal widget."
+msgstr ""
+
+#: admin/class-mtmt-list-table.php:345
+msgid "Minden profil"
+msgstr ""
+
+#: admin/class-mtmt-list-table.php:333
+msgid "Minden státusz"
+msgstr ""
+
+#: admin/class-mtmt-list-table.php:352 elementor/class-mtmt-widget-all-publications.php:145
+msgid "Minden szakmai terület"
+msgstr ""
+
+#: admin/class-mtmt-list-table.php:339
+msgid "Minden év"
+msgstr ""
+
+#: admin/class-mtmt-profiles-page.php:208
+msgid "Minta a találatokból:"
+msgstr ""
+
+#: admin/class-mtmt-capabilities-page.php:66 admin/class-mtmt-capabilities-page.php:77 admin/class-mtmt-capabilities-page.php:93
+msgid "Moderálás"
+msgstr ""
+
+#: elementor/trait-mtmt-widget-common-controls.php:108
+msgid "Másodlagos szöveg szín"
+msgstr ""
+
+#: admin/class-mtmt-settings-page.php:201
+msgid "Még nem futott szinkron."
+msgstr ""
+
+#: admin/class-mtmt-profiles-page.php:125
+msgid "Még nincs egy profil sem."
+msgstr ""
+
+#: admin/class-mtmt-publications-page.php:406
+msgid "Még nincs egy szakmai terület sem beállítva. %s"
+msgstr ""
+
+#: admin/class-mtmt-topic-areas-page.php:84
+msgid "Még nincs egy szakmai terület sem."
+msgstr ""
+
+#: admin/class-mtmt-profiles-page.php:119 admin/class-mtmt-topic-areas-page.php:78
+msgid "Művelet"
+msgstr ""
+
+#: elementor/class-mtmt-widget-all-publications.php:147 includes/class-mtmt-widget-ajax.php:78
+msgid "Nincs a szűrésnek megfelelő publikáció."
+msgstr ""
+
+#: admin/class-mtmt-capabilities-page.php:127 admin/class-mtmt-profiles-page.php:295 admin/class-mtmt-settings-page.php:245 admin/class-mtmt-topic-areas-page.php:159
+msgid "Nincs jogosultságod ehhez a művelethez."
+msgstr ""
+
+#: admin/class-mtmt-capabilities-page.php:39 admin/class-mtmt-profiles-page.php:94 admin/class-mtmt-publications-page.php:113 admin/class-mtmt-settings-page.php:59 admin/class-mtmt-topic-areas-page.php:54
+msgid "Nincs jogosultságod ehhez az oldalhoz."
+msgstr ""
+
+#: elementor/class-mtmt-widget-topic-publications.php:173
+msgid "Nincs kiemelt publikáció ebben a körben."
+msgstr ""
+
+#: admin/class-mtmt-list-table.php:130
+msgid "Nincs publikáció."
+msgstr ""
+
+#: admin/class-mtmt-profiles-page.php:219
+msgid "Nincs találat ezzel a szűréssel."
+msgstr ""
+
+#: admin/class-mtmt-publications-page.php:400
+msgid "Nincs terület kijelölve."
+msgstr ""
+
+#: admin/class-mtmt-profiles-page.php:115
+msgid "Név"
+msgstr ""
+
+#: admin/class-mtmt-settings-page.php:223
+msgid "OK"
+msgstr ""
+
+#: elementor/class-mtmt-widget-all-publications.php:142
+msgid "PUBLIKÁCIÓK"
+msgstr ""
+
+#: admin/class-mtmt-topic-areas-page.php:122
+msgid "Pl. \"Autonóm járművek\", \"Robotika\" — ez fog megjelenni a moderációs űrlapon és a widget szűrőjében."
+msgstr ""
+
+#: admin/class-mtmt-settings-page.php:149
+msgid "Placeholder-kép kiválasztása"
+msgstr ""
+
+#: admin/class-mtmt-settings-page.php:189
+msgid "Profil"
+msgstr ""
+
+#: includes/class-mtmt-sync.php:72
+msgid "Profil #%d nem található."
+msgstr ""
+
+#: admin/class-mtmt-profiles-page.php:350
+msgid "Profil létrehozva."
+msgstr ""
+
+#: admin/class-mtmt-profiles-page.php:275
+msgid "Profil létrehozása"
+msgstr ""
+
+#: admin/class-mtmt-profiles-page.php:236
+msgid "Profil neve"
+msgstr ""
+
+#: admin/class-mtmt-profiles-page.php:513
+msgid "Profil törölve."
+msgstr ""
+
+#: admin/class-mtmt-profiles-page.php:82
+msgid "Profilok"
+msgstr ""
+
+#: admin/class-mtmt-publications-page.php:371
+msgid "Projektazonosító(k)"
+msgstr ""
+
+#: includes/class-mtmt-placeholder-image.php:55
+msgid "Publikáció"
+msgstr ""
+
+#: admin/class-mtmt-publications-page.php:312
+msgid "Publikáció gazdagítása"
+msgstr ""
+
+#: admin/class-mtmt-capabilities-page.php:96
+msgid "Publikáció jóváhagyása/elutasítása/elutasítás-visszavonása, a moderációs lista és a gazdagító űrlap alap mezői (indexkép, támogatás felülbírálása, projektazonosító megadása, kiemelt cikk jelölő). A \"mtmt_moderate\" kapabilitást adja."
+msgstr ""
+
+#: admin/class-mtmt-list-table.php:85
+msgid "SJR"
+msgstr ""
+
+#: elementor/class-mtmt-widget-all-publications.php:132 elementor/class-mtmt-widget-topic-publications.php:161
+msgid "SJR-negyed badge megjelenítése"
+msgstr ""
+
+#: admin/class-mtmt-profiles-page.php:243
+msgid "Scope típusa"
+msgstr ""
+
+#: admin/class-mtmt-list-table.php:94 admin/class-mtmt-settings-page.php:195
+msgid "Státusz"
+msgstr ""
+
+#: admin/class-mtmt-list-table.php:91 admin/class-mtmt-publications-page.php:384 elementor/class-mtmt-widget-topic-publications.php:80 elementor/class-mtmt-widget-topic-publications.php:89
+msgid "Szakmai terület"
+msgstr ""
+
+#: admin/class-mtmt-capabilities-page.php:104
+msgid "Szakmai terület hozzárendelése egy publikációhoz, és a projektazonosító \"Ellenőrizve\" pipája. Szigorúbb kör, mint a Moderálás — ezt a jogot csak azoknak érdemes adni, akik ténylegesen felelősek a besorolás/ellenőrzés pontosságáért. A \"mtmt_classify\" kapabilitást adja."
+msgstr ""
+
+#: elementor/class-mtmt-widget-all-publications.php:88
+msgid "Szakmai terület szűrő megjelenítése"
+msgstr ""
+
+#: elementor/trait-mtmt-widget-common-controls.php:100
+msgid "Szegély szín"
+msgstr ""
+
+#: admin/class-mtmt-capabilities-page.php:65
+msgid "Szerepkör"
+msgstr ""
+
+#: admin/class-mtmt-list-table.php:220
+msgid "Szerkesztés/Gazdagítás"
+msgstr ""
+
+#: admin/class-mtmt-profiles-page.php:246
+msgid "Szerző MTID-lista (vesszővel elválasztva)"
+msgstr ""
+
+#: admin/class-mtmt-profiles-page.php:565
+msgid "Szinkron lefutott: %1$d új, %2$d frissített (ebből %3$d visszaesett pending-be), %4$d hiányzóként jelölt."
+msgstr ""
+
+#: admin/class-mtmt-profiles-page.php:147
+msgid "Szinkron most"
+msgstr ""
+
+#: elementor/trait-mtmt-widget-common-controls.php:84
+msgid "Színek"
+msgstr ""
+
+#: elementor/trait-mtmt-widget-common-controls.php:50
+msgid "Szöveg, ha nincs találat"
+msgstr ""
+
+#: elementor/trait-mtmt-widget-common-controls.php:39
+msgid "Szövegek"
+msgstr ""
+
+#: elementor/class-mtmt-widget-topic-publications.php:68
+msgid "Szűkítés"
+msgstr ""
+
+#: elementor/class-mtmt-widget-topic-publications.php:76
+msgid "Szűkítés módja"
+msgstr ""
+
+#: admin/class-mtmt-list-table.php:358 admin/class-mtmt-profiles-page.php:261
+msgid "Szűrés"
+msgstr ""
+
+#: admin/class-mtmt-profiles-page.php:265
+msgid "Tapasztalati érték: egy tesztintézményen a rekordok kb. felének volt DOI-ja — ez kb. felére csökkentheti a behúzott tételszámot."
+msgstr ""
+
+#: elementor/class-mtmt-widget-all-publications.php:71 elementor/class-mtmt-widget-topic-publications.php:111
+msgid "Tartalom"
+msgstr ""
+
+#: elementor/class-mtmt-widget-all-publications.php:113 elementor/class-mtmt-widget-topic-publications.php:143
+msgid "Teljes"
+msgstr ""
+
+#: admin/class-mtmt-topic-areas-page.php:179
+msgid "Terület létrehozva."
+msgstr ""
+
+#: admin/class-mtmt-topic-areas-page.php:142
+msgid "Terület létrehozása"
+msgstr ""
+
+#: admin/class-mtmt-topic-areas-page.php:76 admin/class-mtmt-topic-areas-page.php:119
+msgid "Terület neve"
+msgstr ""
+
+#: admin/class-mtmt-topic-areas-page.php:191
+msgid "Terület törölve."
+msgstr ""
+
+#: elementor/trait-mtmt-widget-common-controls.php:48
+msgid "Terület-szűrő \"minden terület\" felirata"
+msgstr ""
+
+#: admin/class-mtmt-topic-areas-page.php:42
+msgid "Területek"
+msgstr ""
+
+#: admin/class-mtmt-publications-page.php:407
+msgid "Területek kezelése"
+msgstr ""
+
+#: elementor/trait-mtmt-widget-common-controls.php:127
+msgid "Tipográfia"
+msgstr ""
+
+#: admin/class-mtmt-publications-page.php:361
+msgid "Támogatás felülbírálása"
+msgstr ""
+
+#: elementor/class-mtmt-widget-all-publications.php:98 elementor/class-mtmt-widget-topic-publications.php:128
+msgid "Tételek száma oldalanként"
+msgstr ""
+
+#: admin/class-mtmt-list-table.php:84
+msgid "Típus"
+msgstr ""
+
+#: admin/class-mtmt-publications-page.php:483
+msgid "Tömeges művelet végrehajtva."
+msgstr ""
+
+#: admin/class-mtmt-profiles-page.php:168 admin/class-mtmt-topic-areas-page.php:105
+msgid "Törlés"
+msgstr ""
+
+#: elementor/trait-mtmt-widget-common-controls.php:152
+msgid "Törzsszöveg (szerzők, meta)"
+msgstr ""
+
+#: admin/class-mtmt-profiles-page.php:118
+msgid "Utolsó futás"
+msgstr ""
+
+#: admin/class-mtmt-publications-page.php:313
+msgid "Vissza a listához"
+msgstr ""
+
+#: admin/class-mtmt-settings-page.php:193
+msgid "Visszaesett"
+msgstr ""
+
+#: admin/class-mtmt-settings-page.php:126
+msgid "Visszaállítás alapértelmezettre"
+msgstr ""
+
+#: elementor/class-mtmt-widget-topic-publications.php:176
+msgid "Válassz egy szakmai területet vagy lekérdezési profilt a widget beállításaiban."
+msgstr ""
+
+#: includes/class-mtmt-api-client.php:76
+msgid "Váratlan MTMT API válasz (hiányzó content mező)."
+msgstr ""
+
+#: elementor/trait-mtmt-widget-common-controls.php:136
+msgid "Widget cím"
+msgstr ""
+
+#: elementor/trait-mtmt-widget-common-controls.php:46
+msgid "Widget címe"
+msgstr ""
+
+#: admin/class-mtmt-settings-page.php:108
+msgid "Widget — placeholder-kép"
+msgstr ""
+
+#: includes/class-mtmt-notifier.php:60
+msgid "[%s] Új MTMT publikációk a heti szinkronból"
+msgstr ""
+
+#: includes/class-mtmt-author-formatter.php:69
+msgid "and %d more"
+msgid_plural "and %d more"
+msgstr[0] ""
+msgstr[1] ""
+
+#: admin/class-mtmt-settings-page.php:219
+msgid "hiba"
+msgstr ""
+
+#: admin/class-mtmt-profiles-page.php:136
+msgid "igen"
+msgstr ""
+
+#: admin/class-mtmt-profiles-page.php:137
+msgid "nem"
+msgstr ""
+
+#: admin/class-mtmt-profiles-page.php:499 admin/class-mtmt-publications-page.php:482
+msgid "Állapot frissítve."
+msgstr ""
+
+#: admin/class-mtmt-profiles-page.php:252
+msgid "Érték"
+msgstr ""
+
+#: admin/class-mtmt-profiles-page.php:532
+msgid "Érvénytelen profil."
+msgstr ""
+
+#: admin/class-mtmt-list-table.php:83
+msgid "Év"
+msgstr ""
+
+#: elementor/trait-mtmt-widget-common-controls.php:49
+msgid "Év-fül \"összes év\" felirata"
+msgstr ""
+
+#: elementor/class-mtmt-widget-all-publications.php:146 elementor/class-mtmt-widget-topic-publications.php:172
+msgid "Összes"
+msgstr ""
+
+#: admin/class-mtmt-profiles-page.php:188
+msgid "Összesen %d találat felelne meg ennek a szűrésnek (a profil még NINCS elmentve, semmi sem került be a szinkronba)."
+msgstr ""
+
+#: admin/class-mtmt-settings-page.php:191
+msgid "Új"
+msgstr ""
+
+#: includes/class-mtmt-notifier.php:147
+msgid "Új MTMT publikációk a heti szinkronból"
+msgstr ""
+
+#: admin/class-mtmt-profiles-page.php:177
+msgid "Új profil"
+msgstr ""
+
+#: admin/class-mtmt-topic-areas-page.php:113
+msgid "Új terület"
+msgstr ""
+
+#: elementor/trait-mtmt-widget-common-controls.php:53
+msgid "Üzenet, ha nincs kiválasztva terület/profil (csak szerkesztőknek látszik)"
+msgstr ""
+
+#: admin/class-mtmt-topic-areas-page.php:96
+msgid "— nincs hozzárendelve —"
+msgstr ""
+
+#: admin/class-mtmt-topic-areas-page.php:133
+msgid "— nincs kiválasztva —"
+msgstr ""
+
+#: admin/class-mtmt-settings-page.php:99
+msgid "„Kiemelt cikk\" funkció engedélyezése"
+msgstr ""
+
+#: admin/class-mtmt-settings-page.php:90
+msgid "„Szakmai terület\" funkció engedélyezése"
+msgstr ""
+
+#: admin/class-mtmt-profiles-page.php:204
+msgid "⚠ Ez gyanúsan nagy szám — valószínűleg NEM érvényesült a szűrésed (az MTMT csendben figyelmen kívül hagyja az ismeretlen/rosszul megadott feltételt, és gyakorlatilag a teljes MTMT-adatbázist adná vissza). Ellenőrizd az MTID-et/feltételt a mentés előtt."
+msgstr ""
+

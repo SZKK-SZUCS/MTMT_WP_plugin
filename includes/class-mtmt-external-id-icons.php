@@ -6,9 +6,11 @@
  * a maradék identifier-ek tartoznak (`external_ids`, pl. WoS/Scopus/SZTAKI),
  * lásd Mtmt_Mapper::map_identifiers().
  *
- * Valódi hivatalos logókat (Scopus/WoS/PubMed stb.) nem csomagolunk be
- * forrás/licenc nélkül — egyelőre feliratos "pill" badge-eket adunk, amit
- * bármikor lecserélhetünk tényleges logó-fájlokra (lásd docs/widget-design.md).
+ * FRISSÍTVE (0.9 előkészítés, 2026-08): ha a pluginba be van csomagolva egy
+ * egyszínű SVG-ikon az adott forráshoz (`assets/img/icons/{slug}.svg`), azt
+ * inline-olja (nem `<img>`-ként — CSS `currentColor`-ral színezhető marad,
+ * lásd docs/decisions.md #81). Ikon-fájl hiányában szépen visszaesik a
+ * korábbi feliratos "pill" badge-re — egyik forrásnál sem kötelező az SVG.
  *
  * @package Mtmt_Sync
  */
@@ -21,17 +23,30 @@ defined( 'ABSPATH' ) || exit;
 final class Mtmt_External_Id_Icons {
 
 	/**
-	 * Ismert forrásnevek rövid, kártyára szánt felirata. Ami nincs a listában,
-	 * azt a nyers `source` névvel jelenítjük meg — új MTMT-forrás megjelenése
-	 * esetén sem tűnik el semmi, csak nincs "szép" rövidítése.
+	 * Ismert forrásnevek rövid, kártyára szánt felirata ÉS az ikon-fájlnév
+	 * alapja (`assets/img/icons/{slug}.svg`). Ami nincs a listában, azt a
+	 * nyers `source` névvel jelenítjük meg, SVG-ikon nélkül — új MTMT-forrás
+	 * megjelenése esetén sem tűnik el semmi, csak nincs "szép" rövidítése/ikonja.
 	 *
-	 * @var array<string,string>
+	 * @var array<string,array{label:string,slug:string}>
 	 */
-	private const LABELS = array(
-		'WoS'    => 'WoS',
-		'Scopus' => 'Scopus',
-		'SZTAKI' => 'SZTAKI',
-		'PubMed' => 'PubMed',
+	private const SOURCES = array(
+		'WoS'    => array(
+			'label' => 'WoS',
+			'slug'  => 'wos',
+		),
+		'Scopus' => array(
+			'label' => 'Scopus',
+			'slug'  => 'scopus',
+		),
+		'SZTAKI' => array(
+			'label' => 'SZTAKI',
+			'slug'  => 'sztaki',
+		),
+		'PubMed' => array(
+			'label' => 'PubMed',
+			'slug'  => 'pubmed',
+		),
 	);
 
 	/**
@@ -57,11 +72,16 @@ final class Mtmt_External_Id_Icons {
 				continue;
 			}
 
-			$label     = self::LABELS[ $source_name ] ?? $source_name;
+			$known = self::SOURCES[ $source_name ] ?? null;
+			$label = $known['label'] ?? $source_name;
+			$icon  = $known ? self::get_icon_svg( $known['slug'] ) : null;
+
 			$buttons[] = sprintf(
-				'<a class="mtmt-ext-id-badge" href="%1$s" target="_blank" rel="noopener noreferrer" title="%2$s">%2$s</a>',
+				'<a class="mtmt-ext-id-badge%3$s" href="%1$s" target="_blank" rel="noopener noreferrer" title="%2$s">%4$s%2$s</a>',
 				esc_url( $url ),
-				esc_html( $label )
+				esc_html( $label ),
+				$icon ? ' mtmt-ext-id-badge-icon' : '',
+				$icon ? '<span class="mtmt-ext-id-icon">' . $icon . '</span>' : ''
 			);
 		}
 
@@ -70,5 +90,48 @@ final class Mtmt_External_Id_Icons {
 		}
 
 		return '<div class="mtmt-ext-ids">' . implode( '', $buttons ) . '</div>';
+	}
+
+	/**
+	 * Becsomagolt, EGYSZÍNŰ SVG-ikon inline-tartalma, ha a fájl létezik —
+	 * NULL, ha még nincs elhelyezve. A fájl TARTALMA a pluginhoz csomagolt,
+	 * fejlesztő által elhelyezett, MEGBÍZHATÓ erőforrás (nem látogatói input),
+	 * ezért közvetlenül kerül a kimenetbe — ugyanaz a bizalmi szint, mint a
+	 * becsomagolt placeholder-kép/email-logó fájloknál.
+	 *
+	 * Az esetleges explicit `fill="..."` attribútumokat eltávolítjuk, hogy a
+	 * CSS (`fill: currentColor`) mindig tudja színezni az ikont, függetlenül
+	 * attól, hogyan lett exportálva az eredeti SVG.
+	 *
+	 * @param string $slug
+	 * @return string|null
+	 */
+	private static function get_icon_svg( string $slug ): ?string {
+		static $cache = array();
+
+		if ( array_key_exists( $slug, $cache ) ) {
+			return $cache[ $slug ];
+		}
+
+		$path = MTMT_PLUGIN_DIR . 'assets/img/icons/' . $slug . '.svg';
+		if ( ! file_exists( $path ) ) {
+			$cache[ $slug ] = null;
+			return null;
+		}
+
+		$svg = file_get_contents( $path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		if ( false === $svg ) {
+			$cache[ $slug ] = null;
+			return null;
+		}
+
+		// Az XML-prológ/DOCTYPE nem érvényes egy HTML-dokumentumba ágyazva.
+		$svg = preg_replace( '/<\?xml[^>]*\?>/i', '', $svg );
+		$svg = preg_replace( '/<!DOCTYPE[^>]*>/i', '', $svg );
+		$svg = preg_replace( '/\bfill="[^"]*"/i', '', $svg );
+		$svg = trim( $svg );
+
+		$cache[ $slug ] = $svg;
+		return $svg;
 	}
 }

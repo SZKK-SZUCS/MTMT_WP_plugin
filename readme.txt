@@ -31,6 +31,15 @@ kódmódosítás nélkül.
 A teljes fejlesztési terv és a fázisonkénti elfogadási kritériumok a repóban,
 a `CLAUDE.md` és a `docs/roadmap.md` fájlokban vannak dokumentálva.
 
+= Nyelvek =
+
+A plugin admin-felülete magyar nyelvű forrásszöveggel készült, angol
+fordítással együtt csomagolva (`languages/mtmt-sync-en_US.mo`) — ha a
+WordPress-telepítés nyelve angol (`en_US`), az admin-felület automatikusan
+angolul jelenik meg, külön beállítás nélkül. Új nyelvi fordítás a
+`languages/mtmt-sync.pot` sablonból készíthető (pl. Poedit-tel), a kész
+`.po`/`.mo` párt ugyanabba a `languages/` mappába kell tenni.
+
 == Installation ==
 
 1. Töltsd fel a plugint (vagy klónozd a repót) a `wp-content/plugins/` alá.
@@ -39,6 +48,28 @@ a `CLAUDE.md` és a `docs/roadmap.md` fájlokban vannak dokumentálva.
    (intézmény-MTID, szerző-MTID-lista, vagy haladó cond JSON).
 4. Futtasd a szinkront: `wp mtmt sync` (WP-CLI), vagy várd meg a heti
    automatikus futást (ha a cron-ütemezés már él).
+
+= Éles (production) cron-ütemezés =
+
+A WordPress alapértelmezett ("látogató-vezérelt") cron-je csak akkor fut le,
+ha éppen érkezik egy oldalbetöltés — kis forgalmú vagy időszakosan látogatott
+oldalon ez azt jelentheti, hogy a heti szinkron KÉSVE, vagy egyáltalán nem
+indul el. Éles oldalon ezért ajánlott:
+
+1. Tedd hozzá a `wp-config.php`-hoz: `define( 'DISABLE_WP_CRON', true );`
+   — ez kikapcsolja a látogató-vezérelt automatikus cron-futtatást.
+2. Ehelyett egy VALÓDI rendszer-cron (pl. cPanel Cron Jobs, Plesk
+   ütemezett feladat, vagy szerver-szintű crontab) hívja meg hetente a
+   WP-CLI parancsot közvetlenül:
+   `wp mtmt sync --path=/eleres/az/adott/wordpress/gyokerehez`
+   (vagy ugyanerre a célra a natív WP-cron eseményt is meghívhatod:
+   `wp cron event run mtmt_weekly_sync`).
+3. Így a heti futás DETERMINISZTIKUS időpontban megy, függetlenül az
+   oldal tényleges látogatottságától.
+
+Ez a lépés NINCS a kódba kényszerítve (a plugin `DISABLE_WP_CRON` nélkül is
+működik, csak akkor a látogató-vezérelt cron szabályait követi) — tisztán
+üzemeltetési/konfigurációs döntés, telepítésenként eltérhet.
 
 == Changelog ==
 

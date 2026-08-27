@@ -343,11 +343,11 @@ Megrendelői döntés (2026-08):
 - **Norvég-szint: elhalasztva, nem kell az 1.0-hoz.** Az API-út felderítése
   (hol/hogyan érhető el, ha egyáltalán publikusan elérhető) nincs lezárva —
   a `norway_level` mező marad `NULL`, amíg ezt nem vesszük elő újra.
-- **Dimensions idézettség-badge**: változatlanul nyitott, ha valaha kell.
-- **BibTeX lenyíló**: a döntés függőben, a megrendelő megkérdezte, mi ez —
-  lásd a válasz a docs/decisions.md-ben (#66). Ha kell, az MTMT API maga is
-  tud BibTeX-et exportálni közvetlenül (`export=1&exportFormat=BIBTEX`,
-  CLAUDE.md §5.3) — nem feltétlenül kell nekünk generálni.
+- ~~BibTeX lenyíló~~ — **ELVETVE** (2026-08). A megrendelő megkérdezte, mi ez
+  (válasz: docs/decisions.md #79), majd döntött: nem kell, aki BibTeX-et akar,
+  megoldja az MTMT saját oldalán (`export=1&exportFormat=BIBTEX`, CLAUDE.md §5.3).
+- **Dimensions idézettség-badge**: változatlanul nyitott, ha valaha kell — a
+  megrendelő megkérdezte, mit csinálna pontosan, válasz: docs/decisions.md #79.
 
 ## ✅ Profil-előnézet ("Preview")
 
@@ -384,7 +384,46 @@ létrehozása" gomb ezután is működik ugyanazokkal a mezőértékekkel.
 4. Előnézet után nyomj "Profil létrehozása"-t (a mezők már ki vannak töltve)
    — jöjjön létre a profil a beírt értékekkel, ugyanúgy mint eddig.
 
+## 🔜 0.9 előkészítés
+
+**KÓD KÉSZ, ÉLES ELLENŐRZÉS MÉG NEM TÖRTÉNT.** A megrendelővel egyeztetett
+lista arra, mi kerüljön a 0.9-es kiadásba az "alpha" verzió előtt
+(docs/decisions.md #83-85, #82, #81):
+
+- **i18n pótlás** (CLAUDE.md §0/§2 eddig hiányzó előírása): `languages/`
+  mappa + `.pot` sablon + becsomagolt ANGOL fordítás (`mtmt-sync-en_US.po`/`.mo`)
+  — a JKK oldalán szükséges angol plugin-verzióhoz. Saját, kis kinyerő-eszköz
+  (`bin/i18n/build.php`, `php bin/i18n/build.php`-vel futtatható, nincs
+  Node/WP-CLI-függőség), 228 kinyert string, mind lefordítva
+  (`bin/i18n/translations-en.php`). Ha angol WP-locale-lal fut a site, az
+  admin-felület automatikusan angolul jelenik meg, semmilyen beállítás nélkül.
+- **README kiegészítve** a `DISABLE_WP_CRON` + rendszer-cron ajánlással
+  (CLAUDE.md §6 eddig hiányzó előírása).
+- **Role→capability admin UI** ("Jogosultságok" almenü) — MINDEN létező
+  WP-szerepkörre beállítható, melyik kapja meg a `mtmt_moderate`/`mtmt_classify`
+  kapabilitást, mentéskor azonnal érvénybe lép. A megrendelő kérése:
+  "role capability mindenképp kell".
+- **Egyéb azonosítós SVG-ikonok** — a kód kész az inline-olásukra
+  (`assets/img/icons/{slug}.svg`), a megrendelő maga szerzi be a fájlokat
+  egyszínű SVG-ként, lásd `docs/external-id-icons.md` a pontos listáért/
+  fájlnév-konvencióért. Fájlok hiányában szépen visszaesik a meglévő
+  feliratos pill-badge-re.
+- ~~BibTeX lenyíló~~ — elvetve (lásd Fázis 7 szakasz).
+- **Dimensions idézettség-badge** — a megrendelő megkérdezte, mit csinálna,
+  válasz: docs/decisions.md #79. Döntés még nem született.
+
+**Éles ellenőrzéshez** (Local site, wp-admin):
+1. Állítsd a WordPress nyelvét angolra (Beállítások → Általános → Site
+   Language, vagy telepítéskor) — az "MTMT" admin-menü és minden almenü
+   admin-felülete angolul jelenjen meg.
+2. MTMT → Jogosultságok — pipálj be egy másik szerepkört (pl. "Szerkesztő"
+   helyett/mellett egy egyedi szerepkört, ha van) a Moderálás/Besorolás
+   oszlopokban, mentsd — az adott szerepkörű felhasználó azonnal lássa a
+   megfelelő menüt/mezőket, újra-aktiválás nélkül.
+3. Ha van egyéb azonosítós SVG-fájlod, tedd be `assets/img/icons/wos.svg`
+   (vagy `scopus.svg`/`sztaki.svg`/`pubmed.svg`) néven — a widget-kártyán
+   az adott forráshoz mostantól az ikon jelenjen meg pill-badge helyett.
+
 ## Backlog — még nincs fázishoz kötve
 
-Jelenleg üres — a korábbi egyetlen tétel (profil-előnézet) aktiválva és
-megépítve, lásd fent.
+Jelenleg üres.
