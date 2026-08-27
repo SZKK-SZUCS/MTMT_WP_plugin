@@ -4,7 +4,7 @@ Tags: mtmt, publications, elementor, publikaciok, tudomanyos
 Requires at least: 6.4
 Tested up to: 6.7
 Requires PHP: 8.1
-Stable tag: 0.11.0
+Stable tag: 0.12.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -103,6 +103,14 @@ egyikkel sem, csak a látogató-vezérelt alapbeállítással) működik, tiszt�
 üzemeltetési döntés, telepítésenként eltérhet.
 
 == Changelog ==
+
+= 0.12.0 =
+* Admin-felület minden szövege átírva egyszerűbb, köznyelvi
+  megfogalmazásra (Beállítások, Profilok, Jogosultságok, Területek,
+  moderációs lista, Elementor widget-beállítások) — a belső fejlesztési
+  zsargon és dokumentum-hivatkozások eltávolítva.
+* Javítva: az email-értesítő "Jóváhagyás megnyitása" gombja a Profilok
+  oldalra mutatott, nem a moderációs listára.
 
 = 0.11.0 =
 * Új: a heti automatikus szinkron ideje (nap + óra) mostantól
@@ -259,6 +267,12 @@ egyikkel sem, csak a látogató-vezérelt alapbeállítással) működik, tiszt�
 * Kezdeti bootstrap: plugin-header, aktivátor (tábla-migráció dbDelta-val).
 
 == Upgrade Notice ==
+
+= 0.12.0 =
+Admin-felület szövegei egyszerűsítve, egy hibás email-link javítva. A
+plugin továbbra is 0.x verziószámon fejlődik — 1.0.0-t csak akkor kap, ha
+a megrendelő explicit jóváhagyja, hogy a rendszer kész (lásd CLAUDE.md
+§10.2).
 
 = 0.11.0 =
 Új: a heti automatikus szinkron ideje (nap + óra) mostantól konfigurálható
