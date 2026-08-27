@@ -3,7 +3,7 @@
  * Plugin Name: MTMT Sync
  * Contributor: Szurofka Márton, MFÜI
  * Description: MTMT-alapú publikációs lista jóváhagyással és Elementor megjelenítéssel.
- * Version: 0.6.0
+ * Version: 0.7.0
  * Requires at least: 6.4
  * Requires PHP: 8.1
  * Text Domain: mtmt-sync
@@ -13,7 +13,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'MTMT_VERSION', '0.6.0' );
+define( 'MTMT_VERSION', '0.7.0' );
 define( 'MTMT_DB_VERSION', '3' );
 define( 'MTMT_CAPS_VERSION', '1' );
 define( 'MTMT_PLUGIN_FILE', __FILE__ );

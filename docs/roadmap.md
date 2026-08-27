@@ -306,7 +306,7 @@ Fázis 2-es sima szöveges email javítására: HTML-email, logóval. A logó a
 PLUGINBA becsomagolt statikus fájl (`assets/img/mfui-logo.png`, `.jpg` vagy
 `.jpeg`), NEM site-onkénti admin-beállítás — a megrendelő megerősítette:
 "ez rendszer email, én égetem be központilag a pluginba mint kiadó"
-(docs/decisions.md #66-69 az "Email-értesítő újratervezése" szakaszban).
+(docs/decisions.md #74-78 az "Email-értesítő újratervezése" szakaszban).
 A profil `#ID` helyett a profil neve jelenik meg a törzsben.
 
 **A logó-fájl elhelyezése (kiadói feladat, nem admin-feladat):** tedd a képet
@@ -333,31 +333,55 @@ a Profilok oldalra visz.
 
 ## Fázis 7 (opcionális) — nice-to-have-ek
 
-Változatlan (§9.2), csak külön jóváhagyással: Dimensions idézettség-badge,
-BibTeX lenyíló, haladó frontend-szűrők (szerző/típus/folyóirat/SJR/Norvég-szint),
-Norvég-szint API-útjának lezárása (ha idáig még nem történt meg).
+Megrendelői döntés (2026-08):
+
+- **Haladó frontend-szűrők: ELVETVE.** A jelenlegi keresés + év-fül + terület-szűrő
+  elég, nincs igény szerző/típus/folyóirat/SJR szerinti külön szűrőkre.
+- **Norvég-szint: elhalasztva, nem kell az 1.0-hoz.** Az API-út felderítése
+  (hol/hogyan érhető el, ha egyáltalán publikusan elérhető) nincs lezárva —
+  a `norway_level` mező marad `NULL`, amíg ezt nem vesszük elő újra.
+- **Dimensions idézettség-badge**: változatlanul nyitott, ha valaha kell.
+- **BibTeX lenyíló**: a döntés függőben, a megrendelő megkérdezte, mi ez —
+  lásd a válasz a docs/decisions.md-ben (#66). Ha kell, az MTMT API maga is
+  tud BibTeX-et exportálni közvetlenül (`export=1&exportFormat=BIBTEX`,
+  CLAUDE.md §5.3) — nem feltétlenül kell nekünk generálni.
+
+## ✅ Profil-előnézet ("Preview")
+
+**KÉSZ, mergelve (PR #6), élesben validálva ("a preview fasza"). 0.7.0-ban kiadva.** A "Profilok" oldal "Új profil" űrlapja kapott egy "Előnézet"
+gombot ("Profil létrehozása" mellett, attól függetlenül) — a beírt scope-ból
+(intézmény/szerző/haladó + DOI-only) összeépített `cond_json`-nal kimegy az
+MTMT API-hoz `size=5`, `depth=1` paraméterrel (NEM menti el a profilt, NEM
+indít syncet — csak olvas), és megmutatja:
+- `paging.totalElements` / `totalEstimatedElements` — ha ez gyanúsan nagy
+  (küszöb: 2000, heurisztika, docs/decisions.md #71), figyelmeztet, hogy a
+  cond valószínűleg nem érvényesült.
+- 5 minta-cím + szerzők (`Mtmt_Mapper::map_publication()`-nel leképezve,
+  ugyanazzal a kóddal, mint a valódi sync).
+- A form-mezők (név, scope-típus, érték, DOI-only) megőrződnek előnézet
+  UTÁN is, nem kell újra begépelni — hiba esetén (érvénytelen MTID, rossz
+  JSON) is.
+
+17 unit-teszt-assertion (a `render()` valós HTML-kimenetét vizsgálva,
+stub `wp_remote_get()`-tel) — összesen 123/123 zöld a teljes suite-ban.
+
+*Kész, ha:* az Előnézet gomb nem menti el a profilt, mutatja a találatszámot
++ mintacímeket, figyelmeztet gyanúsan nagy találatszámnál, és a "Profil
+létrehozása" gomb ezután is működik ugyanazokkal a mezőértékekkel.
+
+**Éles ellenőrzéshez** (Local site, wp-admin → Profilok):
+1. Tölts ki egy intézmény-MTID-et (pl. a JKK 19662-t), nyomj "Előnézet"-et —
+   jelenjen meg a találatszám (kb. 767 körül) + 5 minta-cím/szerző, a profil
+   NE kerüljön be a felső listába.
+2. Írj be egy szándékosan rossz/túl tág cond-ot (pl. egy nem létező vagy
+   rosszul megadott MTID-et) — jelenjen meg a "gyanúsan nagy találatszám"
+   figyelmeztetés.
+3. Adj meg egy érvénytelen értéket (pl. betűket az intézmény-MTID mezőbe) —
+   hiba-üzenet jelenjen meg, NE menjen ki API-hívás.
+4. Előnézet után nyomj "Profil létrehozása"-t (a mezők már ki vannak töltve)
+   — jöjjön létre a profil a beírt értékekkel, ugyanúgy mint eddig.
 
 ## Backlog — még nincs fázishoz kötve
 
-- **Profil-előnézet ("Preview") létrehozás előtt** (megrendelői kérés, 2026-08) —
-  az admin "Új profil" űrlapon (Profilok oldal) legyen egy "Előnézet" gomb,
-  ami a beírt scope-ból (intézmény/szerző/haladó + DOI-only) összeépített
-  `cond_json`-nal kimegy az MTMT API-hoz `size=5`-tel (NEM menti el a profilt,
-  NEM indít syncet — csak olvas), és megmutatja:
-  - `paging.totalElements` / `totalEstimatedElements` — ha ez gyanúsan nagy
-    (a docs/field-map.md-ben már dokumentált minta: ~5000/több millió =
-    valószínűleg NEM szűrt, az MTMT csendben ignorálta az ismeretlen cond-ot),
-    erre kifejezetten figyelmeztessen.
-  - Pár minta-cím/szerző a találatokból, hogy vizuálisan is ellenőrizhető
-    legyen, hogy tényleg a várt publikációk jönnek-e.
-  - Cél: ne lehessen véletlenül elgépelt intézmény-mtiddel vagy rosszul szűrő
-    cond-dal létrehozni egy profilt, ami aztán szinkronnál felesleges/rossz
-    tömeget importál be.
-  - Implementáció-vázlat: a `build_conditions()` logika (már megvan
-    `Mtmt_Profiles_Page`-ben) újrahasználható; egy új `mtmt_action=preview`
-    a meglévő (nem-AJAX, sima form-POST) mintát követve — ugyanaz az oldal
-    jelenítse meg az előnézetet a form fölött, a beírt mezőket megőrizve.
-    Nem kell hozzá új tábla vagy repository-módszer, csak az `Mtmt_Api_Client`
-    egyetlen `get_page()` hívása.
-  - Nincs konkrét fázishoz kötve — a Profilok oldalt (Fázis 1) bővítené,
-    bármikor felvehető, amikor ráérünk.
+Jelenleg üres — a korábbi egyetlen tétel (profil-előnézet) aktiválva és
+megépítve, lásd fent.

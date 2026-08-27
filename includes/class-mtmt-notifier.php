@@ -13,7 +13,7 @@ defined( 'ABSPATH' ) || exit;
  * frissített (beleértve a pending-be visszaesetteket is) tétel valamelyik
  * profil eredményében.
  *
- * FRISSÍTVE (megrendelői kérés, 2026-08, docs/decisions.md #66-70): HTML-email,
+ * FRISSÍTVE (megrendelői kérés, 2026-08, docs/decisions.md #74-78): HTML-email,
  * világos, designolt háttérrel + a becsomagolt kiadói logóval (jelenleg
  * `assets/img/mfui-logo.png`, lásd LOGO_CANDIDATES). A logó a PLUGINBA van
  * becsomagolva, NEM site-onként, admin médiatárból választható — ez
@@ -107,7 +107,7 @@ final class Mtmt_Notifier {
 	/**
 	 * Teljes, minimális HTML-dokumentum (nem csak egy `<div>`-fragment) —
 	 * explicit, VILÁGOS `<body>`-háttér kell, mert a becsomagolt logó sötét
-	 * (navy) feliratú, átlátszó/fehér alapra tervezve (docs/decisions.md #70) —
+	 * (navy) feliratú, átlátszó/fehér alapra tervezve (docs/decisions.md #78) —
 	 * egy esetleges sötét emailkliens-háttéren (pl. dark mode) a felirat
 	 * olvashatatlanná válna, ha nem adunk neki saját, világos "kártyát".
 	 * Csak inline stílusok (a legtöbb emailkliens nem futtat `<style>`

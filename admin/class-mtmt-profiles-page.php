@@ -21,15 +21,53 @@ final class Mtmt_Profiles_Page {
 	private const PAGE_SLUG    = 'mtmt-profiles';
 
 	/**
+	 * Hány mintarekordot kérünk le előnézetnél (nem mentünk, nem indítunk syncet).
+	 */
+	private const PREVIEW_SAMPLE_SIZE = 5;
+
+	/**
+	 * Ha a találatszám ennél nagyobb, figyelmeztetünk, hogy valószínűleg NEM
+	 * érvényesült a szűrés (az MTMT csendben ignorálja az ismeretlen cond-ot —
+	 * docs/field-map.md dokumentált mintája: ~5000/becsült 11M = a teljes
+	 * adatbázis). Ez csak egy heurisztikus jelzés, NEM biztos jel — a
+	 * mintarekordok vizuális átnézése a fő ellenőrzési eszköz.
+	 */
+	private const PREVIEW_WARNING_THRESHOLD = 2000;
+
+	/**
 	 * @var Mtmt_Query_Profile_Repository
 	 */
 	private $profiles;
 
 	/**
-	 * @param Mtmt_Query_Profile_Repository $profiles
+	 * @var Mtmt_Api_Client
 	 */
-	public function __construct( Mtmt_Query_Profile_Repository $profiles ) {
-		$this->profiles = $profiles;
+	private $api_client;
+
+	/**
+	 * Előnézet-eredmény a legutóbbi POST-ból (csak akkor van értéke, ha az
+	 * `mtmt_action=preview` sikeresen lefutott ebben a kérésben).
+	 *
+	 * @var array{total:?int,estimated:?int,looks_wide:bool,items:array[]}|null
+	 */
+	private $preview_result = null;
+
+	/**
+	 * A legutóbb beküldött "Új profil" mezőértékek — előnézet (vagy sikertelen
+	 * létrehozás) után ezekkel töltjük vissza az űrlapot, hogy ne kelljen
+	 * újra begépelni.
+	 *
+	 * @var array{label:string,scope_type:string,scope_value:string,doi_only:bool}|null
+	 */
+	private $repopulate = null;
+
+	/**
+	 * @param Mtmt_Query_Profile_Repository $profiles
+	 * @param Mtmt_Api_Client                $api_client Csak az előnézethez kell.
+	 */
+	public function __construct( Mtmt_Query_Profile_Repository $profiles, Mtmt_Api_Client $api_client = new Mtmt_Api_Client() ) {
+		$this->profiles   = $profiles;
+		$this->api_client = $api_client;
 	}
 
 	/**
@@ -138,30 +176,82 @@ final class Mtmt_Profiles_Page {
 
 			<h2><?php esc_html_e( 'Új profil', 'mtmt-sync' ); ?></h2>
 			<p class="description"><?php esc_html_e( 'Egy profil határozza meg, mely MTMT-publikációkat kérdezze le a rendszer szinkronizáláskor. Egy site-on több profil is lehet (pl. kutatócsoportonként); a behúzott publikációk mindig "függőben" státusszal kerülnek be, jóváhagyás előtt nem jelennek meg nyilvánosan.', 'mtmt-sync' ); ?></p>
+
+			<?php if ( $this->preview_result ) : $pv = $this->preview_result; ?>
+				<div class="notice notice-info">
+					<h3><?php esc_html_e( 'Előnézet eredménye', 'mtmt-sync' ); ?></h3>
+					<p>
+						<?php
+						if ( null !== $pv['total'] ) {
+							printf(
+								/* translators: %d: találatok száma */
+								esc_html__( 'Összesen %d találat felelne meg ennek a szűrésnek (a profil még NINCS elmentve, semmi sem került be a szinkronba).', 'mtmt-sync' ),
+								$pv['total']
+							);
+						} elseif ( null !== $pv['estimated'] ) {
+							printf(
+								/* translators: %d: becsult talalatszam */
+								esc_html__( 'Becsült találatszám: kb. %d (az MTMT csak becslést adott vissza; a profil még NINCS elmentve).', 'mtmt-sync' ),
+								$pv['estimated']
+							);
+						} else {
+							esc_html_e( 'A találatszám nem állapítható meg a válaszból (a profil még NINCS elmentve).', 'mtmt-sync' );
+						}
+						?>
+					</p>
+					<?php if ( $pv['looks_wide'] ) : ?>
+						<p style="color:#b32d2e;font-weight:600;">
+							<?php esc_html_e( '⚠ Ez gyanúsan nagy szám — valószínűleg NEM érvényesült a szűrésed (az MTMT csendben figyelmen kívül hagyja az ismeretlen/rosszul megadott feltételt, és gyakorlatilag a teljes MTMT-adatbázist adná vissza). Ellenőrizd az MTID-et/feltételt a mentés előtt.', 'mtmt-sync' ); ?>
+						</p>
+					<?php endif; ?>
+					<?php if ( ! empty( $pv['items'] ) ) : ?>
+						<p><?php esc_html_e( 'Minta a találatokból:', 'mtmt-sync' ); ?></p>
+						<ul style="list-style:disc;padding-left:1.5em;">
+							<?php foreach ( $pv['items'] as $item ) : ?>
+								<li>
+									<strong><?php echo esc_html( $item['title'] ?: __( '(cím nélkül)', 'mtmt-sync' ) ); ?></strong>
+									<?php if ( $item['authors'] ) : ?> — <?php echo esc_html( $item['authors'] ); ?><?php endif; ?>
+									<?php if ( $item['year'] ) : ?> (<?php echo esc_html( (string) $item['year'] ); ?>)<?php endif; ?>
+								</li>
+							<?php endforeach; ?>
+						</ul>
+					<?php else : ?>
+						<p><?php esc_html_e( 'Nincs találat ezzel a szűréssel.', 'mtmt-sync' ); ?></p>
+					<?php endif; ?>
+				</div>
+			<?php endif; ?>
+
+			<?php
+			$rp = $this->repopulate ?? array(
+				'label'       => '',
+				'scope_type'  => 'institute',
+				'value'       => '',
+				'doi_only'    => false,
+			);
+			?>
 			<form method="post">
 				<?php wp_nonce_field( $nonce_action ); ?>
-				<input type="hidden" name="mtmt_action" value="create">
 				<table class="form-table">
 					<tr>
 						<th><label for="mtmt-label"><?php esc_html_e( 'Profil neve', 'mtmt-sync' ); ?></label></th>
 						<td>
-							<input type="text" id="mtmt-label" name="label" class="regular-text" required>
+							<input type="text" id="mtmt-label" name="label" class="regular-text" value="<?php echo esc_attr( $rp['label'] ); ?>" required>
 							<p class="description"><?php esc_html_e( 'Csak belső azonosításra szolgál (pl. melyik kutatócsoport/intézmény profilja) — a nyilvános oldalon sehol nem jelenik meg.', 'mtmt-sync' ); ?></p>
 						</td>
 					</tr>
 					<tr>
 						<th><?php esc_html_e( 'Scope típusa', 'mtmt-sync' ); ?></th>
 						<td>
-							<label><input type="radio" name="scope_type" value="institute" checked> <?php esc_html_e( 'Intézmény MTID', 'mtmt-sync' ); ?></label><br>
-							<label><input type="radio" name="scope_type" value="authors"> <?php esc_html_e( 'Szerző MTID-lista (vesszővel elválasztva)', 'mtmt-sync' ); ?></label><br>
-							<label><input type="radio" name="scope_type" value="advanced"> <?php esc_html_e( 'Haladó — nyers cond JSON', 'mtmt-sync' ); ?></label>
+							<label><input type="radio" name="scope_type" value="institute" <?php checked( $rp['scope_type'], 'institute' ); ?>> <?php esc_html_e( 'Intézmény MTID', 'mtmt-sync' ); ?></label><br>
+							<label><input type="radio" name="scope_type" value="authors" <?php checked( $rp['scope_type'], 'authors' ); ?>> <?php esc_html_e( 'Szerző MTID-lista (vesszővel elválasztva)', 'mtmt-sync' ); ?></label><br>
+							<label><input type="radio" name="scope_type" value="advanced" <?php checked( $rp['scope_type'], 'advanced' ); ?>> <?php esc_html_e( 'Haladó — nyers cond JSON', 'mtmt-sync' ); ?></label>
 							<p class="description"><?php esc_html_e( 'Melyik MTMT-mező alapján szűrjön: egy adott intézmény összes publikációja, egy konkrét szerző-lista publikációi, vagy (haladó felhasználóknak) egy tetszőleges, kézzel megadott feltétel-lista.', 'mtmt-sync' ); ?></p>
 						</td>
 					</tr>
 					<tr>
 						<th><label for="mtmt-value"><?php esc_html_e( 'Érték', 'mtmt-sync' ); ?></label></th>
 						<td>
-							<input type="text" id="mtmt-value" name="scope_value" class="regular-text" placeholder="pl. 19662">
+							<input type="text" id="mtmt-value" name="scope_value" class="regular-text" placeholder="pl. 19662" value="<?php echo esc_attr( $rp['value'] ); ?>">
 							<p class="description">
 								<?php esc_html_e( 'Intézmény esetén az MTMT intézmény-MTID (pl. https://m2.mtmt.hu/api/institute/19662 -> 19662). Szerzőknél MTID-lista vesszővel. Haladónál: [{"field":"...","op":"...","value":"..."}]', 'mtmt-sync' ); ?>
 							</p>
@@ -170,14 +260,22 @@ final class Mtmt_Profiles_Page {
 					<tr>
 						<th><?php esc_html_e( 'Szűrés', 'mtmt-sync' ); ?></th>
 						<td>
-							<label><input type="checkbox" name="doi_only" value="1"> <?php esc_html_e( 'Csak DOI azonosítóval rendelkező rekordok', 'mtmt-sync' ); ?></label>
+							<label><input type="checkbox" name="doi_only" value="1" <?php checked( $rp['doi_only'] ); ?>> <?php esc_html_e( 'Csak DOI azonosítóval rendelkező rekordok', 'mtmt-sync' ); ?></label>
 							<p class="description">
 								<?php esc_html_e( 'Tapasztalati érték: egy tesztintézményen a rekordok kb. felének volt DOI-ja — ez kb. felére csökkentheti a behúzott tételszámot.', 'mtmt-sync' ); ?>
 							</p>
 						</td>
 					</tr>
 				</table>
-				<?php submit_button( __( 'Profil létrehozása', 'mtmt-sync' ) ); ?>
+				<p class="submit">
+					<button type="submit" name="mtmt_action" value="preview" class="button">
+						<?php esc_html_e( 'Előnézet (nem menti el)', 'mtmt-sync' ); ?>
+					</button>
+					<button type="submit" name="mtmt_action" value="create" class="button button-primary">
+						<?php esc_html_e( 'Profil létrehozása', 'mtmt-sync' ); ?>
+					</button>
+				</p>
+				<p class="description"><?php esc_html_e( 'Az "Előnézet" a beírt szűrésből lekér 5 mintarekordot az MTMT-től (mentés és szinkron-indítás nélkül) — így ellenőrizhető, hogy tényleg a várt publikációk jönnének-e, mielőtt elmented a profilt.', 'mtmt-sync' ); ?></p>
 			</form>
 		</div>
 		<?php
@@ -202,6 +300,8 @@ final class Mtmt_Profiles_Page {
 		switch ( $action ) {
 			case 'create':
 				return $this->handle_create();
+			case 'preview':
+				return $this->handle_preview();
 			case 'toggle':
 				return $this->handle_toggle();
 			case 'delete':
@@ -223,6 +323,7 @@ final class Mtmt_Profiles_Page {
 		$doi_only   = ! empty( $_POST['doi_only'] );
 
 		if ( '' === $label ) {
+			$this->repopulate = compact( 'label', 'scope_type', 'value', 'doi_only' );
 			return array(
 				'type'    => 'error',
 				'message' => __( 'A profil neve kötelező.', 'mtmt-sync' ),
@@ -231,6 +332,7 @@ final class Mtmt_Profiles_Page {
 
 		$conditions = $this->build_conditions( $scope_type, $value );
 		if ( is_wp_error( $conditions ) ) {
+			$this->repopulate = compact( 'label', 'scope_type', 'value', 'doi_only' );
 			return array(
 				'type'    => 'error',
 				'message' => $conditions->get_error_message(),
@@ -247,6 +349,84 @@ final class Mtmt_Profiles_Page {
 			'type'    => 'success',
 			'message' => __( 'Profil létrehozva.', 'mtmt-sync' ),
 		);
+	}
+
+	/**
+	 * Előnézet: NEM ment semmit, NEM indít syncet — csak egy `size=5` mintát
+	 * kér le a beírt scope-ból, hogy elgépelt MTID/rosszul szűrő cond ne
+	 * derüljön csak az ELSŐ teljes szinkronnál ki (megrendelői kérés,
+	 * docs/roadmap.md "Profil-előnézet").
+	 *
+	 * @return array{type:string,message:string}|null NULL sikeres előnézetnél —
+	 *         ilyenkor a `$this->preview_result` panel kommunikál, nincs
+	 *         szükség külön "Mentve"-szerű banner-re.
+	 */
+	private function handle_preview(): ?array {
+		$label      = isset( $_POST['label'] ) ? sanitize_text_field( wp_unslash( $_POST['label'] ) ) : '';
+		$scope_type = isset( $_POST['scope_type'] ) ? sanitize_key( wp_unslash( $_POST['scope_type'] ) ) : '';
+		$value      = isset( $_POST['scope_value'] ) ? sanitize_text_field( wp_unslash( $_POST['scope_value'] ) ) : '';
+		$doi_only   = ! empty( $_POST['doi_only'] );
+
+		// A form-mezők mindenképp visszatöltődnek, hiba esetén is — ne kelljen újra begépelni.
+		$this->repopulate = compact( 'label', 'scope_type', 'value', 'doi_only' );
+
+		$conditions = $this->build_conditions( $scope_type, $value );
+		if ( is_wp_error( $conditions ) ) {
+			return array(
+				'type'    => 'error',
+				'message' => $conditions->get_error_message(),
+			);
+		}
+
+		if ( $doi_only ) {
+			$conditions[] = Mtmt_Query_Profile_Repository::doi_only_condition();
+		}
+
+		// depth=1 kritikus (docs/field-map.md) -> e nélkül a mapper nem tudna
+		// szerzőneveket adni a mintasorokhoz (authorships[] csak depth=1-től jön).
+		$result = $this->api_client->get_page(
+			'publication',
+			$conditions,
+			array(
+				'size'  => self::PREVIEW_SAMPLE_SIZE,
+				'depth' => 1,
+			)
+		);
+
+		if ( is_wp_error( $result ) ) {
+			return array(
+				'type'    => 'error',
+				'message' => sprintf(
+					/* translators: %s: hibaüzenet */
+					__( 'Hiba az előnézet lekérésekor: %s', 'mtmt-sync' ),
+					$result->get_error_message()
+				),
+			);
+		}
+
+		$paging    = $result['paging'];
+		$total     = isset( $paging['totalElements'] ) ? (int) $paging['totalElements'] : null;
+		$estimated = isset( $paging['totalEstimatedElements'] ) ? (int) $paging['totalEstimatedElements'] : null;
+		$for_check = $total ?? $estimated ?? 0;
+
+		$items = array();
+		foreach ( array_slice( $result['content'], 0, self::PREVIEW_SAMPLE_SIZE ) as $raw ) {
+			$mapped  = Mtmt_Mapper::map_publication( $raw );
+			$items[] = array(
+				'title'   => (string) ( $mapped['title'] ?? '' ),
+				'authors' => (string) ( $mapped['authors_text'] ?? '' ),
+				'year'    => $mapped['published_year'] ?? null,
+			);
+		}
+
+		$this->preview_result = array(
+			'total'      => $total,
+			'estimated'  => $estimated,
+			'looks_wide' => $for_check >= self::PREVIEW_WARNING_THRESHOLD,
+			'items'      => $items,
+		);
+
+		return null;
 	}
 
 	/**
