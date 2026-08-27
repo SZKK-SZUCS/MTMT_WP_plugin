@@ -111,14 +111,21 @@ final class Mtmt_Widget_Ajax {
 	}
 
 	/**
-	 * Számozott lapozó (nem "load more"/infinite scroll, docs/widget-design.md).
+	 * Számozott lapozó, ellipszissel nagy oldalszámnál (nem "load more"/infinite
+	 * scroll, docs/widget-design.md; a számozott forma a referencia-dizájn
+	 * alapján, docs/decisions.md #95 — korábban csak Előző/Következő volt).
 	 * Public: az Elementor-widgetek is ezt hívják a kezdeti (nem-AJAX) szerver-oldali
 	 * render()-nél, hogy ne legyen két hely, ahol a lapozó-HTML épül.
 	 *
+	 * A `data-page` attribútum minden gombon jelen van (a jelenlegi oldalé
+	 * kivételével, ami `<span>`, nem gomb) — az `assets/js/widget-frontend.js`
+	 * meglévő, delegált `.mtmt-page-btn` kattintás-kezelője változtatás nélkül
+	 * működik minden oldalszám-gombbal, nem csak Előző/Következővel.
+	 *
 	 * @param int    $current
 	 * @param int    $total_pages
-	 * @param string $prev_label Widget-szinten szerkeszthető felirat (Mtmt_Widget_Common_Controls).
-	 * @param string $next_label Widget-szinten szerkeszthető felirat (Mtmt_Widget_Common_Controls).
+	 * @param string $prev_label Widget-szinten szerkeszthető felirat (Mtmt_Widget_Common_Controls) — mostantól aria-label, a gomb maga ikon.
+	 * @param string $next_label Widget-szinten szerkeszthető felirat (Mtmt_Widget_Common_Controls) — mostantól aria-label, a gomb maga ikon.
 	 * @return string
 	 */
 	public static function render_pagination( int $current, int $total_pages, string $prev_label = '', string $next_label = '' ): string {
@@ -133,21 +140,62 @@ final class Mtmt_Widget_Ajax {
 			$next_label = __( 'Következő', 'mtmt-sync' );
 		}
 
-		$out = '<nav class="mtmt-pagination">';
-		if ( $current > 1 ) {
-			$out .= '<button type="button" class="mtmt-page-btn" data-page="' . esc_attr( (string) ( $current - 1 ) ) . '">&larr; ' . esc_html( $prev_label ) . '</button>';
+		$prev_target = max( 1, $current - 1 );
+		$next_target = min( $total_pages, $current + 1 );
+
+		$out  = '<nav class="mtmt-pagination" aria-label="' . esc_attr__( 'Lapozó', 'mtmt-sync' ) . '">';
+		$out .= '<button type="button" class="mtmt-page-btn mtmt-page-btn-nav" data-page="' . esc_attr( (string) $prev_target ) . '" aria-label="' . esc_attr( $prev_label ) . '"' . ( 1 === $current ? ' disabled' : '' ) . '>&larr;</button>';
+
+		foreach ( self::pagination_page_numbers( $current, $total_pages ) as $item ) {
+			if ( null === $item ) {
+				$out .= '<span class="mtmt-page-ellipsis">&hellip;</span>';
+				continue;
+			}
+			if ( $item === $current ) {
+				$out .= '<span class="mtmt-page-btn mtmt-page-btn-number is-current" aria-current="page">' . esc_html( (string) $item ) . '</span>';
+			} else {
+				$out .= '<button type="button" class="mtmt-page-btn mtmt-page-btn-number" data-page="' . esc_attr( (string) $item ) . '">' . esc_html( (string) $item ) . '</button>';
+			}
 		}
-		$out .= '<span class="mtmt-pagination-status">' . sprintf(
-			/* translators: 1: jelenlegi oldal, 2: összes oldal */
-			esc_html__( '%1$d. / %2$d oldal', 'mtmt-sync' ),
-			$current,
-			$total_pages
-		) . '</span>';
-		if ( $current < $total_pages ) {
-			$out .= '<button type="button" class="mtmt-page-btn" data-page="' . esc_attr( (string) ( $current + 1 ) ) . '">' . esc_html( $next_label ) . ' &rarr;</button>';
-		}
+
+		$out .= '<button type="button" class="mtmt-page-btn mtmt-page-btn-nav" data-page="' . esc_attr( (string) $next_target ) . '" aria-label="' . esc_attr( $next_label ) . '"' . ( $current === $total_pages ? ' disabled' : '' ) . '>&rarr;</button>';
 		$out .= '</nav>';
 
 		return $out;
+	}
+
+	/**
+	 * Mely oldalszámok jelenjenek meg a lapozóban: mindig az első és az utolsó,
+	 * plusz a jelenlegi ±1 szomszédja; a köztük lévő kihagyást `null` (ellipszis)
+	 * jelöli. Kis oldalszámnál (a "lyuk" sosem nagyobb 1-nél) gyakorlatilag
+	 * minden oldal megjelenik, nagy oldalszámnál összecsukódik — ugyanaz a minta,
+	 * mint a referencia-képen ("1 2 3 … 8").
+	 *
+	 * @param int $current
+	 * @param int $total
+	 * @return array<int,int|null>
+	 */
+	private static function pagination_page_numbers( int $current, int $total ): array {
+		// window=2 -> a referencia-képen látott "1 2 3 … 8" mintát adja (nem
+		// csak "1 2 … 8"-at) az 1. oldalon állva, szimmetrikusan az utolsó
+		// oldalnál is.
+		$window = 2;
+		$pages  = array();
+		for ( $i = 1; $i <= $total; $i++ ) {
+			if ( 1 === $i || $total === $i || ( $i >= $current - $window && $i <= $current + $window ) ) {
+				$pages[] = $i;
+			}
+		}
+
+		$result = array();
+		$prev   = null;
+		foreach ( $pages as $page ) {
+			if ( null !== $prev && $page - $prev > 1 ) {
+				$result[] = null;
+			}
+			$result[] = $page;
+			$prev     = $page;
+		}
+		return $result;
 	}
 }

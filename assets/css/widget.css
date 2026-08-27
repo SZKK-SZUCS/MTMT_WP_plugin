@@ -1,10 +1,18 @@
 /*
  * MTMT Sync — widget frontend stílusok (Fázis 5).
  * Vanilla CSS, nincs build lépés (CLAUDE.md §2).
+ *
+ * Vizuális alap-referencia (docs/decisions.md #95, megrendelői screenshot):
+ * alulvonalas év-fülek, egysoros "lista" kártyák (nem dobozolt/árnyékos
+ * kártya-rács), forrás+év kiemelő-színű sor, jobb szélen típus-badge +
+ * körvonalas nyíl-CTA, számozott lapozó. A PDF/Kód/Videó gombsor a
+ * referencia-képen SZÁNDÉKOSAN nincs átvéve — azt korábban a megrendelő
+ * kifejezetten kivette a tervből (CLAUDE.md §14/3).
  */
 
 .mtmt-widget {
-	--mtmt-accent: #2e5f8a;
+	--mtmt-accent: #16aebd;
+	--mtmt-heading: #16233f;
 	--mtmt-border: #dfe4ea;
 	--mtmt-muted: #667085;
 	--mtmt-bg-soft: #f6f8fa;
@@ -17,11 +25,11 @@
 }
 
 .mtmt-widget-header {
-	margin-bottom: 1.6em;
+	margin-bottom: 1.75em;
 }
 
 .mtmt-eyebrow {
-	margin: 0 0 0.25em;
+	margin: 0 0 0.4em;
 	font-size: 0.8em;
 	font-weight: 700;
 	letter-spacing: 0.08em;
@@ -30,7 +38,19 @@
 }
 
 .mtmt-widget-title {
+	margin: 0 0 0.4em;
+	font-size: 2rem;
+	line-height: 1.2;
+	font-weight: 800;
+	color: var(--mtmt-heading);
+}
+
+.mtmt-widget-subtitle {
 	margin: 0;
+	max-width: 62ch;
+	color: var(--mtmt-muted);
+	font-size: 1em;
+	line-height: 1.55;
 }
 
 .mtmt-widget-controls {
@@ -58,41 +78,47 @@
 	box-shadow: 0 0 0 3px color-mix(in srgb, var(--mtmt-accent) 18%, transparent);
 }
 
+/* Év-fülek: alulvonalas ("underline tab") stílus, nem kitöltött pill —
+   a referencia-dizájn szerint. A közös alsó szegélyt a konténer adja, az
+   aktív fül saját, kiemelő-színű alsó szegélye pedig ARRA a szegélyre
+   "ül rá" (negatív margó), így pontosan egy vonalban van vele. */
 .mtmt-year-tabs {
 	display: flex;
 	flex-wrap: wrap;
-	gap: 0.4em;
-	margin-bottom: 1.25em;
+	gap: 1.5em;
+	margin-bottom: 1.75em;
 	border-bottom: 1px solid var(--mtmt-border);
-	padding-bottom: 0.6em;
 }
 
 .mtmt-year-tab {
 	background: transparent;
-	border: 1px solid transparent;
-	border-radius: 999px;
-	padding: 0.4em 1em;
+	border: none;
+	border-bottom: 2px solid transparent;
+	border-radius: 0;
+	margin-bottom: -1px;
+	padding: 0.15em 0.1em 0.6em;
 	font-size: 0.95em;
+	font-weight: 600;
 	cursor: pointer;
 	color: var(--mtmt-muted);
-	transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+	transition: color 0.15s ease, border-color 0.15s ease;
 }
 
 .mtmt-year-tab:hover {
-	background: var(--mtmt-bg-soft);
+	color: var(--mtmt-heading);
 }
 
 .mtmt-year-tab.is-active {
-	background: var(--mtmt-accent);
-	border-color: var(--mtmt-accent);
-	color: #fff;
-	font-weight: 600;
+	color: var(--mtmt-heading);
+	border-bottom-color: var(--mtmt-accent);
 }
 
+/* Lista: vékony elválasztó vonalak a sorok között, nem dobozolt/árnyékos
+   kártya-rács — a sorok maguk adják a függőleges térközt a saját
+   paddingjükkel, ezért itt nincs külön gap. */
 .mtmt-widget-list {
 	display: flex;
 	flex-direction: column;
-	gap: 1.5em;
 	transition: opacity 0.2s ease;
 }
 
@@ -104,14 +130,21 @@
 
 .mtmt-pub-card {
 	display: flex;
-	gap: 1.5em;
-	padding: 1.25em;
-	border: 1px solid var(--mtmt-border);
-	border-radius: 12px;
+	align-items: flex-start;
+	gap: 1.25em;
+	margin: 0 -1em;
+	padding: 1.25em 3.4em 1.25em 1em;
+	border: none;
+	border-bottom: 1px solid var(--mtmt-border);
+	border-radius: 10px;
 	position: relative;
-	background: #fff;
-	transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+	background: transparent;
+	transition: background-color 0.2s ease;
 	animation: mtmt-card-in 0.4s ease both;
+}
+
+.mtmt-widget-list .mtmt-pub-card:last-child {
+	border-bottom: none;
 }
 
 .mtmt-pub-card[data-href] {
@@ -120,15 +153,13 @@
 
 .mtmt-pub-card[data-href]:hover,
 .mtmt-pub-card[data-href]:focus-within {
-	transform: translateY(-3px);
-	box-shadow: 0 10px 24px rgba(20, 30, 45, 0.1);
-	border-color: var(--mtmt-accent);
+	background-color: var(--mtmt-bg-soft);
 }
 
-/* Visszafogott belépő-stagger az elsö nehány kártyára — a lista minden
+/* Visszafogott belépő-stagger az elsö nehány sorra — a lista minden
    AJAX-fragment-cserénél újra lejátszódik (a böngésző új DOM-elemekként
-   kezeli a becserélt kártyákat), ami finom visszajelzés arra, hogy a
-   lista frissült. Csak az elsö 8 kártyára, hogy nagy listáknál se váljon
+   kezeli a becserélt sorokat), ami finom visszajelzés arra, hogy a lista
+   frissült. Csak az elsö 8 sorra, hogy nagy listáknál se váljon
    lassúvá/zajossá. */
 .mtmt-widget-list .mtmt-pub-card:nth-child(1) { animation-delay: 0.02s; }
 .mtmt-widget-list .mtmt-pub-card:nth-child(2) { animation-delay: 0.05s; }
@@ -152,9 +183,9 @@
 
 .mtmt-pub-card-media {
 	position: relative;
-	flex: 0 0 180px;
-	width: 180px;
-	height: 110px;
+	flex: 0 0 112px;
+	width: 112px;
+	height: 78px;
 	border-radius: 8px;
 	overflow: hidden;
 	background: var(--mtmt-bg-soft);
@@ -188,20 +219,46 @@
 .mtmt-pub-card-css-placeholder span {
 	display: block;
 	width: 100%;
-	padding: 0.5em 0.6em;
+	padding: 0.4em 0.5em;
 	background: linear-gradient(to top, rgba(15, 23, 32, 0.82), rgba(15, 23, 32, 0));
 	color: #fff;
-	font-size: 0.8em;
+	font-size: 0.72em;
 	font-weight: 600;
-	line-height: 1.3;
+	line-height: 1.25;
 	max-height: 4.6em;
 	overflow: hidden;
 }
 
+/* A típus-badge és a nyíl-CTA a SOR (nem a kép) jobb szélén ülnek,
+   egymástól függetlenül pozicionálva — a sor jobb oldali paddingje
+   (lásd .mtmt-pub-card) tartja fenn nekik a helyet. */
 .mtmt-pub-card-type-badge {
 	position: absolute;
-	top: 0.5em;
-	right: 0.5em;
+	top: 1.25em;
+	right: 1em;
+}
+
+.mtmt-pub-card-arrow {
+	position: absolute;
+	top: 50%;
+	right: 1em;
+	transform: translateY(-50%);
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 2.2em;
+	height: 2.2em;
+	border-radius: 50%;
+	border: 1px solid var(--mtmt-border);
+	color: var(--mtmt-accent);
+	transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.mtmt-pub-card[data-href]:hover .mtmt-pub-card-arrow {
+	background-color: var(--mtmt-accent);
+	border-color: var(--mtmt-accent);
+	color: #fff;
+	transform: translateY(-50%) translateX(3px);
 }
 
 .mtmt-pub-card-body {
@@ -210,9 +267,11 @@
 }
 
 .mtmt-pub-card-title {
-	margin: 0 0 0.45em;
+	margin: 0 0 0.3em;
 	font-size: 1.05em;
+	font-weight: 700;
 	line-height: 1.35;
+	color: var(--mtmt-heading);
 }
 
 .mtmt-pub-card-title a {
@@ -227,37 +286,40 @@
 }
 
 .mtmt-pub-card-authors {
-	margin: 0 0 0.55em;
+	margin: 0 0 0.3em;
 	color: var(--mtmt-muted);
 	font-size: 0.92em;
-	line-height: 1.5;
+	line-height: 1.4;
 }
 
 .mtmt-pub-card-topic-areas {
-	margin: 0 0 0.55em;
+	margin: 0 0 0.3em;
 	line-height: 2;
 }
 
-.mtmt-pub-card-meta {
-	margin: 0 0 0.55em;
-	font-size: 0.9em;
-	line-height: 2;
-	color: var(--mtmt-muted);
-}
-
-.mtmt-pub-card-source {
-	color: inherit;
+/* Forrás (folyóirat/kötet) + év — kiemelő-színű sor, a referencia-dizájn
+   idézi vele a "ez egy hivatkozás" jelleget, DE ez NEM tényleges link
+   (nincs saját folyóirat-URL-mezőnk) — csak vizuális kiemelés. */
+.mtmt-pub-card-source-line {
+	margin: 0 0 0.3em;
+	font-size: 0.92em;
+	color: var(--mtmt-accent);
+	font-weight: 600;
 }
 
 .mtmt-pub-card-year {
 	font-weight: 600;
 }
 
+.mtmt-pub-card-meta {
+	margin: 0;
+	font-size: 0.85em;
+	line-height: 1.6;
+	color: var(--mtmt-muted);
+}
+
 .mtmt-pub-card-doi {
 	display: inline-block;
-	margin-left: 0.4em;
-	font-size: 0.85em;
-	color: var(--mtmt-muted);
 }
 
 .mtmt-badge {
@@ -274,9 +336,9 @@
 
 /* A badge-ek inline-block elemként alapból baseline-hoz igazodnának, ami a
    körülöttük futó normál szöveghez képest "csúszottnak" tűnik — middle
-   igazítás oldja meg. */
+   igazítás oldja meg (lásd fent, .mtmt-badge). */
 .mtmt-pub-card-meta .mtmt-badge {
-	margin-left: 0.4em;
+	margin-left: 0.5em;
 }
 
 .mtmt-badge-topic-area {
@@ -302,7 +364,7 @@
 	flex-wrap: wrap;
 	align-items: center;
 	gap: 0.5em;
-	margin-top: 0.7em;
+	margin-top: 0.6em;
 }
 
 .mtmt-ext-id-badge {
@@ -364,28 +426,75 @@
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	gap: 1em;
-	margin-top: 1.5em;
+	flex-wrap: wrap;
+	gap: 0.4em;
+	margin-top: 2em;
 }
 
 .mtmt-page-btn {
-	background: var(--mtmt-bg-soft);
-	border: 1px solid var(--mtmt-border);
-	border-radius: 6px;
-	padding: 0.5em 1em;
+	background: transparent;
+	border: 1px solid transparent;
+	border-radius: 8px;
+	color: var(--mtmt-muted);
+	padding: 0.45em 0.4em;
+	min-width: 2.2em;
+	text-align: center;
 	cursor: pointer;
 	font-size: 0.9em;
+	font-weight: 600;
 	transition: border-color 0.15s ease, color 0.15s ease, background-color 0.15s ease;
 }
 
 .mtmt-page-btn:hover {
-	border-color: var(--mtmt-accent);
-	color: var(--mtmt-accent);
+	background-color: var(--mtmt-bg-soft);
+	color: var(--mtmt-heading);
 }
 
-.mtmt-pagination-status {
-	font-size: 0.9em;
+/* Oldalszám-gombok: kerek/négyzetes "pill"-jelleg, az aktuális oldal
+   kitöltött, kiemelő-színű — a referencia-lapozó szerint. */
+.mtmt-page-btn-number {
+	border-radius: 8px;
+}
+
+.mtmt-page-btn-number.is-current {
+	background-color: var(--mtmt-accent);
+	color: #fff;
+	cursor: default;
+}
+
+.mtmt-page-btn-number.is-current:hover {
+	background-color: var(--mtmt-accent);
+	color: #fff;
+}
+
+/* Előző/Következő: körvonalas kör, csak ikon (a felirat aria-label-ként
+   marad meg akadálymentességi célra). */
+.mtmt-page-btn-nav {
+	border-radius: 50%;
+	border-color: var(--mtmt-border);
+	width: 2.2em;
+	height: 2.2em;
+	min-width: 2.2em;
+	padding: 0;
+}
+
+.mtmt-page-btn-nav:hover {
+	border-color: var(--mtmt-accent);
+	color: var(--mtmt-accent);
+	background-color: transparent;
+}
+
+.mtmt-page-btn-nav:disabled {
+	opacity: 0.35;
+	cursor: default;
+	pointer-events: none;
+}
+
+.mtmt-page-ellipsis {
 	color: var(--mtmt-muted);
+	padding: 0 0.2em;
+	min-width: 1.5em;
+	text-align: center;
 }
 
 .mtmt-widget.is-loading .mtmt-widget-list {
@@ -396,11 +505,20 @@
 @media (max-width: 600px) {
 	.mtmt-pub-card {
 		flex-direction: column;
+		padding-right: 1em;
 	}
 	.mtmt-pub-card-media {
 		width: 100%;
 		flex-basis: auto;
 		height: 150px;
+	}
+	.mtmt-pub-card-type-badge {
+		position: static;
+		display: inline-block;
+		margin-bottom: 0.5em;
+	}
+	.mtmt-pub-card-arrow {
+		display: none;
 	}
 }
 
@@ -412,6 +530,7 @@
 	.mtmt-pub-card-img,
 	.mtmt-pub-card-css-placeholder,
 	.mtmt-pub-card-title a,
+	.mtmt-pub-card-arrow,
 	.mtmt-year-tab,
 	.mtmt-ext-id-badge,
 	.mtmt-page-btn,
@@ -421,12 +540,11 @@
 		transition: none !important;
 		animation: none !important;
 	}
-	.mtmt-pub-card[data-href]:hover,
-	.mtmt-pub-card[data-href]:focus-within {
-		transform: none;
-	}
 	.mtmt-pub-card[data-href]:hover .mtmt-pub-card-img,
 	.mtmt-pub-card[data-href]:hover .mtmt-pub-card-css-placeholder {
 		transform: none;
+	}
+	.mtmt-pub-card[data-href]:hover .mtmt-pub-card-arrow {
+		transform: translateY(-50%);
 	}
 }

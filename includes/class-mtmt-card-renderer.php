@@ -18,6 +18,14 @@ defined( 'ABSPATH' ) || exit;
 final class Mtmt_Card_Renderer {
 
 	/**
+	 * Egyszerű, egyszínű "nyíl jobbra" ikon a sor végén lévő dekoratív CTA-körhöz
+	 * (docs/decisions.md #95 — vizuális referencia-igazítás). `aria-hidden`, mert
+	 * pusztán a sor egészének (`data-href`) kattinthatóságát jelzi vizuálisan,
+	 * nincs saját cél-URL-je.
+	 */
+	private const ARROW_SVG = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>';
+
+	/**
 	 * @param array $publication      Publikáció-sor (repository `get_list()` eleme),
 	 *                                opcionálisan kiegészítve `topic_area_labels` (string[]) kulccsal.
 	 * @param array $display_options  {
@@ -49,7 +57,7 @@ final class Mtmt_Card_Renderer {
 		$full  = 'full' === $display_options['citation_style'];
 
 		$out  = '<div class="mtmt-pub-card"' . ( $link ? ' data-href="' . esc_url( $link ) . '" tabindex="0" role="link"' : '' ) . '>';
-		$out .= '<div class="mtmt-pub-card-media">' . self::render_media( $publication ) . self::render_type_badge( $publication ) . '</div>';
+		$out .= '<div class="mtmt-pub-card-media">' . self::render_media( $publication ) . '</div>';
 		$out .= '<div class="mtmt-pub-card-body">';
 		// Új fülön nyílik (a whole-card JS-kattintás is így viselkedik, hogy a
 		// két navigációs útvonal konzisztens legyen, és a látogató ne veszítse
@@ -69,20 +77,34 @@ final class Mtmt_Card_Renderer {
 			$out .= '</p>';
 		}
 
-		$out .= '<p class="mtmt-pub-card-meta">';
-		if ( $full && ! empty( $publication['source_title'] ) ) {
-			$out .= '<em class="mtmt-pub-card-source">' . esc_html( $publication['source_title'] ) . '</em> &middot; ';
+		// Forrás + év — vizuálisan kiemelt (kiemelő-színű) sor, a referencia-dizájn
+		// szerint (docs/decisions.md #95), NEM tényleges link (nincs saját
+		// folyóirat-URL-mezőnk, csak a stílusa idézi a hivatkozás-jelleget).
+		$has_year = ! empty( $publication['published_year'] );
+		if ( ( $full && ! empty( $publication['source_title'] ) ) || $has_year ) {
+			$out .= '<p class="mtmt-pub-card-source-line">';
+			if ( $full && ! empty( $publication['source_title'] ) ) {
+				$out .= '<span class="mtmt-pub-card-source">' . esc_html( $publication['source_title'] ) . '</span>';
+				if ( $has_year ) {
+					$out .= ', ';
+				}
+			}
+			if ( $has_year ) {
+				$out .= '<span class="mtmt-pub-card-year">' . esc_html( (string) $publication['published_year'] ) . '</span>';
+			}
+			$out .= '</p>';
 		}
-		if ( ! empty( $publication['published_year'] ) ) {
-			$out .= '<span class="mtmt-pub-card-year">' . esc_html( (string) $publication['published_year'] ) . '</span>';
+
+		$meta_parts = array();
+		if ( $display_options['show_doi_link'] && ! empty( $publication['doi'] ) ) {
+			$meta_parts[] = '<span class="mtmt-pub-card-doi">DOI: ' . esc_html( (string) $publication['doi'] ) . '</span>';
 		}
 		if ( $display_options['show_sjr_badge'] && ! empty( $publication['sjr_quartile'] ) ) {
-			$out .= ' <span class="mtmt-badge mtmt-badge-sjr ' . esc_attr( self::sjr_badge_class( (string) $publication['sjr_quartile'] ) ) . '">' . esc_html( (string) $publication['sjr_quartile'] ) . '</span>';
+			$meta_parts[] = '<span class="mtmt-badge mtmt-badge-sjr ' . esc_attr( self::sjr_badge_class( (string) $publication['sjr_quartile'] ) ) . '">' . esc_html( (string) $publication['sjr_quartile'] ) . '</span>';
 		}
-		if ( $display_options['show_doi_link'] && ! empty( $publication['doi'] ) ) {
-			$out .= ' <span class="mtmt-pub-card-doi">DOI: ' . esc_html( (string) $publication['doi'] ) . '</span>';
+		if ( ! empty( $meta_parts ) ) {
+			$out .= '<p class="mtmt-pub-card-meta">' . implode( ' ', $meta_parts ) . '</p>';
 		}
-		$out .= '</p>';
 
 		if ( $full ) {
 			$ext_ids_html = Mtmt_External_Id_Icons::render_buttons( $publication['external_ids'] ?? null, (string) $display_options['ext_id_badge_mode'] );
@@ -91,7 +113,12 @@ final class Mtmt_Card_Renderer {
 			}
 		}
 
-		$out .= '</div></div>';
+		$out .= '</div>'; // .mtmt-pub-card-body vége
+
+		$out .= self::render_type_badge( $publication );
+		$out .= self::render_arrow_cta( $link );
+
+		$out .= '</div>'; // .mtmt-pub-card vége
 
 		return $out;
 	}
@@ -156,6 +183,22 @@ final class Mtmt_Card_Renderer {
 			return '';
 		}
 		return '<span class="mtmt-badge mtmt-pub-card-type-badge ' . esc_attr( self::type_badge_class( $type ) ) . '">' . esc_html( $type ) . '</span>';
+	}
+
+	/**
+	 * Dekoratív "nyíl jobbra" CTA-kör a sor végén — a referencia-dizájn szerint
+	 * (docs/decisions.md #95). Csak akkor jelenik meg, ha a sor egésze tényleg
+	 * kattintható (`$link` nem üres) — különben félrevezető lenne egy "menj oda"
+	 * jelzés egy nem-kattintható sornál.
+	 *
+	 * @param string $link
+	 * @return string
+	 */
+	private static function render_arrow_cta( string $link ): string {
+		if ( '' === $link ) {
+			return '';
+		}
+		return '<span class="mtmt-pub-card-arrow" aria-hidden="true">' . self::ARROW_SVG . '</span>';
 	}
 
 	/**

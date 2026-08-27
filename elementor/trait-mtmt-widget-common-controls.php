@@ -53,6 +53,19 @@ trait Mtmt_Widget_Common_Controls {
 			'no_scope_message'      => __( 'Üzenet, ha nincs kiválasztva terület/profil (csak szerkesztőknek látszik)', 'mtmt-sync' ),
 		);
 
+		if ( array_key_exists( 'header_subtitle', $defaults ) ) {
+			$this->add_control(
+				'header_subtitle',
+				array(
+					'label'       => __( 'Widget alcíme (leíró mondat a cím alatt)', 'mtmt-sync' ),
+					'type'        => \Elementor\Controls_Manager::TEXTAREA,
+					'default'     => $defaults['header_subtitle'],
+					'label_block' => true,
+					'description' => __( 'Üresen hagyva nem jelenik meg alcím-sor.', 'mtmt-sync' ),
+				)
+			);
+		}
+
 		foreach ( $fields as $key => $label ) {
 			if ( ! array_key_exists( $key, $defaults ) ) {
 				continue;

@@ -941,3 +941,68 @@ set_areas_for_publication()`/`delete()`, és EGYSZER egy teljes
     Nincs hozzá unit-teszt (tisztán CSS-változás, PHP-oldali logika nem
     érintett) — a teljes PHP teszt-szuit (194 assertion) és a repo-szintű
     `php -l` lint ettől függetlenül ellenőrizve, változatlanul zöld.
+95. **Widget vizuális referencia-igazítás egy élő screenshot alapján**
+    (megrendelői kérés: "a dizájn hasonlítson jobban erre" + egy BME/TUM-stílusú
+    publikációs lista screenshotja). **FONTOS**: a screenshoton szerepelt egy
+    PDF/Kód/Videó gombsor is — ezt a megrendelő korábban EXPLICITEN kivette a
+    tervből (CLAUDE.md §14/3), és megkérdezve megerősítette, hogy ez most sem
+    kell, csak a vizuális stílus. Kiderült, hogy a `docs/widget-design.md`
+    eredeti (2026-08-as) terve MÁR leírta ezt a stílust (soronkénti lista,
+    alulvonalas év-fülek, kék forrás-sor, számozott lapozás, körkörös
+    nyíl-CTA) — a Fázis 5 0.5.0-ás implementációja ettől eltért (dobozolt
+    kártya-rács, kitöltött pill év-fülek, csak Előző/Következő lapozás); ez a
+    javítás visszaigazítja a kódot a már meglévő tervhez.
+    - **Márka-színek**: `--mtmt-accent` a korábbi kék (`#2e5f8a`) helyett a
+      pluginban már máshol (email-fejléc, `Mtmt_Notifier`) használt MFÜI-teál
+      (`#16aebd`) lett; új `--mtmt-heading` (`#16233f`, navy) a
+      cím/kártya-cím/aktív-fül szövegszínhez — mindkettő a már bevezetett
+      márka-paletta újrahasznosítása, nem új, kitalált szín.
+    - **Fejléc**: opcionális, üresen alapértelmezett "Alcím" mező (widget
+      Tartalom fül, TEXTAREA control, `header_subtitle`) — csak akkor jelenik
+      meg egy `<p class="mtmt-widget-subtitle">` sor, ha a szerkesztő ír bele
+      valamit. Csak az "A" (összesítő) widgeten van értelme, a "B" widgetnek
+      eleve nincs saját fejléce (a befogadó oldal ad neki kontextust).
+    - **Év-fülek**: kitöltött pill helyett alulvonalas ("underline tab")
+      stílus — a közös alsó szegélyre "ül rá" (negatív margóval) az aktív fül
+      saját, kiemelő-színű alsó szegélye.
+    - **Lista-elrendezés**: a korábbi dobozolt/árnyékos kártya-rács helyett
+      soronkénti lista, vékony elválasztó vonalakkal a sorok között (nem
+      kártyánkénti border+shadow). Hover: finom háttérszín-tónus (nem
+      emelkedés/árnyék, az a "dobozolt kártya" mentális modellhez illett,
+      most már nem az). Kép-zoom hoveren megmaradt.
+    - **Kártya-tartalom átrendezés** (`Mtmt_Card_Renderer::render()`):
+      - Forrás (`source_title`) + év most egy közös, kiemelő-színű
+        `.mtmt-pub-card-source-line` sorban van (`"Forrás, Év"` formátum,
+        vesszővel), NEM tényleges link (nincs saját folyóirat-URL-mezőnk,
+        csak a stílusa idézi a hivatkozás-jelleget) — ha nincs `source_title`
+        (vagy `compact` stílusnál), a sor csak az évet mutatja, ha van; ha se
+        forrás, se év, a sor teljesen elmarad.
+      - DOI + SJR-badge egy közös `.mtmt-pub-card-meta` sorba került (a
+        korábbi, forrás+évvel közös sor helyett) — ha mindkettő hiányzik, a
+        `<p>` teljesen elmarad (nincs üres, felesleges sor).
+      - **Típus-badge átkerült** a `.mtmt-pub-card-media` dobozból (a
+        kép sarkából) a `.mtmt-pub-card` sor jobb szélére (abszolút
+        pozicionálva, a sor saját `padding-right`-ja tartja fenn neki a
+        helyet) — a referencia-kép szerint a badge a SORON van, nem a képen.
+      - **Új dekoratív "nyíl jobbra" CTA-kör** (`.mtmt-pub-card-arrow`,
+        inline SVG, `aria-hidden`) a sor jobb szélén, függőlegesen középen —
+        CSAK akkor jelenik meg, ha a sor ténylegesen kattintható (van
+        `$link`), különben félrevezető lenne. Nincs saját cél-URL-je, a sor
+        egészének kattinthatóságát vizualizálja; hoveren kitöltődik a
+        kiemelő-színnel.
+    - **Számozott lapozás** (`Mtmt_Widget_Ajax::render_pagination()`, korábban
+      csak Előző/Következő + "X. / Y oldal" szöveg): mostantól tényleges
+      oldalszám-gombok, ellipszissel nagy oldalszámnál (mindig 1. és utolsó
+      oldal + az aktuális ±2 szomszédja — ez adja a referencia-képen látott
+      "1 2 3 … 8" mintát). Az aktuális oldal `<span aria-current="page">`,
+      NEM gomb (nincs értelme rákattintani ugyanarra az oldalra). Az
+      Előző/Következő gomb ikon-only lett (a felirat `aria-label`-ként
+      maradt meg, akadálymentességi célra, NEM látható szövegként) — a
+      meglévő `assets/js/widget-frontend.js` `.mtmt-page-btn` delegált
+      kattintás-kezelője változtatás NÉLKÜL működik minden új gombbal is,
+      mert az mindig a `data-page` attribútumot olvassa (a `disabled`
+      attribútum natívan megakadályozza a kattintást a szélső oldalakon).
+    Regresszió: `test-fase5-widgets.php` 35 -> 46 assertion (Card_Renderer
+    új markup-szerkezete, számozott lapozó ellipszis-logikája, aria-label-es
+    Előző/Következő). Teljes suite (205 assertion) zöld, repo-szintű
+    `php -l` lint tiszta, i18n újraépítve (256 string, mind lefordítva).

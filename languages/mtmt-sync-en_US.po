@@ -7,7 +7,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"PO-Revision-Date: 2026-08-27T18:23:57+00:00\n"
+"PO-Revision-Date: 2026-08-27T20:41:16+00:00\n"
 "Language: en_US\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: bin/i18n/build.php\n"
@@ -19,10 +19,6 @@ msgstr "%1$d record(s) failed to save (database error). Sample: %2$s"
 #: includes/class-mtmt-notifier.php:170
 msgid "%1$d új · %2$d frissítve (ebből %3$d visszaesett pending-be) · %4$d hiányzóként jelölve"
 msgstr "%1$d new · %2$d updated (of which %3$d reverted to pending) · %4$d marked missing"
-
-#: includes/class-mtmt-widget-ajax.php:142
-msgid "%1$d. / %2$d oldal"
-msgstr "Page %1$d of %2$d"
 
 #: admin/class-mtmt-settings-page.php:342
 msgid "%1$s: %2$d új, %3$d frissítve (%4$d visszaesett pending-be), %5$d hiányzó"
@@ -184,7 +180,7 @@ msgstr "Show DOI"
 msgid "Egy profil határozza meg, mely MTMT-publikációkat kérdezze le a rendszer szinkronizáláskor. Egy site-on több profil is lehet (pl. kutatócsoportonként); a behúzott publikációk mindig \"függőben\" státusszal kerülnek be, jóváhagyás előtt nem jelennek meg nyilvánosan."
 msgstr "A profile determines which MTMT publications the system fetches when syncing. A site can have several profiles (e.g. one per research group); publications that come in always start out \"pending\" — they don't appear publicly before being approved."
 
-#: elementor/trait-mtmt-widget-common-controls.php:200
+#: elementor/trait-mtmt-widget-common-controls.php:213
 msgid "Egyéb azonosítók (WoS/Scopus/…)"
 msgstr "Other identifiers (WoS/Scopus/…)"
 
@@ -220,7 +216,7 @@ msgstr "Preview (doesn't save)"
 msgid "Előnézet eredménye"
 msgstr "Preview result"
 
-#: elementor/class-mtmt-widget-all-publications.php:163 elementor/class-mtmt-widget-topic-publications.php:189 includes/class-mtmt-widget-ajax.php:82 includes/class-mtmt-widget-ajax.php:130
+#: elementor/class-mtmt-widget-all-publications.php:164 elementor/class-mtmt-widget-topic-publications.php:189 includes/class-mtmt-widget-ajax.php:82 includes/class-mtmt-widget-ajax.php:137
 msgid "Előző"
 msgstr "Previous"
 
@@ -296,7 +292,7 @@ msgstr "If left empty, no email is sent. Notifications are only sent for the wee
 msgid "Haladó — nyers cond JSON"
 msgstr "Advanced — raw cond JSON"
 
-#: elementor/trait-mtmt-widget-common-controls.php:116
+#: elementor/trait-mtmt-widget-common-controls.php:129
 msgid "Halvány háttérszín"
 msgstr "Soft background color"
 
@@ -332,11 +328,11 @@ msgstr "ID"
 msgid "Időpont"
 msgstr "Time"
 
-#: elementor/trait-mtmt-widget-common-controls.php:208
+#: elementor/trait-mtmt-widget-common-controls.php:221
 msgid "Ikon méret"
 msgstr "Icon size"
 
-#: elementor/trait-mtmt-widget-common-controls.php:232
+#: elementor/trait-mtmt-widget-common-controls.php:245
 msgid "Ikon szín"
 msgstr "Icon color"
 
@@ -396,7 +392,7 @@ msgstr "Approve"
 msgid "Jóváhagyás megnyitása"
 msgstr "Open for approval"
 
-#: elementor/class-mtmt-widget-all-publications.php:159 elementor/class-mtmt-widget-topic-publications.php:186
+#: elementor/class-mtmt-widget-all-publications.php:160 elementor/class-mtmt-widget-topic-publications.php:186
 msgid "Keresés cím, szerző vagy forrás szerint…"
 msgstr "Search by title, author, or source…"
 
@@ -424,7 +420,7 @@ msgstr "Feature"
 msgid "Kiemelés visszavonása"
 msgstr "Unfeature"
 
-#: elementor/trait-mtmt-widget-common-controls.php:92
+#: elementor/trait-mtmt-widget-common-controls.php:105
 msgid "Kiemelő szín"
 msgstr "Accent color"
 
@@ -432,23 +428,23 @@ msgstr "Accent color"
 msgid "Kompakt"
 msgstr "Compact"
 
-#: elementor/trait-mtmt-widget-common-controls.php:162
+#: elementor/trait-mtmt-widget-common-controls.php:175
 msgid "Kártya"
 msgstr "Card"
 
-#: elementor/trait-mtmt-widget-common-controls.php:188
+#: elementor/trait-mtmt-widget-common-controls.php:201
 msgid "Kártya belső margó"
 msgstr "Card padding"
 
-#: elementor/trait-mtmt-widget-common-controls.php:170
+#: elementor/trait-mtmt-widget-common-controls.php:183
 msgid "Kártya háttérszíne"
 msgstr "Card background color"
 
-#: elementor/trait-mtmt-widget-common-controls.php:178
+#: elementor/trait-mtmt-widget-common-controls.php:191
 msgid "Kártya lekerekítés"
 msgstr "Card corner radius"
 
-#: elementor/trait-mtmt-widget-common-controls.php:144
+#: elementor/trait-mtmt-widget-common-controls.php:157
 msgid "Kártya-cím"
 msgstr "Card title"
 
@@ -456,9 +452,13 @@ msgstr "Card title"
 msgid "Kép kiválasztása"
 msgstr "Select image"
 
-#: elementor/class-mtmt-widget-all-publications.php:164 elementor/class-mtmt-widget-topic-publications.php:190 includes/class-mtmt-widget-ajax.php:85 includes/class-mtmt-widget-ajax.php:133
+#: elementor/class-mtmt-widget-all-publications.php:165 elementor/class-mtmt-widget-topic-publications.php:190 includes/class-mtmt-widget-ajax.php:85 includes/class-mtmt-widget-ajax.php:140
 msgid "Következő"
 msgstr "Next"
+
+#: includes/class-mtmt-widget-ajax.php:146
+msgid "Lapozó"
+msgstr "Pagination"
 
 #: elementor/trait-mtmt-widget-common-controls.php:51
 msgid "Lapozó \"előző\" felirata"
@@ -588,7 +588,7 @@ msgstr "All profiles"
 msgid "Minden státusz"
 msgstr "All statuses"
 
-#: admin/class-mtmt-list-table.php:352 elementor/class-mtmt-widget-all-publications.php:160
+#: admin/class-mtmt-list-table.php:352 elementor/class-mtmt-widget-all-publications.php:161
 msgid "Minden szakmai terület"
 msgstr "All topic areas"
 
@@ -604,7 +604,7 @@ msgstr "Sample results:"
 msgid "Moderálás"
 msgstr "Moderation"
 
-#: elementor/trait-mtmt-widget-common-controls.php:108
+#: elementor/trait-mtmt-widget-common-controls.php:121
 msgid "Másodlagos szöveg szín"
 msgstr "Secondary text color"
 
@@ -628,7 +628,7 @@ msgstr "There are no topic areas yet."
 msgid "Művelet"
 msgstr "Action"
 
-#: elementor/class-mtmt-widget-all-publications.php:162 includes/class-mtmt-widget-ajax.php:79
+#: elementor/class-mtmt-widget-all-publications.php:163 includes/class-mtmt-widget-ajax.php:79
 msgid "Nincs a szűrésnek megfelelő publikáció."
 msgstr "No publication matches this filter."
 
@@ -672,15 +672,15 @@ msgstr "OK"
 msgid "PUBLIKÁCIÓK"
 msgstr "PUBLICATIONS"
 
-#: elementor/trait-mtmt-widget-common-controls.php:248
+#: elementor/trait-mtmt-widget-common-controls.php:261
 msgid "Pill háttérszín"
 msgstr "Pill background color"
 
-#: elementor/trait-mtmt-widget-common-controls.php:264
+#: elementor/trait-mtmt-widget-common-controls.php:277
 msgid "Pill lekerekítés"
 msgstr "Pill corner radius"
 
-#: elementor/trait-mtmt-widget-common-controls.php:256
+#: elementor/trait-mtmt-widget-common-controls.php:269
 msgid "Pill szegély szín"
 msgstr "Pill border color"
 
@@ -764,7 +764,7 @@ msgstr "Assigning a topic area to a publication, and the project identifier's \"
 msgid "Szakmai terület szűrő megjelenítése"
 msgstr "Show topic area filter"
 
-#: elementor/trait-mtmt-widget-common-controls.php:100
+#: elementor/trait-mtmt-widget-common-controls.php:113
 msgid "Szegély szín"
 msgstr "Border color"
 
@@ -788,11 +788,11 @@ msgstr "Sync completed: %1$d new, %2$d updated (of which %3$d reverted to pendin
 msgid "Szinkron most"
 msgstr "Sync now"
 
-#: elementor/trait-mtmt-widget-common-controls.php:84
+#: elementor/trait-mtmt-widget-common-controls.php:97
 msgid "Színek"
 msgstr "Colors"
 
-#: elementor/trait-mtmt-widget-common-controls.php:240
+#: elementor/trait-mtmt-widget-common-controls.php:253
 msgid "Szöveg szín"
 msgstr "Text color"
 
@@ -864,7 +864,7 @@ msgstr "Topic Areas"
 msgid "Területek kezelése"
 msgstr "Manage topic areas"
 
-#: elementor/trait-mtmt-widget-common-controls.php:127
+#: elementor/trait-mtmt-widget-common-controls.php:140
 msgid "Tipográfia"
 msgstr "Typography"
 
@@ -888,7 +888,7 @@ msgstr "Bulk action performed."
 msgid "Törlés"
 msgstr "Delete"
 
-#: elementor/trait-mtmt-widget-common-controls.php:152
+#: elementor/trait-mtmt-widget-common-controls.php:165
 msgid "Törzsszöveg (szerzők, meta)"
 msgstr "Body text (authors, meta)"
 
@@ -920,7 +920,11 @@ msgstr "Choose a topic area or a query profile in the widget settings."
 msgid "Váratlan MTMT API válasz (hiányzó content mező)."
 msgstr "Unexpected MTMT API response (missing content field)."
 
-#: elementor/trait-mtmt-widget-common-controls.php:136
+#: elementor/trait-mtmt-widget-common-controls.php:60
+msgid "Widget alcíme (leíró mondat a cím alatt)"
+msgstr "Widget subtitle (a descriptive sentence under the title)"
+
+#: elementor/trait-mtmt-widget-common-controls.php:149
 msgid "Widget cím"
 msgstr "Widget title"
 
@@ -982,7 +986,7 @@ msgstr "Year"
 msgid "Év-fül \"összes év\" felirata"
 msgstr "Year tab's \"all years\" label"
 
-#: elementor/class-mtmt-widget-all-publications.php:161 elementor/class-mtmt-widget-topic-publications.php:187
+#: elementor/class-mtmt-widget-all-publications.php:162 elementor/class-mtmt-widget-topic-publications.php:187
 msgid "Összes"
 msgstr "All"
 
@@ -1005,6 +1009,10 @@ msgstr "New profile"
 #: admin/class-mtmt-topic-areas-page.php:113
 msgid "Új terület"
 msgstr "New topic area"
+
+#: elementor/trait-mtmt-widget-common-controls.php:64
+msgid "Üresen hagyva nem jelenik meg alcím-sor."
+msgstr "Leave empty to show no subtitle line."
 
 #: elementor/trait-mtmt-widget-common-controls.php:53
 msgid "Üzenet, ha nincs kiválasztva terület/profil (csak szerkesztőknek látszik)"

@@ -156,6 +156,7 @@ final class Mtmt_Widget_All_Publications extends \Elementor\Widget_Base {
 			array(
 				'header_eyebrow'        => __( 'PUBLIKÁCIÓK', 'mtmt-sync' ),
 				'header_title'          => __( 'Lektorált publikációk', 'mtmt-sync' ),
+				'header_subtitle'       => '',
 				'search_placeholder'    => __( 'Keresés cím, szerző vagy forrás szerint…', 'mtmt-sync' ),
 				'area_filter_all_label' => __( 'Minden szakmai terület', 'mtmt-sync' ),
 				'year_tab_all_label'    => __( 'Összes', 'mtmt-sync' ),
@@ -198,6 +199,7 @@ final class Mtmt_Widget_All_Publications extends \Elementor\Widget_Base {
 		// a "Szövegek" szekcióban szerkeszthetők (docs/decisions.md #60).
 		$header_eyebrow        = (string) $settings['header_eyebrow'];
 		$header_title          = (string) $settings['header_title'];
+		$header_subtitle       = (string) ( $settings['header_subtitle'] ?? '' );
 		$search_placeholder    = (string) $settings['search_placeholder'];
 		$area_filter_all_label = (string) $settings['area_filter_all_label'];
 		$year_tab_all_label    = (string) $settings['year_tab_all_label'];
@@ -244,6 +246,9 @@ final class Mtmt_Widget_All_Publications extends \Elementor\Widget_Base {
 			<div class="mtmt-widget-header">
 				<p class="mtmt-eyebrow"><?php echo esc_html( $header_eyebrow ); ?></p>
 				<h2 class="mtmt-widget-title"><?php echo esc_html( $header_title ); ?></h2>
+				<?php if ( '' !== $header_subtitle ) : ?>
+					<p class="mtmt-widget-subtitle"><?php echo esc_html( $header_subtitle ); ?></p>
+				<?php endif; ?>
 			</div>
 
 			<?php if ( $show_search || ( $show_topic_filter && ! empty( $areas ) ) ) : ?>

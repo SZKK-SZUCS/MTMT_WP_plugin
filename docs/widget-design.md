@@ -1,5 +1,17 @@
 # Widget design-referencia (Fázis 5-höz)
 
+> **Utólagos megjegyzés (2026-08, docs/decisions.md #95):** a Fázis 5 eredeti
+> (0.5.0-ás) implementációja néhány ponton eltért az itt lent leírt tervtől
+> (dobozolt/árnyékos kártya-rács a soronkénti lista helyett, kitöltött pill
+> év-fülek a mostani terv szerinti alulvonalas fülek helyett, csak Előző/
+> Következő a lent kért számozott lapozás helyett). A megrendelő egy élő
+> referencia-screenshottal jelezte, hogy ez ne térjen el — egy külön javító
+> kör ezt visszaigazította a lent leírt tervhez (lásd #95): soronkénti lista,
+> alulvonalas év-fülek, kék/kiemelő-színű forrás-sor, számozott lapozó,
+> körkörös nyíl-CTA. A lenti szöveg (mezőkészlet, linkviselkedés) változatlanul
+> érvényes volt már 0.5.0 óta is — csak a vizuális réteg (CSS + a pár
+> markup-részlet, ami a badge/nyíl pozícióját érintette) igazodott most hozzá.
+
 Képes referencia a megrendelőtől (2026-08), TUM-stílusú kutatócsoport-publikációs
 oldal mintájára, + egy megbeszélés (2026-08, lásd CLAUDE.md §14 és docs/decisions.md
 #16-21) ami pontosította. **NEM implementálandó Fázis 1/2/3/4-ben** — ez a Fázis 5

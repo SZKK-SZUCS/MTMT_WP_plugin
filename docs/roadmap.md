@@ -523,11 +523,54 @@ assertion) zöld, lint tiszta.
 5. Nézd meg egy kártyalistát — a szerzők/meta-sor/badge-ek között legyen
    érdemi levegő, a SJR-/egyéb-azonosító-badge-ek ne tűnjenek "csúszottnak"
    a szöveghez képest.
-6. Vidd az egeret egy kártyára — finoman emelkedjen (árnyék nő), az
+6. Vidd az egeret egy sorra — finom háttérszín-tónus jelenjen meg, az
    indexkép enyhén nagyítson; kattints egy év-fülre/keress rá valamire —
-   az újonnan betöltött kártyák finoman "beússzanak" (fade-in). Rendszer
+   az újonnan betöltött sorok finoman "beússzanak" (fade-in). Rendszer
    szinten kapcsold be a "csökkentett mozgás" (reduced motion)
    beállítást (OS/böngésző szinten) — ugyanezek az animációk maradjanak ki.
+   (A 0.94-es hover-emelés+árnyék helyett most háttértónus van, lásd lent
+   #95 — a lista-elrendezés flat lett, nem dobozolt kártya.)
+
+## ✅ Widget vizuális referencia-igazítás (screenshot alapján)
+
+**KÉSZ, még nincs élesben validálva.** A megrendelő egy élő screenshotot
+küldött ("a dizájn hasonlítson jobban erre") egy BME/TUM-stílusú
+publikációs listáról. **Megkérdezve megerősítette**: a képen látható
+PDF/Kód/Videó gombsor NEM kell (azt korábban explicit kivették a tervből,
+CLAUDE.md §14/3) — csak a vizuális stílus. Kiderült, hogy a
+`docs/widget-design.md` eredeti terve már leírta ezt a stílust, csak a
+0.5.0-ás implementáció eltért tőle — ez a kör visszaigazítja. Részletek:
+docs/decisions.md #95.
+
+- Márka-színek frissítve a plugin más részein (email-fejléc) már használt
+  teál/navy párra (`--mtmt-accent: #16aebd`, új `--mtmt-heading: #16233f`).
+- Opcionális "Alcím" mező az "A" widget fejlécében (üresen nem jelenik meg).
+- Alulvonalas (nem kitöltött pill) év-fülek.
+- Soronkénti lista dobozolt/árnyékos kártya-rács helyett, elválasztó
+  vonalakkal; hover finom háttértónus (nem emelkedés).
+- Forrás+év kiemelő-színű közös sor, DOI+SJR közös meta-sor, típus-badge a
+  sor jobb szélén (nem a képen), új körkörös nyíl-CTA dekoráció.
+- Számozott lapozás ellipszissel (korábban csak Előző/Következő).
+
+11 új assertion (`test-fase5-widgets.php`, 35→46), teljes suite (205
+assertion) zöld, lint tiszta, i18n újraépítve (256 string).
+
+**Éles ellenőrzéshez** (Local site, Elementor szerkesztő):
+1. Nyisd meg az "A" (összesítő) widgetet — az év-fülek alulvonalasak
+   legyenek (nem kitöltött pill), a lista soronkénti (nem dobozolt kártya),
+   vékony elválasztó vonalakkal.
+2. Írj be egy szöveget a widget Tartalom fülén az "Alcím" mezőbe, mentsd —
+   jelenjen meg a cím alatt egy leíró sor; töröld — tűnjön el.
+3. Egy publikáció-sornál nézd meg: a forrás+év egy kiemelő-színű (teál)
+   sorban van, a DOI+SJR-badge egy másik, halványabb sorban; a
+   kiadványtípus-badge a sor JOBB SZÉLÉN van (nem a képen); egy körvonalas
+   nyíl-gomb is legyen a sor jobb szélén, függőlegesen középen.
+4. Ha a lista több oldalas: alul számozott lapozás legyen ("1 2 3 … N"
+   minta nagy oldalszámnál), nem csak Előző/Következő; az aktuális oldal
+   kitöltött, kiemelő-színű legyen.
+5. Vidd az egeret egy sorra — finom háttérszín-tónus jelenjen meg, a
+   nyíl-gomb kitöltődjön a kiemelő-színnel; kattints a nyíl-gomb köré nem
+   eső részre — navigáljon (DOI/MTMT-link).
 
 ## Backlog — még nincs fázishoz kötve
 
