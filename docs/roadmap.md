@@ -199,35 +199,75 @@ repository-metódus már készen áll a Fázis 5-ös widget számára.
    tűnjön el a terület-UI (a korábban elmentett hozzárendelés a DB-ben marad,
    csak nem látszik/szerkeszthető, amíg vissza nem kapcsolod).
 
-## Fázis 5 — Elementor widget (A + B)
+## 🔜 Fázis 5 — Elementor widget (A + B)
 
+**KÓD KÉSZ, ág: `fazis-5-elementor-widgets`, ÉLES ELLENŐRZÉS MÉG NEM TÖRTÉNT.**
 Eredeti "Fázis 5 — alap" (§9.1) helyett **két widget** (§14/10), a
 `docs/widget-design.md`-ben rögzített, megrendelő által megerősített
-mezőkészlettel és linkviselkedéssel:
+mezőkészlettel és linkviselkedéssel. A 3 nyitott döntés (szerzőnév-forma,
+placeholder-kép módja, év-fülek) a build előtt eldőlt — lásd widget-design.md
+és docs/decisions.md #49-57.
 
-- **Közös:** csak `status='approved'`, kizárólag a saját táblából olvas. Kártya-mezők:
-  cím, szerzők, szakmai terület (ha be van kapcsolva), forrás, DOI, kiadványtípus,
-  megjelenés éve, SJR-negyed, egyéb azonosítós logó-gombok (§14/4 — logó-asset-ek
-  beszerzése itt esedékes: WoS/Scopus/PubMed/SZTAKI stb.). Teljes kártya kattintható,
-  cél DOI-nál `doi.org/<doi>`, DOI hiányában (ha engedélyezve) a **gui-link**
-  `m2.mtmt.hu/gui2/?mode=browse&params=publication;<mtid>` (VERIFIKÁLVA, NEM az
-  API-endpoint). Indexkép hiányában placeholder-kép + rágenerált cím (§14/8 —
-  előbb el kell dönteni: CSS-overlay vagy szerver-oldali GD/Imagick, ld. lent).
+- **Közös** (`Mtmt_Card_Renderer` + `Mtmt_Widget_Data`, mindkét widget ezt
+  hívja): csak `status='approved'`, kizárólag a saját táblából olvas, AJAX-fragment
+  (nem "load more") kereséshez/lapozáshoz/év-váltáshoz. Kártya-mezők: cím,
+  szerzők (teljes név, 5 fölött "…, and N more" levágással, `authors_raw`-ból),
+  szakmai terület-badge (ha be van kapcsolva), forrás, DOI, kiadványtípus-badge,
+  megjelenés éve, SJR-negyed-badge, egyéb azonosítós logó-gombok (jelenleg
+  feliratos "pill" badge, valódi WoS/Scopus/SZTAKI logó-fájlok nélkül — lásd
+  lent). Teljes kártya kattintható (új fülön nyílik), cél DOI-nál `doi.org/<doi>`,
+  DOI hiányában (ha engedélyezve) a gui-link. Indexkép hiányában szerver-oldali
+  (GD) placeholder-kép, cím beégetve, becsomagolt Open Sans Bond fonttal
+  (magyar ékezetekkel — élőben, ténylegesen legenerált képpel verifikálva);
+  GD/font hiányában szépen visszaesik CSS-overlay-re.
 - **„A" — összesítő központi widget:** minden jóváhagyott tétel, év-fülekkel
-  lapozva, szakmai terület szerinti szűrő-lenyíló (ha a Fázis 4 toggle be van
-  kapcsolva), jól megcsinált kereső (cím/szerző/forrás).
+  ("Összes" éves fül + konkrét évek), szakmai terület szerinti szűrő-lenyíló
+  (ha a Fázis 4 toggle be van kapcsolva), kereső (cím/szerző/forrás).
 - **„B" — terület-aloldal widget:** csak `is_featured=1` tételek, EGY konkrét
-  terület/profil widget-beállításban kiválasztva. Csak akkor jelenik meg az
-  Elementor widget-listában, ha a Fázis 3-as "kiemelt cikk" toggle be van
-  kapcsolva (§14/11 — ez a widget-regisztráció feltétele).
+  szakmai TERÜLETRE VAGY LEKÉRDEZÉSI PROFILRA szűkítve (widget-beállításban
+  mód-választóval) — a "profil" mód akkor is működik, ha a terület-funkció ki
+  van kapcsolva. Csak akkor jelenik meg az Elementor widget-listában, ha a
+  "kiemelt cikk" toggle be van kapcsolva (§14/11).
+
+**Amit még be kell szerezni/pótolni** (nem blokkolja a kódot, de nyitott):
+valódi WoS/Scopus/SZTAKI logó-fájlok az egyéb-azonosítós gombokhoz (jelenleg
+feliratos pill-badge helyettesíti, lecserélhető bármikor).
 
 *Kész, ha:* mindkét widget csak approved (ill. "B" esetén approved+featured)
 tételt mutat, csak a saját táblát hívja, a linkviselkedés és a mezőkészlet a
 widget-design.md szerint működik.
 
-**Nyitott döntés Fázis 5 indítása előtt** (docs/widget-design.md "Nyitott
-kérdések" szakasza): szerzőnév rövidített vagy teljes forma a kártyán;
-placeholder-kép CSS-overlay vagy szerver-oldali generálás.
+**Éles ellenőrzéshez** (Local site, Elementor szerkesztő + wp-admin):
+1. Egy oldalon, Elementorral, húzd be az "MTMT publikációk – összesítő" ("A")
+   widgetet — jelenjen meg év-fülekkel, kereső mezővel, kártyákkal.
+2. Keress rá egy ismert címre/szerzőre a keresőben — a lista AJAX-szal
+   szűküljön (nem teljes oldal-újratöltés), URL nem változik.
+3. Válts év-fület — a lista frissüljön, csak az adott év tételei látszanak.
+4. Ha a "Szakmai terület" funkció be van kapcsolva: jelenjen meg a terület-szűrő
+   lenyíló, és szűrjön helyesen.
+5. Kattints egy kártyára (nem a logó-gombra/linkre) — DOI-s tételnél
+   `doi.org/...`-ra, DOI nélkülinél (ha a "DOI megjelenítése" widget-beállítás be
+   van kapcsolva) az MTMT gui-oldalára navigáljon, új fülön.
+6. Egy indexkép nélküli publikációnál nézd meg a kártya-képet — legyen rajta a
+   cím, olvashatóan (ez a GD-generált placeholder; ha valamiért nem GD-s utat
+   venné, akkor is legyen olvasható cím a CSS-overlay-verzión).
+7. Húzz be egy "MTMT publikációk – szakmai terület" ("B") widgetet is — csak
+   akkor legyen elérhető a widget-listában, ha Beállításokban a "Kiemelt cikk"
+   funkció be van kapcsolva. Állítsd be "Szakmai terület" vagy "Lekérdezési
+   profil" módra egy konkrét értékkel — csak az adott kör KIEMELT, jóváhagyott
+   tételei jelenjenek meg.
+8. Beállítások → Widget — placeholder-kép szekcióban tölts fel egy egyedi
+   alapképet, mentsd — az ÚJONNAN generált placeholder-képek ezt használják
+   (a korábban generáltak nem frissülnek vissza menet közben, ez így várt).
+9. Mindkét widget Tartalom fülén nyisd meg a "Szövegek" szekciót — írj át pl.
+   a widget címét vagy a kereső helyőrző szövegét, mentsd — a frontenden a
+   megváltoztatott szöveg jelenjen meg (a fejléc/kereső/év-fül azonnal, az
+   üres-lista üzenet és a lapozó "előző/következő" felirata AJAX-lapozás/
+   -keresés UTÁN is maradjon a testre szabott szöveg, ne ugorjon vissza az
+   eredeti magyar szövegre).
+10. Mindkét widget Stílus fülén próbálj ki egy szín- és egy tipográfia-controlt
+    (pl. "Kiemelő szín", "Kártya-cím" tipográfia) — látszódjon a változás a
+    frontenden (kiemelő szín pl. az aktív év-fülön/hover-en, kártya-cím betűtípus/méret).
 
 ## Fázis 6 — GitHub + PUC
 

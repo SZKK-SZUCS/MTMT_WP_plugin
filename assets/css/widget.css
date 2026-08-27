@@ -1,0 +1,306 @@
+/*
+ * MTMT Sync — widget frontend stílusok (Fázis 5).
+ * Vanilla CSS, nincs build lépés (CLAUDE.md §2).
+ */
+
+.mtmt-widget {
+	--mtmt-accent: #2e5f8a;
+	--mtmt-border: #dfe4ea;
+	--mtmt-muted: #667085;
+	--mtmt-bg-soft: #f6f8fa;
+	box-sizing: border-box;
+	max-width: 100%;
+}
+
+.mtmt-widget * {
+	box-sizing: border-box;
+}
+
+.mtmt-widget-header {
+	margin-bottom: 1.25em;
+}
+
+.mtmt-eyebrow {
+	margin: 0 0 0.25em;
+	font-size: 0.8em;
+	font-weight: 700;
+	letter-spacing: 0.08em;
+	color: var(--mtmt-accent);
+	text-transform: uppercase;
+}
+
+.mtmt-widget-title {
+	margin: 0;
+}
+
+.mtmt-widget-controls {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.75em;
+	margin-bottom: 1em;
+}
+
+.mtmt-search-input,
+.mtmt-area-filter {
+	padding: 0.55em 0.8em;
+	border: 1px solid var(--mtmt-border);
+	border-radius: 6px;
+	font-size: 0.95em;
+	min-width: 220px;
+	flex: 1 1 220px;
+}
+
+.mtmt-year-tabs {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.4em;
+	margin-bottom: 1.25em;
+	border-bottom: 1px solid var(--mtmt-border);
+	padding-bottom: 0.6em;
+}
+
+.mtmt-year-tab {
+	background: transparent;
+	border: 1px solid transparent;
+	border-radius: 999px;
+	padding: 0.4em 1em;
+	font-size: 0.95em;
+	cursor: pointer;
+	color: var(--mtmt-muted);
+}
+
+.mtmt-year-tab:hover {
+	background: var(--mtmt-bg-soft);
+}
+
+.mtmt-year-tab.is-active {
+	background: var(--mtmt-accent);
+	border-color: var(--mtmt-accent);
+	color: #fff;
+	font-weight: 600;
+}
+
+.mtmt-widget-list {
+	display: flex;
+	flex-direction: column;
+	gap: 1em;
+}
+
+.mtmt-widget-empty {
+	color: var(--mtmt-muted);
+	padding: 2em 0;
+	text-align: center;
+}
+
+.mtmt-pub-card {
+	display: flex;
+	gap: 1.25em;
+	padding: 1em;
+	border: 1px solid var(--mtmt-border);
+	border-radius: 10px;
+	position: relative;
+	transition: box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.mtmt-pub-card[data-href] {
+	cursor: pointer;
+}
+
+.mtmt-pub-card[data-href]:hover,
+.mtmt-pub-card[data-href]:focus-within {
+	box-shadow: 0 2px 12px rgba(20, 30, 45, 0.08);
+	border-color: var(--mtmt-accent);
+}
+
+.mtmt-pub-card-media {
+	position: relative;
+	flex: 0 0 180px;
+	width: 180px;
+	height: 110px;
+	border-radius: 6px;
+	overflow: hidden;
+	background: var(--mtmt-bg-soft);
+}
+
+.mtmt-pub-card-img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	display: block;
+	margin: 0;
+}
+
+.mtmt-pub-card-css-placeholder {
+	width: 100%;
+	height: 100%;
+	background-size: cover;
+	background-position: center;
+	position: relative;
+	display: flex;
+	align-items: flex-end;
+}
+
+.mtmt-pub-card-css-placeholder span {
+	display: block;
+	width: 100%;
+	padding: 0.5em 0.6em;
+	background: linear-gradient(to top, rgba(15, 23, 32, 0.82), rgba(15, 23, 32, 0));
+	color: #fff;
+	font-size: 0.8em;
+	font-weight: 600;
+	line-height: 1.3;
+	max-height: 4.6em;
+	overflow: hidden;
+}
+
+.mtmt-pub-card-type-badge {
+	position: absolute;
+	top: 0.5em;
+	right: 0.5em;
+}
+
+.mtmt-pub-card-body {
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
+.mtmt-pub-card-title {
+	margin: 0 0 0.3em;
+	font-size: 1.05em;
+	line-height: 1.35;
+}
+
+.mtmt-pub-card-title a {
+	color: inherit;
+	text-decoration: none;
+}
+
+.mtmt-pub-card[data-href]:hover .mtmt-pub-card-title a {
+	text-decoration: underline;
+}
+
+.mtmt-pub-card-authors {
+	margin: 0 0 0.4em;
+	color: var(--mtmt-muted);
+	font-size: 0.92em;
+}
+
+.mtmt-pub-card-topic-areas {
+	margin: 0 0 0.4em;
+}
+
+.mtmt-pub-card-meta {
+	margin: 0 0 0.4em;
+	font-size: 0.9em;
+	color: var(--mtmt-muted);
+}
+
+.mtmt-pub-card-source {
+	color: inherit;
+}
+
+.mtmt-pub-card-year {
+	font-weight: 600;
+}
+
+.mtmt-pub-card-doi {
+	display: inline-block;
+	margin-left: 0.3em;
+	font-size: 0.85em;
+	color: var(--mtmt-muted);
+}
+
+.mtmt-badge {
+	display: inline-block;
+	padding: 0.2em 0.6em;
+	border-radius: 999px;
+	font-size: 0.75em;
+	font-weight: 600;
+	line-height: 1.6;
+	background: var(--mtmt-bg-soft);
+	color: #33404f;
+}
+
+.mtmt-badge-topic-area {
+	background: #eef2ff;
+	color: #3b4ba0;
+	margin-right: 0.3em;
+}
+
+.mtmt-badge-color-0 { background: #e7f0fb; color: #205081; }
+.mtmt-badge-color-1 { background: #eafaf1; color: #1f7a4d; }
+.mtmt-badge-color-2 { background: #fdf1e6; color: #a35a12; }
+.mtmt-badge-color-3 { background: #f5edfb; color: #6a3aa8; }
+.mtmt-badge-color-4 { background: #fdecec; color: #a3311f; }
+
+.mtmt-badge-sjr-d1 { background: #fff3cd; color: #8a6400; }
+.mtmt-badge-sjr-q1 { background: #eafaf1; color: #1f7a4d; }
+.mtmt-badge-sjr-q2 { background: #e7f0fb; color: #205081; }
+.mtmt-badge-sjr-q3 { background: #fdf1e6; color: #a35a12; }
+.mtmt-badge-sjr-q4 { background: #fdecec; color: #a3311f; }
+
+.mtmt-ext-ids {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.4em;
+	margin-top: 0.5em;
+}
+
+.mtmt-ext-id-badge {
+	display: inline-block;
+	padding: 0.2em 0.65em;
+	border: 1px solid var(--mtmt-border);
+	border-radius: 6px;
+	font-size: 0.75em;
+	font-weight: 600;
+	color: var(--mtmt-muted);
+	text-decoration: none;
+}
+
+.mtmt-ext-id-badge:hover {
+	border-color: var(--mtmt-accent);
+	color: var(--mtmt-accent);
+}
+
+.mtmt-pagination {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 1em;
+	margin-top: 1.5em;
+}
+
+.mtmt-page-btn {
+	background: var(--mtmt-bg-soft);
+	border: 1px solid var(--mtmt-border);
+	border-radius: 6px;
+	padding: 0.5em 1em;
+	cursor: pointer;
+	font-size: 0.9em;
+}
+
+.mtmt-page-btn:hover {
+	border-color: var(--mtmt-accent);
+	color: var(--mtmt-accent);
+}
+
+.mtmt-pagination-status {
+	font-size: 0.9em;
+	color: var(--mtmt-muted);
+}
+
+.mtmt-widget.is-loading .mtmt-widget-list {
+	opacity: 0.5;
+	pointer-events: none;
+}
+
+@media (max-width: 600px) {
+	.mtmt-pub-card {
+		flex-direction: column;
+	}
+	.mtmt-pub-card-media {
+		width: 100%;
+		flex-basis: auto;
+		height: 150px;
+	}
+}

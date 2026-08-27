@@ -38,6 +38,12 @@ final class Mtmt_Sync_Runner {
 			$log_repo->log_result( $trigger_type, $result );
 		}
 
+		// Egyszer, a teljes futás végén (nem rekordonként) — egy nagyobb
+		// intézménynél száz+ update_option()-hívás mérhető terhelést jelentene
+		// (lásd §14/6 timeout-aggály), a widget-cache viszont nem rekord-, hanem
+		// futás-granularitású frissülést igényel.
+		Mtmt_Widget_Cache::bump();
+
 		if ( 'cron' === $trigger_type ) {
 			( new Mtmt_Notifier() )->notify_if_needed( $results );
 		}

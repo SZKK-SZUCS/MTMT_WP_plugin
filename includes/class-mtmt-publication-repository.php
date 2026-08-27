@@ -209,14 +209,16 @@ final class Mtmt_Publication_Repository {
 	public function get_list( array $args = array() ): array {
 		$args = array_merge(
 			array(
-				'status'     => '',
-				'year'       => 0,
-				'profile_id' => 0,
-				'ids'        => null,
-				'orderby'    => 'published_year',
-				'order'      => 'DESC',
-				'paged'      => 1,
-				'per_page'   => 20,
+				'status'        => '',
+				'year'          => 0,
+				'profile_id'    => 0,
+				'ids'           => null,
+				'search'        => '',
+				'featured_only' => false,
+				'orderby'       => 'published_year',
+				'order'         => 'DESC',
+				'paged'         => 1,
+				'per_page'      => 20,
 			),
 			$args
 		);
@@ -235,6 +237,17 @@ final class Mtmt_Publication_Repository {
 		if ( $args['profile_id'] ) {
 			$where[]  = 'query_profile_id = %d';
 			$params[] = (int) $args['profile_id'];
+		}
+		if ( ! empty( $args['featured_only'] ) ) {
+			$where[] = 'is_featured = 1';
+		}
+		if ( '' !== trim( (string) $args['search'] ) ) {
+			// Cím / szerzők / forrás LIKE-egyezés — widget kereső mezőhöz (Fázis 5).
+			$like     = '%' . $this->wpdb->esc_like( trim( (string) $args['search'] ) ) . '%';
+			$where[]  = '(title LIKE %s OR authors_text LIKE %s OR source_title LIKE %s)';
+			$params[] = $like;
+			$params[] = $like;
+			$params[] = $like;
 		}
 		if ( is_array( $args['ids'] ) ) {
 			$ids = array_map( 'absint', $args['ids'] );
@@ -282,6 +295,62 @@ final class Mtmt_Publication_Repository {
 		$rows = $this->wpdb->get_col(
 			"SELECT DISTINCT published_year FROM {$this->table} WHERE published_year IS NOT NULL ORDER BY published_year DESC"
 		);
+		return array_map( 'intval', $rows );
+	}
+
+	/**
+	 * Ugyanaz, mint get_distinct_years(), de a Fázis 5 widget-scope-ra szűkítve
+	 * (státusz/profil/kiemelt/id-lista) — Mtmt_Widget_Data-nak kell, hogy ne
+	 * kínáljon fel olyan év-fület, aminek a widget adott szűrésével 0 találata
+	 * lenne. Szándékosan külön a get_list()-től (ami maga is tesztelt, élesben
+	 * validált kód) — kis duplikáció a WHERE-építésben, cserébe nem kell
+	 * hozzányúlni a már stabil metódushoz.
+	 *
+	 * @param array $args {
+	 *     @type string $status        Alapértelmezetten 'approved' (a widgetek mindig ezt kérik).
+	 *     @type int    $profile_id
+	 *     @type bool   $featured_only
+	 *     @type int[]|null $ids
+	 * }
+	 * @return int[]
+	 */
+	public function get_distinct_years_filtered( array $args = array() ): array {
+		$args = array_merge(
+			array(
+				'status'        => 'approved',
+				'profile_id'    => 0,
+				'featured_only' => false,
+				'ids'           => null,
+			),
+			$args
+		);
+
+		$where  = array( '1=1', 'published_year IS NOT NULL' );
+		$params = array();
+
+		if ( '' !== $args['status'] ) {
+			$where[]  = 'status = %s';
+			$params[] = $args['status'];
+		}
+		if ( $args['profile_id'] ) {
+			$where[]  = 'query_profile_id = %d';
+			$params[] = (int) $args['profile_id'];
+		}
+		if ( ! empty( $args['featured_only'] ) ) {
+			$where[] = 'is_featured = 1';
+		}
+		if ( is_array( $args['ids'] ) ) {
+			$ids = array_map( 'absint', $args['ids'] );
+			if ( empty( $ids ) ) {
+				return array();
+			}
+			$where[] = 'id IN (' . implode( ',', array_fill( 0, count( $ids ), '%d' ) ) . ')';
+			$params  = array_merge( $params, $ids );
+		}
+
+		$sql  = "SELECT DISTINCT published_year FROM {$this->table} WHERE " . implode( ' AND ', $where ) . ' ORDER BY published_year DESC';
+		$rows = $params ? $this->wpdb->get_col( $this->wpdb->prepare( $sql, $params ) ) : $this->wpdb->get_col( $sql );
+
 		return array_map( 'intval', $rows );
 	}
 
@@ -336,6 +405,10 @@ final class Mtmt_Publication_Repository {
 			array( 'id' => $id )
 		);
 
+		if ( false !== $result ) {
+			Mtmt_Widget_Cache::bump(); // Jóváhagyás/elutasítás azonnal látszódjon a widgeten (docs/decisions.md #59).
+		}
+
 		return false !== $result;
 	}
 
@@ -358,7 +431,11 @@ final class Mtmt_Publication_Repository {
 		$sql          = "UPDATE {$this->table} SET status = %s, moderated_by = %d, moderated_at = %s WHERE id IN ({$placeholders})";
 		$params       = array_merge( array( $status, $user_id, current_time( 'mysql' ) ), $ids );
 
-		return (int) $this->wpdb->query( $this->wpdb->prepare( $sql, $params ) );
+		$affected = (int) $this->wpdb->query( $this->wpdb->prepare( $sql, $params ) );
+		if ( $affected > 0 ) {
+			Mtmt_Widget_Cache::bump();
+		}
+		return $affected;
 	}
 
 	/**
@@ -379,7 +456,11 @@ final class Mtmt_Publication_Repository {
 		$sql          = "UPDATE {$this->table} SET is_featured = %d WHERE id IN ({$placeholders})";
 		$params       = array_merge( array( $featured ? 1 : 0 ), $ids );
 
-		return (int) $this->wpdb->query( $this->wpdb->prepare( $sql, $params ) );
+		$affected = (int) $this->wpdb->query( $this->wpdb->prepare( $sql, $params ) );
+		if ( $affected > 0 ) {
+			Mtmt_Widget_Cache::bump();
+		}
+		return $affected;
 	}
 
 	/**
@@ -420,6 +501,10 @@ final class Mtmt_Publication_Repository {
 		}
 
 		$result = $this->wpdb->update( $this->table, $data, array( 'id' => $id ) );
+
+		if ( false !== $result ) {
+			Mtmt_Widget_Cache::bump(); // pl. thumbnail/is_featured is befolyásolja, mit mutat a widget.
+		}
 
 		return false !== $result;
 	}

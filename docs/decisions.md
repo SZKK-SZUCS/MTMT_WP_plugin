@@ -361,3 +361,139 @@ dokumentálás közben, nem csak leírtam:
     ténylegesen** — widget nélkül nincs mit "aloldalon" megjeleníteni. Fázis 4
     az adatmodellt + admin UI-t adja, és előkészíti a `get_publication_ids_
     for_area()` metódust, amit a Fázis 5-ös "B" widget közvetlenül hívhat majd.
+
+## Fázis 5 — Elementor widgetek (2026-08)
+
+Előzetesen egyeztetett 3 döntés (AskUserQuestion): teljes szerzőnév
+listakorlátozással (nem monogram), szerver-oldali (GD) placeholder-kép-
+generálás (nem CSS-overlay), és év-fülek (nem accordion) — ezek CLAUDE.md
+§14/8-at és a docs/widget-design.md "Nyitott kérdések" szakaszát véglegesítik,
+lásd ott. Az alábbiak az eziutáni implementációs döntések.
+
+49. **Elementor widget-osztályok NEM kapnak dependency injectiont a
+    konstruktorban.** Az Elementor több kódúton (szerkesztő-AJAX, dokumentum-
+    betöltés) saját maga hozza létre a widget-példányt `new static($data, $args)`
+    alakban — egy egyedi, kötelező konstruktor-paraméter ezeken az útvonalakon
+    eldobná a widgetet. A repository-kat/`Mtmt_Widget_Data`-t ezért a `render()`-en
+    belül, lazy módon építik fel (`global $wpdb`), ugyanaz a minta, mint a
+    mtmt-sync.php admin-hookjaiban.
+
+50. **A "B" widget scope-ja terület VAGY lekérdezési profil lehet**, nem csak
+    terület — a CLAUDE.md §14/10 eredeti "területre/profilra szűkítve"
+    megfogalmazását szó szerint vettem: ha a "szakmai terület" funkció ki van
+    kapcsolva egy site-on, a "B" widget így is használható marad (profil-módban),
+    a regisztráció egyedüli feltétele a "kiemelt cikk" toggle (widget-design.md,
+    FÜGGETLEN a terület-togletől).
+
+51. **Font-választás a placeholder-képhez: becsomagolt Open Sans Bold**
+    (SIL OFL 1.1, `assets/fonts/OpenSans-Bold.ttf` + `OFL.txt`), NEM a szerver
+    esetleges rendszer-betűtípusa. Indoklás: (a) rendszer-font elérhetősége/útja
+    nem garantálható különböző hosting-környezetek között, (b) a magyar ékezetes
+    karakterek (különösen ő/ű, a duplavesszős variánsok) nem minden fontban
+    szerepelnek — élőben, ténylegesen legenerált teszt-képpel verifikálva, hogy
+    az Open Sans helyesen rendereli az "ŐŰ" karaktereket is. Felülírható
+    (`mtmt_placeholder_font_path` option), de nincs hozzá admin UI — ez csak
+    programozott/advanced use-case, a becsomagolt font az elvárt alapeset.
+
+52. **Placeholder-kép cache: nincs automatikus törlés/GC.** A generált fájl neve
+    `md5(mtid|cím|alapkép-útvonal|alapkép-mtime)` — cím- vagy alapkép-csere
+    automatikusan új fájlt generál, de a régi (immár hivatkozatlan) fájl a
+    lemezen marad. Tudatos egyszerűsítés ebben a körben (nincs cron-alapú
+    cache-tisztító job) — ha a lemezhasználat gondot okozna élesben, ez egy
+    külön, kis backlog-tétel lehet.
+
+53. **`Mtmt_Widget_Data` cache: 5 perces tranziens, nincs explicit invalidálás**
+    admin-mentéskor. A CLAUDE.md §9.1 "object cache/tranziens" javaslatát a
+    legegyszerűbb formában valósítja meg — egy moderációs jóváhagyás legfeljebb
+    5 percen belül látszik meg a frontenden. Ha ez élesben túl lassúnak
+    bizonyul, a következő lépés egy verzió-számláló opció lenne, amit minden
+    repository-írás (upsert/set_status/save_enrichment) növelne, és ami a
+    tranziens-kulcs része lenne — nem épült be most, hogy ne nőjön feleslegesen
+    a kód, amíg nincs bizonyíték rá, hogy kell.
+
+54. **Whole-card link mindig új fülön nyílik** (`target="_blank"`), a cím-linkre
+    ÉS a JS-es "bárhol a kártyán" kattintásra is egyformán — konzisztencia
+    kedvéért (kezdetben csak a JS-utat terveztem `window.open`-nel, a valódi
+    `<a>` címlinket alapból ugyanígy kellett módosítani, különben a két
+    navigációs útvonal eltérően viselkedett volna).
+
+55. **"Hivatkozás-stílus: kompakt/teljes" (CLAUDE.md §9.1) értelmezése**: mivel
+    a spec nem részletezi, mit takar pontosan — kompakt módban a forrás-sor
+    (`source_title`) és az egyéb-azonosítós logó-gombok elmaradnak a kártyáról,
+    minden más (cím, szerzők, terület-badge, év, SJR, DOI-szöveg) megmarad.
+    Élő megtekintés után finomítható, ha a megrendelő mást vár ez alatt.
+
+56. **Szerzőnév-levágás szövege angol ("…, and N more")**, nem magyar
+    ("és N további szerző") — konzisztens az `authors_text` mögötti
+    `join_with_and()` meglévő, már élesben validált angol "and"-konvenciójával
+    (CLAUDE.md §5.4, a megrendelő saját mintadokumentuma). Ha a megrendelő
+    inkább magyar utótagot szeretne, ez egy lokalizált string-csere,
+    `Mtmt_Author_Formatter::format_for_card()`-ban.
+
+57. **Év-fülekhez hozzáadva egy "Összes" fül** (0 = nincs év-szűrés) — a
+    widget-design.md konkrét évszámokat sorol fel (2026|2025|...), egy
+    "minden év" opciót nem említ explicit, de hasznos kiegészítésnek tűnt (pl.
+    keresésnél ne kelljen évenként külön kattintani). Élő visszajelzés után
+    törölhető, ha a megrendelő nem akarja.
+
+58. **JAVÍTVA élő teszt után: a widgetek nem jelentek meg az Elementor
+    widget-panelen.** Az eredeti `Mtmt_Elementor_Loader` az `elementor/widgets/
+    register` és `elementor/elements/categories_registered` felakasztását egy
+    `elementor/loaded`-re kötött `boot()` mögé rejtette. Ez hook-sorrendi hiba:
+    az Elementor a Widgets_Manager/Elements_Manager saját inicializálása
+    során, MÉG az `elementor/loaded` tényleges kitüzelése ELŐTT elsüti ezeket
+    az akciókat — mire a mi `boot()`-unk lefutott volna, az Elementor már
+    végzett a widget-regisztrációs körrel, a mi `add_action()`-jeink elkéstek,
+    soha nem futottak le. A javítás: `elementor/widgets/register` (és a másik
+    két akció) feltétel nélkül, közvetlenül a plugin-betöltéskor felakasztva —
+    ez az Elementor saját fejlesztői dokumentációjának mintája is. A védelem
+    (ne töltődjön be `\Elementor\Widget_Base`-t kiterjesztő fájl Elementor
+    nélkül) továbbra is megvan: a `require_once`-ok a callback BELSEJÉBEN
+    maradtak, ami Elementor nélkül sosem fut le, mert maga az akció sosem tüzel.
+
+59. **JAVÍTVA élő teszt után: jóváhagyás után akár 5 percig a régi (cache-elt)
+    listát mutatta a widget**, csak egy admin-mentés (bármilyen, nem feltétlen
+    a kapcsolódó rekordé) után frissült — ez a `Mtmt_Widget_Data` sima,
+    5 perces TTL-ű tranziens-cache-éből fakadt (a #53-ban már előre jelzett
+    kockázat, most ténylegesen élesben is jelentkezett). Megoldás:
+    `Mtmt_Widget_Cache` — egy `wp_options`-beli verziószámláló, amit minden
+    widget-láthatóságot érintő írás NÖVEL (`set_status`, `bulk_set_status`,
+    `bulk_set_featured`, `save_enrichment`, `Mtmt_Topic_Area_Repository::
+    set_areas_for_publication()`/`delete()`, és EGYSZER egy teljes
+    `Mtmt_Sync_Runner::run()` végén — nem rekordonként, hogy egy nagy
+    intézménynél ne legyen száz+ felesleges `update_option()`-hívás egy
+    szinkron alatt). A `Mtmt_Widget_Data` cache-kulcsai tartalmazzák ezt a
+    verziót — így egy admin-írás után az ELSŐ frontend-lekérdezés azonnal
+    "cache-miss" lesz. A TTL-t emiatt fel lehetett emelni 5 percről 1 órára
+    (csak biztonsági háló, ha egy írási útvonal mégis kimaradna a bump()-ból),
+    ami ritkább DB-írást is jelent a gyakori (változatlan) lekérdezéseknél.
+
+60. **Élő visszajelzés után: widget-szintű szöveg- és stílus-testreszabás.**
+    Két kérés: (a) a korábban kőbe vésett (`__()`-be ágyazott) feliratok
+    (fejléc-cím, kereső helyőrző, üres-lista üzenet, lapozó "előző/következő")
+    legyenek szerkeszthetők widget-példányonként; (b) legyen Elementor
+    Stílus-fül (színek/tipográfia/kártya-megjelenés). Megoldás: egy közös
+    `Mtmt_Widget_Common_Controls` TRAIT (nem külön osztály — mindkét widget
+    `\Elementor\Widget_Base`-t terjeszt ki, a trait csak a control-regisztrációt
+    DRY-osítja), amit mindkét widget használ:
+    - `register_mtmt_text_controls(array $defaults)` — csak azokhoz a
+      kulcsokhoz ad TEXT controlt, amik szerepelnek a hívó widget saját
+      `$defaults` tömbjében, így az "A" és "B" widget természetesen kapja meg
+      a saját releváns mezőkészletét (pl. a terület-szűrő felirata csak
+      "A"-nál értelmes, a "nincs terület/profil kiválasztva" üzenet csak "B"-nél).
+    - `register_mtmt_style_controls()` — a színek NEM közvetlen CSS-tulajdonságot
+      írnak felül, hanem a widget.css-ben már meglévő CSS-változókat
+      (`--mtmt-accent`, `--mtmt-border`, `--mtmt-muted`, `--mtmt-bg-soft`) a
+      `{{WRAPPER}} .mtmt-widget` szinten — mivel a teljes stíluslap ezekre a
+      változókra épül, ez egyetlen ponton ad valódi, széleskörű testreszabást
+      négy Color controllal, nem kellett minden CSS-szabályt egyenként
+      exponálni. Typography group-controlok a címre/kártya-címre/törzsszövegre,
+      plusz kártya-háttérszín/lekerekítés/belső margó.
+    - A "Tartalom fülön szerkeszthető, de a swappelt AJAX-fragmentben (kártya-lista,
+      lapozó) is megjelenő" szövegek (`empty_state_text`, `pagination_prev_label`,
+      `pagination_next_label`) `data-*` attribútumokon keresztül a JS-be, onnan
+      minden AJAX-kérés POST body-jában a szerverre jutnak — a header/kereső
+      helyőrző/év-fül-felirat/terület-szűrő-felirat NEM része az AJAX-cserének
+      (a `.mtmt-widget-controls`/`.mtmt-year-tabs` blokk sosem cserélődik,
+      csak a `.mtmt-widget-list`/`.mtmt-widget-pagination`), ezért azokhoz elég
+      a kezdeti szerver-oldali render().

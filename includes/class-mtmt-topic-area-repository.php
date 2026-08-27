@@ -79,6 +79,7 @@ final class Mtmt_Topic_Area_Repository {
 	public function delete( int $id ): void {
 		$this->wpdb->delete( $this->pivot_table, array( 'topic_area_id' => $id ) );
 		$this->wpdb->delete( $this->areas_table, array( 'id' => $id ) );
+		Mtmt_Widget_Cache::bump();
 	}
 
 	/**
@@ -115,6 +116,8 @@ final class Mtmt_Topic_Area_Repository {
 				)
 			);
 		}
+
+		Mtmt_Widget_Cache::bump(); // A terület-badge/szűrés a widgeten azonnal a friss hozzárendelést mutassa.
 	}
 
 	/**
