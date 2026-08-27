@@ -16,6 +16,7 @@ tovább — semmi nem törik el, nincs kötelező elem ezen a listán.
 | `Scopus` | `assets/img/icons/scopus.svg` | ✅ igen (docs/field-map.md) |
 | `SZTAKI` | `assets/img/icons/sztaki.svg` | ✅ igen (docs/field-map.md) |
 | `PubMed` | `assets/img/icons/pubmed.svg` | ⚠ csak elvárt (CLAUDE.md §14/4), élőben még nem futott össze ilyen rekord |
+| `ResearchGate publ.` | `assets/img/icons/researchgate.svg` | ✅ igen (élő widget-kártya screenshot alapján — figyelem, a raw `source.name` NEM "ResearchGate", hanem pontosan "ResearchGate publ.") |
 
 **Formátum-elvárás:**
 - **SVG**, lehetőleg `viewBox`-szal (nem fix `width`/`height`-tal), hogy tetszőleges méretben élesen skálázódjon.

@@ -875,3 +875,15 @@ set_areas_for_publication()`/`delete()`, és EGYSZER egy teljes
     lefedve legyen; új esetek: `text`/`icon`/érvénytelen mód, `<style>`/
     `class=`/`fill=` teljes hiánya a kimenetből). Teljes teszt-szuit
     (192 assertion) zöld, repo-szintű `php -l` lint tiszta.
+92. **5. egyéb-azonosítós ikon: ResearchGate.** A megrendelő egy élő
+    widget-kártya screenshotján mutatta, hogy a "ResearchGate publ."
+    forrás is feliratos pill-ként jelenik meg (mert eddig nem volt a
+    `Mtmt_External_Id_Icons::SOURCES` listában), és betöltötte a
+    `ResearchGate.svg`-t. **Fontos, screenshotból megerősített részlet**: a
+    raw MTMT `source.name` ehhez a forráshoz NEM "ResearchGate", hanem
+    pontosan **"ResearchGate publ."** — a `SOURCES` tömb kulcsa ez lett,
+    a badge-en megjelenő rövidített `label` viszont "ResearchGate" (ugyanaz
+    a minta, mint a többi forrásnál: a kulcs a nyers API-értékhez igazodik,
+    a felirat szabadon rövidíthető). Fájlnév átnevezve kisbetűsre
+    (`researchgate.svg`, ugyanaz a hiba, mint #91-nél a másik 4 fájlnál).
+    Regresszió: `test-ext-id-icons.php` 16 -> 18 assertion.

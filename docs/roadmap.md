@@ -465,11 +465,12 @@ megrendelő megerősítette, hogy a javítás után a szinkron sikeres.
 
 ## ✅ Egyéb azonosítós ikonok — megjelenítési mód + stílus-vezérlők
 
-**KÉSZ, még nincs élesben validálva.** A megrendelő betöltötte a 4 SVG-ikont
-(WoS/Scopus/SZTAKI/PubMed), majd kérte: "legyen beállítható: Csak ikon; Csak
-szöveg; Mindkettő, ezen felül ikon szín, szöveg szín, pill dizájn". A
-betöltött fájlok átvizsgálásakor egy komoly, a funkciót érdemben blokkoló
-hiba derült ki és lett javítva — részletek: docs/decisions.md #91.
+**KÉSZ, még nincs élesben validálva.** A megrendelő betöltötte az 5 SVG-ikont
+(WoS/Scopus/SZTAKI/PubMed/ResearchGate), majd kérte: "legyen beállítható:
+Csak ikon; Csak szöveg; Mindkettő, ezen felül ikon szín, szöveg szín, pill
+dizájn". A betöltött fájlok átvizsgálásakor egy komoly, a funkciót érdemben
+blokkoló hiba derült ki és lett javítva — részletek: docs/decisions.md #91,
+a később pótolt ResearchGate-hez #92.
 
 - Fájlnevek kisbetűsre javítva (`WoS.svg` -> `wos.svg` stb. — Windows-on
   némán működött volna, élesben a case-sensitive fájlrendszer miatt nem).
@@ -481,14 +482,19 @@ hiba derült ki és lett javítva — részletek: docs/decisions.md #91.
   Csak ikon / Csak szöveg), mindkét widgeten.
 - Widget Stílus fül, új "Egyéb azonosítók" szekció: ikon szín, szöveg szín,
   pill háttérszín, pill szegély szín, pill lekerekítés.
+- ResearchGate felvéve az ismert források közé — a raw `source.name` itt
+  kivételesen NEM "ResearchGate", hanem "ResearchGate publ." (élő
+  screenshotból megerősítve), a badge-en megjelenő felirat "ResearchGate".
 
-10 új assertion (`test-ext-id-icons.php`, 6→16), teljes suite (192
+12 új assertion (`test-ext-id-icons.php`, 6→18), teljes suite (194
 assertion) zöld, lint tiszta.
 
 **Éles ellenőrzéshez** (Local site, Elementor szerkesztő):
-1. Egy publikáción, ahol van WoS/Scopus/SZTAKI/PubMed azonosító, nézd meg a
-   kártyát — az ikonok most már ténylegesen betöltve jelenjenek meg (nem
-   feliratos pill), a szín kövesse a szöveg színét.
+1. Egy publikáción, ahol van WoS/Scopus/SZTAKI/PubMed/ResearchGate
+   azonosító, nézd meg a kártyát — az ikonok most már ténylegesen
+   betöltve jelenjenek meg (nem feliratos pill), a szín kövesse a szöveg
+   színét, a ResearchGate-badge felirata "ResearchGate" legyen (nem
+   "ResearchGate publ.").
 2. Widget Tartalom fülön váltogasd az "Egyéb azonosítók megjelenítése"
    beállítást Csak ikon / Csak szöveg / Mindkettő között — a kártyák
    frissüljenek megfelelően (kereséssel/lapozással AJAX-frissítés után is).

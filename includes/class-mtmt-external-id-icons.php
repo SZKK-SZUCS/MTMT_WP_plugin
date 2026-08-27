@@ -47,6 +47,14 @@ final class Mtmt_External_Id_Icons {
 			'label' => 'PubMed',
 			'slug'  => 'pubmed',
 		),
+		// A raw `source.name` itt NEM "ResearchGate" — élesben megfigyelve
+		// (widget-kártya screenshot) a pontos érték "ResearchGate publ.",
+		// ezért a kulcs is ez; a badge-en megjelenő, rövidebb `label` viszont
+		// szabadon választható, ugyanúgy, mint a többi forrásnál.
+		'ResearchGate publ.' => array(
+			'label' => 'ResearchGate',
+			'slug'  => 'researchgate',
+		),
 	);
 
 	/** Elfogadott `$mode` értékek — bármi más 'both'-ra esik vissza. */
