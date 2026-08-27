@@ -526,3 +526,66 @@ lásd ott. Az alábbiak az eziutáni implementációs döntések.
 65. **Nincs `enableReleaseAssets()`** — a plugin nem használ build-lépést
     (CLAUDE.md §2, §10.3), a GitHub által automatikusan generált forrás-zip
     elég a PUC-nak, a mappa-wrappelést maga a PUC kezeli.
+
+## Fázis 7 — döntések a megrendelőtől (2026-08)
+
+66. **BibTeX — mi ez, elmagyarázva a megrendelőnek.** A BibTeX egy egyszerű,
+    szöveges hivatkozás-formátum (LaTeX-bibliográfiákhoz született, de ma
+    minden nagyobb referenciakezelő — Zotero, Mendeley, EndNote — is beolvassa).
+    Egy rekord kb. így néz ki:
+    ```
+    @article{igneczi2026autonom,
+      author  = {Ignéczi, Gergő and Tóth, Roland},
+      title   = {...},
+      journal = {...},
+      year    = {2026},
+      doi     = {10.xxxx/...}
+    }
+    ```
+    Az ötlet (CLAUDE.md §9.2) egy "BibTeX" lenyíló gomb lett volna minden
+    widget-kártyán, amiből a látogató (jellemzően egy másik kutató, aki
+    hivatkozni akar a cikkre) egy kattintással kimásolhatja ezt. **Döntés
+    függőben** — a megrendelő megkérdezte, mi ez, válasz elküldve, még nincs
+    igen/nem. Ha mégis kell: az MTMT API maga is exportál BibTeX-et
+    (`export=1&exportFormat=BIBTEX`, CLAUDE.md §5.3) — nem feltétlenül
+    kellene nekünk a strukturált mezőkből újraépíteni, elég lehet egy
+    linkgomb az MTMT saját export-végpontjára.
+67. **Haladó frontend-szűrők (szerző/típus/folyóirat/SJR/Norvég-szint) ELVETVE**
+    — a megrendelő szerint a jelenlegi keresés + év-fül + terület-szűrő elég.
+68. **Norvég-szint elhalasztva, nem blokkolja az 1.0-t** — a megrendelő szerint
+    egyelőre nem kell, az API-út felderítése (docs/decisions.md #25, docs/
+    field-map.md) nyitva marad, amíg újra elő nem vesszük.
+
+## Profil-előnézet ("Preview") — aktiválva a backlogból (2026-08)
+
+69. **A "Profil neve" mező hidden helyett két NÉV SZERINTI submit-gombra
+    váltott** (`name="mtmt_action" value="preview"` / `value="create"`) az
+    eddigi `<input type="hidden" name="mtmt_action" value="create">` helyett —
+    ez a szokásos HTML-minta több submit-célra egy formban, nem kellett
+    külön JS. Mellékhatás (elfogadott, sőt inkább jó): Enter lenyomása a
+    "Profil neve" mezőben most az "Előnézet" gombot süti el elsőként (a DOM-ban
+    ez van előrébb), nem a mentést — ez biztonságosabb alapértelmezés, mint
+    a korábbi (ahol Enter egyből létrehozta volna a profilt).
+70. **`Mtmt_Profiles_Page` konstruktora kapott egy `Mtmt_Api_Client`
+    paramétert, PHP 8.1 "new in initializers"-szel alapértelmezve**
+    (`Mtmt_Api_Client $api_client = new Mtmt_Api_Client()`) — így a
+    mtmt-sync.php-beli meglévő hívási hely (`new Mtmt_Profiles_Page($profile_repo)`)
+    nem tört el, de a metódus mégis DI-vel, tesztelhetően kapja a klienst
+    (konzisztens a repository-k eddigi minta injektálásával).
+71. **A találatszám-figyelmeztetés küszöbe (2000) heurisztika, NEM biztos
+    jel** — a docs/field-map.md dokumentált mintája (~5000/becsült 11M = a
+    teljes adatbázis, ha a cond csendben nem érvényesült) alapján, de mivel
+    egy legitim, nagy intézmény is adhat ennél több valós találatot, ez csak
+    figyelmeztet, nem blokkol — a mentés gomb a figyelmeztetés mellett is
+    elérhető marad. Az elsődleges ellenőrzési eszköz az 5 mintacím/szerző
+    vizuális átnézése (a backlog eredeti célja szerint).
+72. **A `depth=1` az előnézet-hívásban is kötelező** (nem `depth=0`) —
+    ugyanaz az ok, mint a syncnél (docs/field-map.md): `depth=0` mellett
+    hiányzik az `authorships[]`, tehát a mintasorokban nem lenne szerzőnév,
+    csak cím. Az előnézet ugyanazt a `Mtmt_Mapper::map_publication()`-t
+    hívja, mint a valódi sync — nem kellett külön leképző logika.
+73. **Az előnézet-eredmény NEM tárolódik sehol** (sem DB-ben, sem
+    tranziensben/session-ben) — egyetlen kérés-válasz ciklus élettartama,
+    a `Mtmt_Profiles_Page` egy privát property-jében (`$preview_result`),
+    ami minden oldalbetöltéskor újraépül vagy üres. Ez szándékos: az
+    előnézet definíció szerint egyszeri, nem kell hozzá state.
