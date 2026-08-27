@@ -272,31 +272,31 @@
 	gap: 0.35em;
 }
 
+/* Az ikon-méret widget-szinten állítható (Stílus fül, "Egyéb azonosítók"
+   szekció, "Ikon méret" control) — a korábbi fix 1em az ősök (badge
+   0.75em-es font-size-a stb.) miatt gyakorlatilag alig látható méretre
+   zsugorodott. Az alapérték (16px) csak biztonsági tartalék, Elementorban
+   mindig konkrét értéket kap a widget wrapperére. */
 .mtmt-ext-id-icon {
 	display: inline-flex;
-	width: 1em;
-	height: 1em;
+	flex: 0 0 auto;
+	width: var(--mtmt-ext-id-icon-size, 16px);
+	height: var(--mtmt-ext-id-icon-size, 16px);
 }
 
 .mtmt-ext-id-icon svg {
-	width: 1em;
-	height: 1em;
+	width: 100%;
+	height: 100%;
 	fill: var(--mtmt-ext-id-icon-color, currentColor);
 }
 
-/* "Csak ikon" mód: nincs mellette felirat, ezért négyzetesebb, kicsit
-   nagyobb belső hely + ikon jár neki, hogy ne tűnjön aránytévesztettnek a
-   szöveges pillek mellett. A span-wrappert és a benne lévő svg-t is bővíteni
-   kell együtt, különben az svg kilógna a span fix méretű dobozából. */
+/* "Csak ikon" mód: nincs mellette felirat, ezért négyzetesebb belső hely
+   jár neki, hogy ne tűnjön aránytévesztettnek a szöveges pillek mellett —
+   maga az ikon-méret ugyanazt az "Ikon méret" beállítást követi, mint
+   "Ikon és szöveg" módban, hogy kiszámítható maradjon. */
 .mtmt-ext-id-badge-icon-only {
 	padding: 0.35em;
 	line-height: 0;
-}
-
-.mtmt-ext-id-badge-icon-only .mtmt-ext-id-icon,
-.mtmt-ext-id-badge-icon-only .mtmt-ext-id-icon svg {
-	width: 1.15em;
-	height: 1.15em;
 }
 
 .mtmt-pagination {

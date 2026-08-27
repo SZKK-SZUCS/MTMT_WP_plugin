@@ -480,11 +480,17 @@ a később pótolt ResearchGate-hez #92.
   hatástalan maradt volna.
 - Widget Tartalom fül: "Egyéb azonosítók megjelenítése" (Ikon és szöveg /
   Csak ikon / Csak szöveg), mindkét widgeten.
-- Widget Stílus fül, új "Egyéb azonosítók" szekció: ikon szín, szöveg szín,
-  pill háttérszín, pill szegély szín, pill lekerekítés.
+- Widget Stílus fül, új "Egyéb azonosítók" szekció: ikon méret, ikon szín,
+  szöveg szín, pill háttérszín, pill szegély szín, pill lekerekítés.
 - ResearchGate felvéve az ismert források közé — a raw `source.name` itt
   kivételesen NEM "ResearchGate", hanem "ResearchGate publ." (élő
   screenshotból megerősítve), a badge-en megjelenő felirat "ResearchGate".
+- **Utólagos javítás**: a megrendelő jelezte, hogy az ikonok alapból nagyon
+  kicsik — a korábbi fix `1em` a badge örökölt, kicsi `font-size`-lánca
+  miatt alig látszott. Az ikon-méret is CSS-változóra (`--mtmt-ext-id-icon-size`)
+  került, widget Stílus fülön reszponzív SLIDER-rel állítható (px/em,
+  alapérték 16px) — MINDKÉT módban (ikon+szöveg / csak ikon) ugyanazt az
+  egy beállítást követi (docs/decisions.md #93).
 
 12 új assertion (`test-ext-id-icons.php`, 6→18), teljes suite (194
 assertion) zöld, lint tiszta.
@@ -498,6 +504,9 @@ assertion) zöld, lint tiszta.
 2. Widget Tartalom fülön váltogasd az "Egyéb azonosítók megjelenítése"
    beállítást Csak ikon / Csak szöveg / Mindkettő között — a kártyák
    frissüljenek megfelelően (kereséssel/lapozással AJAX-frissítés után is).
+2b. Widget Stílus fülön, "Egyéb azonosítók" szekcióban próbáld ki az "Ikon
+   méret" csúszkát (pl. 24px vagy 30px) — az ikonok láthatóan nagyobbra
+   nőjenek, "Csak ikon" módban is ugyanazt a méretet kövessék.
 3. Widget Stílus fülön, "Egyéb azonosítók" szekcióban állíts be egy eltérő
    ikon- és szövegszínt, illetve pill háttér/szegély/lekerekítés értéket —
    látszódjon a különbség a badge-eken.

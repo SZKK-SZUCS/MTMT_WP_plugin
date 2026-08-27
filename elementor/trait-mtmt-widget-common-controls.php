@@ -202,6 +202,30 @@ trait Mtmt_Widget_Common_Controls {
 			)
 		);
 
+		$this->add_responsive_control(
+			'ext_id_icon_size',
+			array(
+				'label'      => __( 'Ikon méret', 'mtmt-sync' ),
+				'type'       => \Elementor\Controls_Manager::SLIDER,
+				'size_units' => array( 'px', 'em' ),
+				'range'      => array(
+					'px' => array(
+						'min' => 8,
+						'max' => 48,
+					),
+					'em' => array(
+						'min'  => 0.5,
+						'max'  => 3,
+						'step' => 0.1,
+					),
+				),
+				'default'    => array(
+					'unit' => 'px',
+					'size' => 16,
+				),
+				'selectors'  => array( '{{WRAPPER}} .mtmt-widget' => '--mtmt-ext-id-icon-size: {{SIZE}}{{UNIT}};' ),
+			)
+		);
 		$this->add_control(
 			'ext_id_icon_color',
 			array(

@@ -887,3 +887,20 @@ set_areas_for_publication()`/`delete()`, és EGYSZER egy teljes
     a felirat szabadon rövidíthető). Fájlnév átnevezve kisbetűsre
     (`researchgate.svg`, ugyanaz a hiba, mint #91-nél a másik 4 fájlnál).
     Regresszió: `test-ext-id-icons.php` 16 -> 18 assertion.
+93. **Egyéb azonosítós ikonok: méret is állítható legyen** (megrendelői
+    visszajelzés: "nagyon kicsik az ikonok most alapértelmezetten"). A
+    korábbi CSS fix `1em`-es ikon-méret a badge-lánc örökölt, egyre kisebb
+    `font-size`-jai miatt (a `.mtmt-ext-id-badge` maga is `font-size: 0.75em`)
+    a gyakorlatban alig látható méretre zsugorodott. Megoldás: új
+    `--mtmt-ext-id-icon-size` CSS-változó (`.mtmt-ext-id-icon`/`svg` ezt
+    követi, `width/height: 100%` a belső `svg`-n, hogy a wrapper mérete
+    egyedüli igazságforrás legyen), widget Stílus fül "Egyéb azonosítók"
+    szekciójában egy reszponzív "Ikon méret" SLIDER control (px 8-48 vagy
+    em 0.5-3, alapérték 16px) — ugyanaz a minta, mint a meglévő
+    `card_border_radius`/`card_padding`. A korábbi, "csak ikon" módra
+    külön hardcode-olt 1.15em-es nagyítás megszűnt — most már MINDKÉT mód
+    (ikon+szöveg / csak ikon) ugyanazt az egy beállítást követi, kiszámíthatóbb,
+    mint egy rejtett, mód-függő automatikus nagyítás. Nincs hozzá önálló
+    unit-teszt (Elementor Style-tab control-regisztráció, a kódbázisban
+    eddig sem volt erre harness — a Stílus-fül controlok élő ellenőrzéssel
+    validáltak, lásd docs/roadmap.md).

@@ -260,6 +260,7 @@ return array(
 	'Egyéb azonosítók (WoS/Scopus/…)' => 'Other identifiers (WoS/Scopus/…)',
 	'Egyéb azonosítók megjelenítése' => 'Other identifiers display',
 	'Ha egy forráshoz nincs betöltve ikon-fájl, "Csak ikon" módban is a felirat jelenik meg helyette.' => 'If a source has no icon file loaded, the label is shown instead even in "Icon only" mode.',
+	'Ikon méret' => 'Icon size',
 	'Ikon szín' => 'Icon color',
 	'Ikon és szöveg' => 'Icon and text',
 	'Pill háttérszín' => 'Pill background color',

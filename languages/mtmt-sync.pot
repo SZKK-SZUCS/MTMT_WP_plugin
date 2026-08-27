@@ -7,7 +7,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-08-27T17:54:43+00:00\n"
+"POT-Creation-Date: 2026-08-27T18:23:57+00:00\n"
 "X-Generator: bin/i18n/build.php\n"
 "X-Domain: mtmt-sync\n"
 #: includes/class-mtmt-sync.php:161
@@ -331,6 +331,10 @@ msgid "Időpont"
 msgstr ""
 
 #: elementor/trait-mtmt-widget-common-controls.php:208
+msgid "Ikon méret"
+msgstr ""
+
+#: elementor/trait-mtmt-widget-common-controls.php:232
 msgid "Ikon szín"
 msgstr ""
 
@@ -666,15 +670,15 @@ msgstr ""
 msgid "PUBLIKÁCIÓK"
 msgstr ""
 
-#: elementor/trait-mtmt-widget-common-controls.php:224
+#: elementor/trait-mtmt-widget-common-controls.php:248
 msgid "Pill háttérszín"
 msgstr ""
 
-#: elementor/trait-mtmt-widget-common-controls.php:240
+#: elementor/trait-mtmt-widget-common-controls.php:264
 msgid "Pill lekerekítés"
 msgstr ""
 
-#: elementor/trait-mtmt-widget-common-controls.php:232
+#: elementor/trait-mtmt-widget-common-controls.php:256
 msgid "Pill szegély szín"
 msgstr ""
 
@@ -786,7 +790,7 @@ msgstr ""
 msgid "Színek"
 msgstr ""
 
-#: elementor/trait-mtmt-widget-common-controls.php:216
+#: elementor/trait-mtmt-widget-common-controls.php:240
 msgid "Szöveg szín"
 msgstr ""
 
