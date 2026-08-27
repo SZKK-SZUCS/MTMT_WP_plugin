@@ -717,3 +717,16 @@ set_areas_for_publication()`/`delete()`, és EGYSZER egy teljes
     felvehető a meglévő pinger-listára. A `DISABLE_WP_CRON`+WP-CLI út
     megmaradt B) opcióként (determinisztikusabb időzítés, de rendszer-cron
     hozzáférést igényel) — egyik módszer sincs kikényszerítve a kódban.
+87. **Kézi "Teljes szinkron most" gomb a Beállítások oldalon** — a megrendelő
+    élő tesztelés közben (email-kézbesítés ellenőrzése) kényelmetlennek
+    találta, hogy a cron-flavored futtatáshoz (ami emailt is küld, szemben a
+    Profilok oldal profilonkénti "Szinkron most" gombjával, ami szándékosan
+    NEM küld) konzolból kellett `wp cron event run mtmt_weekly_sync`-ot
+    futtatnia. Az új gomb `Mtmt_Sync_Runner::run('cron')`-t hívja profil-
+    szűkítés nélkül (= MINDEN engedélyezett profil, ugyanaz, mint a valódi
+    heti cron), tehát ha volt aktivitás, email is megy. Az eredmény egy
+    profilonkénti összefoglaló admin-notice-ban jelenik meg (hasonló mintát
+    követve, mint a Profilok oldal "Szinkron most" gombjának visszajelzése).
+    Nincs hozzá külön unit-teszt — vékony admin-glue réteg már tesztelt
+    komponensek (`Mtmt_Sync_Runner`, `Mtmt_Notifier`) fölött, valódi HTTP-t
+    hívna egy mock nélkül; élő teszteléssel ellenőrzött.

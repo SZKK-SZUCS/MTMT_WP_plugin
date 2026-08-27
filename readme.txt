@@ -63,12 +63,32 @@ megbízható, rendszeres HTTP-hívással):
 `curl -s -A 'valami-egyedi-user-agent' 'https://<a-site-domainje>/wp-cron.php?doing_wp_cron'`
 
 Ha már van egy központi cron-pinger szolgáltatásod más WP-oldalakhoz
-(pl. egy Docker-konténer, ami rendszeres időközönként végigmegy egy
-domain-listán), ide a plugint futtató oldal domainje simán felvehető —
-nem kell hozzá semmilyen plugin-specifikus paraméter, a sima
+(pl. egy Docker-konténer, ami rendszeres időközönként meghívja a
+domain(ok) `wp-cron.php`-ját), ide a plugint futtató oldal domainje simán
+felvehető — nem kell hozzá semmilyen plugin-specifikus paraméter, a sima
 `wp-cron.php?doing_wp_cron` hívás minden esedékes WP-cron eseményt
 (a heti MTMT-szinkront is) elindít, amikor esedékes. 5 perces
 gyakoriság bőven elég egy heti futáshoz.
+
+Példa egy önálló, `docker-compose`-ba tehető pinger-szolgáltatásra (a plugint
+futtató WordPress-szolgáltatással egy stack-ben, vagy attól teljesen
+függetlenül, egy központi "minden site"-pingerben is elhelyezhető):
+
+`
+  mtmt-cron-pinger:
+    image: alpine:latest
+    restart: unless-stopped
+    command: >
+      /bin/sh -c "apk add --no-cache curl &&
+      while true; do
+        curl -s -A 'MTMT-Sync-Cron-Pinger' 'https://<a-site-sajat-domainje>/wp-cron.php?doing_wp_cron' > /dev/null 2>&1;
+        sleep 300;
+      done"
+`
+
+(Cseréld ki a `<a-site-saját-domainje>`-t a ténylegesen futtatott WordPress
+domainjére. Ha egy meglévő, több site-ot is pingelő konténered van, elég a
+`while` ciklusba egy újabb `curl`-sort felvenni ugyanezzel a mintával.)
 
 **B) `DISABLE_WP_CRON` + közvetlen WP-CLI hívás** (determinisztikusabb
 időpont, de rendszer-cron hozzáférést igényel a szerveren):

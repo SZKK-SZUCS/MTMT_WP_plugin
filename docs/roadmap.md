@@ -346,8 +346,15 @@ Megrendelői döntés (2026-08):
 - ~~BibTeX lenyíló~~ — **ELVETVE** (2026-08). A megrendelő megkérdezte, mi ez
   (válasz: docs/decisions.md #79), majd döntött: nem kell, aki BibTeX-et akar,
   megoldja az MTMT saját oldalán (`export=1&exportFormat=BIBTEX`, CLAUDE.md §5.3).
-- **Dimensions idézettség-badge**: változatlanul nyitott, ha valaha kell — a
-  megrendelő megkérdezte, mit csinálna pontosan, válasz: docs/decisions.md #79.
+- **Dimensions idézettség-badge — KÉSŐBBI OPCIONÁLIS FEATURE** (2026-08,
+  megrendelői döntés). Mi lenne: egy DOI-alapú, külső (badge.dimensions.ai)
+  beágyazott script-jelvény a widget-kártyán, ami mutatja, hányszor idézték a
+  publikációt — a Dimensions.ai adatbázisából, ami a látogató böngészőjében
+  élőben frissül (nem csak a heti MTMT-szinkronnal), és tipikusan szélesebb
+  forrásból számol, mint az MTMT saját idézettség-száma. Ára: külső script
+  fut le a látogató böngészőjében DOI-nkénti bontásban (apró adatvédelmi
+  megfontolás, jelzés + lazy-load ajánlott). Részletes magyarázat:
+  docs/decisions.md #79. Nincs ütemezve, csak ha a megrendelő külön kéri.
 
 ## ✅ Profil-előnézet ("Preview")
 
@@ -409,8 +416,12 @@ lista arra, mi kerüljön a 0.9-es kiadásba az "alpha" verzió előtt
   fájlnév-konvencióért. Fájlok hiányában szépen visszaesik a meglévő
   feliratos pill-badge-re.
 - ~~BibTeX lenyíló~~ — elvetve (lásd Fázis 7 szakasz).
-- **Dimensions idézettség-badge** — a megrendelő megkérdezte, mit csinálna,
-  válasz: docs/decisions.md #79. Döntés még nem született.
+- ~~Dimensions idézettség-badge~~ — később opcionális feature, nincs
+  ütemezve (lásd Fázis 7 szakasz, docs/decisions.md #79).
+- **Kézi "Teljes szinkron most" gomb** (Beállítások oldal) — ugyanazt futtatja,
+  mint a heti cron (minden profil + email, ha volt aktivitás), hogy ne kelljen
+  konzolból `wp cron event run mtmt_weekly_sync`-ot futtatni egy email-teszthez
+  vagy egy soron kívüli teljes szinkronhoz. Megrendelői kérés, docs/decisions.md #87.
 
 **Éles ellenőrzéshez** (Local site, wp-admin):
 1. Állítsd a WordPress nyelvét angolra (Beállítások → Általános → Site
@@ -423,6 +434,10 @@ lista arra, mi kerüljön a 0.9-es kiadásba az "alpha" verzió előtt
 3. Ha van egyéb azonosítós SVG-fájlod, tedd be `assets/img/icons/wos.svg`
    (vagy `scopus.svg`/`sztaki.svg`/`pubmed.svg`) néven — a widget-kártyán
    az adott forráshoz mostantól az ikon jelenjen meg pill-badge helyett.
+4. Beállítások → "Teljes szinkron most" gomb — nyomd meg, jöjjön vissza egy
+   profilonkénti összefoglaló admin-notice-ban, és ha volt aktivitás és van
+   megadott címzett, kapj róla emailt is (ugyanaz a HTML-email, mint a
+   cronnál) — a futás-naplóban is jelenjen meg egy "cron" trigger-típusú sor.
 
 ## Backlog — még nincs fázishoz kötve
 

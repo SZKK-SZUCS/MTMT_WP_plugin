@@ -13,6 +13,8 @@
  * @package Mtmt_Sync
  */
 return array(
+	'%1$s: %2$d új, %3$d frissítve (%4$d visszaesett pending-be), %5$d hiányzó' => '%1$s: %2$d new, %3$d updated (%4$d reverted to pending), %5$d missing',
+	'%1$s: HIBA — %2$s' => '%1$s: ERROR — %2$s',
 	'%1$d új · %2$d frissítve (ebből %3$d visszaesett pending-be) · %4$d hiányzóként jelölve' => '%1$d new · %2$d updated (of which %3$d reverted to pending) · %4$d marked missing',
 	'%1$d. / %2$d oldal' => 'Page %1$d of %2$d',
 	'(cím nélkül)' => '(untitled)',
@@ -241,4 +243,10 @@ return array(
 	'„Kiemelt cikk" funkció engedélyezése' => 'Enable the "Featured Article" feature',
 	'„Szakmai terület" funkció engedélyezése' => 'Enable the "Topic Area" feature',
 	'⚠ Ez gyanúsan nagy szám — valószínűleg NEM érvényesült a szűrésed (az MTMT csendben figyelmen kívül hagyja az ismeretlen/rosszul megadott feltételt, és gyakorlatilag a teljes MTMT-adatbázist adná vissza). Ellenőrizd az MTID-et/feltételt a mentés előtt.' => "⚠ This number looks suspiciously large — your filter probably did NOT take effect (MTMT silently ignores unknown or malformed conditions and would return essentially the entire MTMT database). Double-check the MTID/condition before saving.",
+	'Nincs egyetlen engedélyezett profil sem — nincs mit szinkronizálni.' => "There isn't a single enabled profile — nothing to sync.",
+	'Teljes szinkron futtatása (mint a heti cron)' => 'Run full sync (like the weekly cron)',
+	'Teljes szinkron most' => 'Full sync now',
+	'Ugyanazt futtatja le, mint a heti automatikus (cron) futás — MINDEN engedélyezett profilt, ÉS ha volt új/frissült tétel, kimegy az email-értesítés is a fenti címzetteknek. (A profilonkénti "Szinkron most" gomb a Profilok oldalon ezzel szemben szándékosan NEM küld emailt, mert azt ott úgyis a képernyőn látod.) Ezzel nem kell konzolból WP-CLI-t futtatni ("wp cron event run mtmt_weekly_sync") egy email-teszthez vagy egy soron kívüli teljes szinkronhoz.' => 'Runs the same thing as the weekly automatic (cron) run — EVERY enabled profile, AND if there were new/updated items, the email notification also goes out to the recipients above. (By contrast, the per-profile "Sync now" button on the Profiles page deliberately does NOT send an email, since you already see the result on screen there.) This means you don\'t have to run WP-CLI from the console ("wp cron event run mtmt_weekly_sync") for an email test or an off-schedule full sync.',
+	'email-értesítés kiküldve.' => 'email notification sent.',
+	'lett volna email, de nincs megadva címzett.' => 'an email would have been sent, but no recipient is configured.',
 );

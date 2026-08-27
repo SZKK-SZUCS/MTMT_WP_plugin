@@ -181,6 +181,16 @@ final class Mtmt_Settings_Page {
 				<?php submit_button( __( 'Mentés', 'mtmt-sync' ) ); ?>
 			</form>
 
+			<h2><?php esc_html_e( 'Teljes szinkron most', 'mtmt-sync' ); ?></h2>
+			<form method="post">
+				<?php wp_nonce_field( $nonce_action ); ?>
+				<input type="hidden" name="mtmt_action" value="run_cron_sync">
+				<p class="description">
+					<?php esc_html_e( 'Ugyanazt futtatja le, mint a heti automatikus (cron) futás — MINDEN engedélyezett profilt, ÉS ha volt új/frissült tétel, kimegy az email-értesítés is a fenti címzetteknek. (A profilonkénti "Szinkron most" gomb a Profilok oldalon ezzel szemben szándékosan NEM küld emailt, mert azt ott úgyis a képernyőn látod.) Ezzel nem kell konzolból WP-CLI-t futtatni ("wp cron event run mtmt_weekly_sync") egy email-teszthez vagy egy soron kívüli teljes szinkronhoz.', 'mtmt-sync' ); ?>
+				</p>
+				<?php submit_button( __( 'Teljes szinkron futtatása (mint a heti cron)', 'mtmt-sync' ), 'primary', 'submit', false ); ?>
+			</form>
+
 			<h2><?php esc_html_e( 'Futás-napló (utolsó 20)', 'mtmt-sync' ); ?></h2>
 			<table class="widefat striped">
 				<thead>
@@ -276,6 +286,86 @@ final class Mtmt_Settings_Page {
 			);
 		}
 
+		if ( 'run_cron_sync' === $action ) {
+			return $this->handle_run_cron_sync();
+		}
+
 		return null;
+	}
+
+	/**
+	 * A "Teljes szinkron most" gomb — ugyanaz a kódút, amit a heti cron is
+	 * hív (`Mtmt_Sync_Runner::run('cron')`, profil-szűkítés nélkül = MINDEN
+	 * engedélyezett profil), tehát email is mehet, ha volt aktivitás. Ez
+	 * váltja ki, hogy egy email-teszthez vagy egy soron kívüli teljes
+	 * szinkronhoz konzolból kelljen `wp cron event run mtmt_weekly_sync`-ot
+	 * futtatni (megrendelői kérés, docs/decisions.md #87).
+	 *
+	 * @return array{type:string,message:string}
+	 */
+	private function handle_run_cron_sync(): array {
+		if ( function_exists( 'set_time_limit' ) ) {
+			@set_time_limit( 0 ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+		}
+
+		$results = Mtmt_Sync_Runner::run( 'cron' );
+
+		if ( empty( $results ) ) {
+			return array(
+				'type'    => 'error',
+				'message' => __( 'Nincs egyetlen engedélyezett profil sem — nincs mit szinkronizálni.', 'mtmt-sync' ),
+			);
+		}
+
+		$profile_labels = array();
+		foreach ( $this->profile_repo->get_all() as $profile ) {
+			$profile_labels[ (int) $profile['id'] ] = $profile['label'];
+		}
+
+		$parts = array();
+		foreach ( $results as $result ) {
+			$profile_id = (int) ( $result['profile_id'] ?? 0 );
+			$label      = $profile_labels[ $profile_id ] ?? ( '#' . $profile_id );
+
+			if ( ! empty( $result['errors'] ) ) {
+				$parts[] = sprintf(
+					/* translators: 1: profil neve, 2: hibaüzenetek */
+					__( '%1$s: HIBA — %2$s', 'mtmt-sync' ),
+					$label,
+					implode( '; ', $result['errors'] )
+				);
+				continue;
+			}
+
+			$parts[] = sprintf(
+				/* translators: 1: profil neve, 2: uj, 3: frissitett, 4: visszaesett, 5: hianyzo */
+				__( '%1$s: %2$d új, %3$d frissítve (%4$d visszaesett pending-be), %5$d hiányzó', 'mtmt-sync' ),
+				$label,
+				(int) ( $result['inserted'] ?? 0 ),
+				(int) ( $result['updated'] ?? 0 ),
+				(int) ( $result['reverted_to_pending'] ?? 0 ),
+				(int) ( $result['missing'] ?? 0 )
+			);
+		}
+
+		$has_activity = false;
+		foreach ( $results as $result ) {
+			if ( ( $result['inserted'] ?? 0 ) > 0 || ( $result['updated'] ?? 0 ) > 0 ) {
+				$has_activity = true;
+				break;
+			}
+		}
+
+		$summary = implode( ' | ', $parts );
+		if ( $has_activity && Mtmt_Notifier::get_recipients() ) {
+			$summary .= ' — ' . __( 'email-értesítés kiküldve.', 'mtmt-sync' );
+		} elseif ( $has_activity ) {
+			$summary .= ' — ' . __( 'lett volna email, de nincs megadva címzett.', 'mtmt-sync' );
+		}
+
+		return array(
+			'type'    => 'success',
+			'message' => $summary,
+		);
 	}
 }
