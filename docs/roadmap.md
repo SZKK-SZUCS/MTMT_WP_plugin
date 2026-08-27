@@ -447,34 +447,21 @@ megrendelő megerősítette, hogy a javítás után a szinkron sikeres.
   hiányzik. Ez az egyszerű oldalbetöltéssel önmagát helyreállítja, nincs
   szükség manuális deaktiválás/reaktiválásra. Részletek: docs/decisions.md #90.
 
-**Éles ellenőrzéshez** (Local site, wp-admin):
-1. Állítsd a WordPress nyelvét angolra (Beállítások → Általános → Site
-   Language, vagy telepítéskor) — az "MTMT" admin-menü és minden almenü
-   admin-felülete angolul jelenjen meg.
-2. MTMT → Jogosultságok — pipálj be egy másik szerepkört (pl. "Szerkesztő"
-   helyett/mellett egy egyedi szerepkört, ha van) a Moderálás/Besorolás
-   oszlopokban, mentsd — az adott szerepkörű felhasználó azonnal lássa a
-   megfelelő menüt/mezőket, újra-aktiválás nélkül.
-3. Ha van egyéb azonosítós SVG-fájlod, tedd be `assets/img/icons/wos.svg`
-   (vagy `scopus.svg`/`sztaki.svg`/`pubmed.svg`) néven — a widget-kártyán
-   az adott forráshoz mostantól az ikon jelenjen meg pill-badge helyett.
-4. Beállítások → "Teljes szinkron most" gomb — nyomd meg, jöjjön vissza egy
-   profilonkénti összefoglaló admin-notice-ban, és ha volt aktivitás és van
-   megadott címzett, kapj róla emailt is (ugyanaz a HTML-email, mint a
-   cronnál) — a futás-naplóban is jelenjen meg egy "cron" trigger-típusú sor.
-5. wp-admin → Pluginok — az MTMT Sync sorában, Deaktiválás mellett jelenjen
-   meg piros "Adatok törlése / alaphelyzet" link. Kattintásra jöjjön egy
-   `confirm()` dialog; OK után a moderációs lista, a Profilok, a Területek
-   ürüljön ki, a futás-napló is legyen üres — a Beállítások (címzettek,
-   funkció-kapcsolók, Jogosultságok oldal) viszont maradjon változatlan.
-6. Futtasd újra a kézi szinkront (Beállítások → "Teljes szinkron most", vagy
-   Profilok oldal → "Szinkron most") azon a profilon/site-on, ahol korábban
-   "372 új" jelent meg, de a tábla üres maradt — a `wp_mtmt_publications`
-   tábla hiánya miatt (docs/decisions.md #90). Elég egy sima wp-admin
-   oldalbetöltés (bármelyik admin-oldal) az új kód telepítése UTÁN — a
-   séma-ellenőrzés automatikusan helyreállítja a hiányzó táblát, kézi
-   deaktiválás/reaktiválás nélkül. Utána a szinkron már ténylegesen töltse
-   fel a táblát a jelentett darabszámmal.
+**Éles ellenőrzés — MEGERŐSÍTVE (2026-08-27, megrendelő):**
+1. ✅ PUC — a telepített plugin megkapja/felkínálja az új verziót.
+2. ✅ Cron email — sikeresen megérkezik.
+3. ✅ Angol fordítás — működik.
+4. ✅ Role→capability admin UI — működik.
+5. ✅ "Adatok törlése / alaphelyzet" gomb — működik.
+6. ✅ Kézi szinkron a #90-es javítás után — a tábla ténylegesen feltöltődik
+   (a korábbi "372 új, üres tábla" tünet elhárult).
+
+**Még nyitott:**
+- Egyéb azonosítós SVG-ikonok (`assets/img/icons/{wos,scopus,sztaki,pubmed}.svg`)
+  — a megrendelő folyamatban van a beszerzésükkel.
+- **A megrendelő központi cron-pinger job-ját át kell nézni** — jelezte, hogy
+  szerinte "nem jó" (a README-ben dokumentált A) opció mintája alapján
+  állította össze); a pontos kódot külön küldi el egyeztetésre.
 
 ## Backlog — még nincs fázishoz kötve
 
