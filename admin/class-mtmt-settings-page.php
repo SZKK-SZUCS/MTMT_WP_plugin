@@ -1,45 +1,30 @@
 <?php
 /**
- * Admin oldal: email-értesítés címzettjei + futás-napló (CLAUDE.md §6, §14/5).
+ * Beállítások oldal: funkció-kapcsolók, placeholder-kép, email-értesítés,
+ * ütemezés, kézi szinkron, futás-napló.
  *
  * @package Mtmt_Sync
  */
 
 defined( 'ABSPATH' ) || exit;
 
-/**
- * `manage_options`-hoz kötve, mint a profil-oldal — ez is site-config, nem
- * napi moderáció. Jövőbeli fázisok globális kapcsolói (szakmai terület
- * opt-in, kiemelt cikk opt-in) is ide kerülnek majd.
- */
 final class Mtmt_Settings_Page {
 
 	private const CAPABILITY   = 'manage_options';
 	private const NONCE_ACTION = 'mtmt_settings_action';
 	private const PAGE_SLUG    = 'mtmt-settings';
 
-	/**
-	 * @var Mtmt_Sync_Log_Repository
-	 */
+	/** @var Mtmt_Sync_Log_Repository */
 	private $log_repo;
 
-	/**
-	 * @var Mtmt_Query_Profile_Repository
-	 */
+	/** @var Mtmt_Query_Profile_Repository */
 	private $profile_repo;
 
-	/**
-	 * @param Mtmt_Sync_Log_Repository       $log_repo
-	 * @param Mtmt_Query_Profile_Repository  $profile_repo
-	 */
 	public function __construct( Mtmt_Sync_Log_Repository $log_repo, Mtmt_Query_Profile_Repository $profile_repo ) {
 		$this->log_repo     = $log_repo;
 		$this->profile_repo = $profile_repo;
 	}
 
-	/**
-	 * `admin_menu`-ből hívva — a top-level "MTMT" (Mtmt_Publications_Page) alá, almenüként.
-	 */
 	public function add_menu_page(): void {
 		add_submenu_page(
 			Mtmt_Publications_Page::PAGE_SLUG,
@@ -51,9 +36,6 @@ final class Mtmt_Settings_Page {
 		);
 	}
 
-	/**
-	 * Az oldal renderelése + POST-kezelés.
-	 */
 	public function render(): void {
 		if ( ! current_user_can( self::CAPABILITY ) ) {
 			wp_die( esc_html__( 'Nincs jogosultságod ehhez az oldalhoz.', 'mtmt-sync' ) );
@@ -104,7 +86,7 @@ final class Mtmt_Settings_Page {
 					</label>
 				</p>
 				<p class="description">
-					<?php esc_html_e( 'Ezen a site-on kategorizálod-e a publikációkat szakmai terület szerint (pl. "Autonóm járművek", "Robotika"), mindegyik területhez egy külön WP-aloldallal. Nem minden telepítésen kell — ha kikapcsolod: a gazdagító űrlapon nincs terület-választó, a widgeteken nincs terület-badge/szűrő. A területek listáját a "Területek" almenüben szerkesztheted.', 'mtmt-sync' ); ?>
+					<?php esc_html_e( 'Publikációkat szakmai terület szerint sorolhatsz be (pl. Autonóm járművek, Robotika), mindegyikhez saját aloldallal. A területek listáját a Területek menüben szerkesztheted.', 'mtmt-sync' ); ?>
 				</p>
 				<p>
 					<label>
@@ -113,18 +95,18 @@ final class Mtmt_Settings_Page {
 					</label>
 				</p>
 				<p class="description">
-					<?php esc_html_e( 'Kiemelt cikkeket lehet megjelölni a moderációs listán, és külön widgettel (szakmai terület aloldalakon) csak ezeket lehet majd kiemelten megjeleníteni. Ha ki van kapcsolva: a gazdagító űrlapon nincs "kiemelt cikk" jelölő, és a hozzá tartozó widget nem lesz elérhető Elementorban.', 'mtmt-sync' ); ?>
+					<?php esc_html_e( 'Fontos cikkeket kiemeltként jelölhetsz meg a moderációs listán — ezeket egy külön widget is meg tudja jeleníteni.', 'mtmt-sync' ); ?>
 				</p>
 				<?php submit_button( __( 'Mentés', 'mtmt-sync' ) ); ?>
 			</form>
 
-			<h2><?php esc_html_e( 'Widget — placeholder-kép', 'mtmt-sync' ); ?></h2>
+			<h2><?php esc_html_e( 'Alapértelmezett borítókép', 'mtmt-sync' ); ?></h2>
 			<form method="post">
 				<?php wp_nonce_field( $nonce_action ); ?>
 				<input type="hidden" name="mtmt_action" value="save_widget">
 				<table class="form-table">
 					<tr>
-						<th><?php esc_html_e( 'Alap placeholder-kép', 'mtmt-sync' ); ?></th>
+						<th><?php esc_html_e( 'Kép', 'mtmt-sync' ); ?></th>
 						<td>
 							<div id="mtmt-placeholder-preview">
 								<?php if ( $placeholder_image_id ) : ?>
@@ -139,7 +121,7 @@ final class Mtmt_Settings_Page {
 								<button type="button" class="button" id="mtmt-remove-placeholder"><?php esc_html_e( 'Visszaállítás alapértelmezettre', 'mtmt-sync' ); ?></button>
 							</p>
 							<p class="description">
-								<?php esc_html_e( 'Ez a kép jelenik meg a widget-kártyán azoknál a jóváhagyott publikációknál, amelyekhez nincs feltöltve egyedi indexkép — a publikáció címe automatikusan rákerül a kép aljára (CLAUDE.md §14/8). Ha üresen hagyod, a pluginhoz csomagolt alapértelmezett képet használja.', 'mtmt-sync' ); ?>
+								<?php esc_html_e( 'Ez a kép jelenik meg azoknál a jóváhagyott publikációknál, amelyeknek nincs saját borítóképe — a cím automatikusan rákerül. Ha nem választasz képet, a plugin alapértelmezett képe jelenik meg.', 'mtmt-sync' ); ?>
 							</p>
 						</td>
 					</tr>
@@ -159,7 +141,7 @@ final class Mtmt_Settings_Page {
 						return;
 					}
 					frame = wp.media( {
-						title: <?php echo wp_json_encode( __( 'Placeholder-kép kiválasztása', 'mtmt-sync' ) ); ?>,
+						title: <?php echo wp_json_encode( __( 'Kép kiválasztása', 'mtmt-sync' ) ); ?>,
 						multiple: false,
 						library: { type: 'image' }
 					} );
@@ -189,7 +171,7 @@ final class Mtmt_Settings_Page {
 					<textarea id="mtmt-recipients" name="recipients" rows="4" class="large-text code"><?php echo esc_textarea( $recipients ); ?></textarea>
 				</p>
 				<p class="description">
-					<?php esc_html_e( 'Ha üres, nem megy ki email. Csak a heti automatikus (cron) futásról küld értesítést, ha volt új vagy frissült tétel — kézi/CLI szinkronnál nem, mert azt az admin úgyis a képernyőn látja. Az email fejlécében megjelenő logó a pluginba van beégetve (kiadói/rendszer-email), nem site-onként állítható — lásd assets/img/mfui-logo.png.', 'mtmt-sync' ); ?>
+					<?php esc_html_e( 'Ha üresen hagyod, nem megy ki email. Csak a heti automatikus futásról érkezik értesítés, ha volt új vagy frissült publikáció.', 'mtmt-sync' ); ?>
 				</p>
 				<?php submit_button( __( 'Mentés', 'mtmt-sync' ) ); ?>
 			</form>
@@ -224,15 +206,14 @@ final class Mtmt_Settings_Page {
 					<?php if ( $next_run_ts ) : ?>
 						<?php
 						printf(
-							/* translators: %s: következő automatikus futás dátuma/időpontja */
-							esc_html__( 'Következő automatikus futás: %s (a site saját időzónájában, Beállítások → Általános).', 'mtmt-sync' ),
+							/* translators: %s: következő futás dátuma/időpontja */
+							esc_html__( 'Következő automatikus futás: %s.', 'mtmt-sync' ),
 							esc_html( wp_date( 'Y-m-d H:i', $next_run_ts ) )
 						);
 						?>
 					<?php else : ?>
-						<?php esc_html_e( 'Jelenleg nincs beütemezve automatikus futás — mentsd el az ütemezést, hogy létrejöjjön.', 'mtmt-sync' ); ?>
+						<?php esc_html_e( 'Jelenleg nincs beütemezve automatikus futás — mentsd el, hogy létrejöjjön.', 'mtmt-sync' ); ?>
 					<?php endif; ?>
-					<?php esc_html_e( 'Ez csak akkor fut le ténylegesen a megadott időpontban, ha van, ami kiváltja a WP-cron feldolgozását (látogató-vezérelt oldalbetöltés, vagy egy külső "pinger", ami rendszeresen meglátogatja a wp-cron.php végpontot) — lásd a README cron-dokumentációját.', 'mtmt-sync' ); ?>
 				</p>
 				<?php submit_button( __( 'Ütemezés mentése', 'mtmt-sync' ) ); ?>
 			</form>
@@ -242,9 +223,9 @@ final class Mtmt_Settings_Page {
 				<?php wp_nonce_field( $nonce_action ); ?>
 				<input type="hidden" name="mtmt_action" value="run_cron_sync">
 				<p class="description">
-					<?php esc_html_e( 'Ugyanazt futtatja le, mint a heti automatikus (cron) futás — MINDEN engedélyezett profilt, ÉS ha volt új/frissült tétel, kimegy az email-értesítés is a fenti címzetteknek. (A profilonkénti "Szinkron most" gomb a Profilok oldalon ezzel szemben szándékosan NEM küld emailt, mert azt ott úgyis a képernyőn látod.) Ezzel nem kell konzolból WP-CLI-t futtatni ("wp cron event run mtmt_weekly_sync") egy email-teszthez vagy egy soron kívüli teljes szinkronhoz.', 'mtmt-sync' ); ?>
+					<?php esc_html_e( 'Azonnal lefuttatja a szinkronizálást minden bekapcsolt profilra. Ha volt új vagy frissült publikáció, email is megy a fenti címzetteknek.', 'mtmt-sync' ); ?>
 				</p>
-				<?php submit_button( __( 'Teljes szinkron futtatása (mint a heti cron)', 'mtmt-sync' ), 'primary', 'submit', false ); ?>
+				<?php submit_button( __( 'Szinkron futtatása', 'mtmt-sync' ), 'primary', 'submit', false ); ?>
 			</form>
 
 			<h2><?php esc_html_e( 'Futás-napló (utolsó 20)', 'mtmt-sync' ); ?></h2>
@@ -338,7 +319,7 @@ final class Mtmt_Settings_Page {
 
 			return array(
 				'type'    => 'success',
-				'message' => __( 'Mentve. Az újonnan generált placeholder-képek már az új alapképet használják — a korábban legenerált (cache-elt) képek a lemezen maradnak, de a widget nem hivatkozik rájuk többé.', 'mtmt-sync' ),
+				'message' => __( 'Mentve.', 'mtmt-sync' ),
 			);
 		}
 
@@ -354,11 +335,6 @@ final class Mtmt_Settings_Page {
 	}
 
 	/**
-	 * A heti automatikus szinkron nap/óra ütemezésének mentése
-	 * (megrendelői kérés: "lehet-e időzíteni a cron futását pl hétfőnként
-	 * hajnalra", docs/decisions.md #98). `Mtmt_Cron::save_schedule()` csak
-	 * akkor ütemez újra, ha ténylegesen változott az érték.
-	 *
 	 * @return array{type:string,message:string}
 	 */
 	private function handle_save_schedule(): array {
@@ -380,20 +356,16 @@ final class Mtmt_Settings_Page {
 			'message' => $next_run
 				? sprintf(
 					/* translators: %s: kovetkezo automatikus futas datuma/idopontja */
-					__( 'Mentve, az ütemezés frissítve. Következő automatikus futás: %s.', 'mtmt-sync' ),
+					__( 'Mentve. Következő automatikus futás: %s.', 'mtmt-sync' ),
 					wp_date( 'Y-m-d H:i', $next_run )
 				)
-				: __( 'Mentve, de az újraütemezés valamiért nem sikerült — ellenőrizd a WP-cron beállításait.', 'mtmt-sync' ),
+				: __( 'Mentve, de az ütemezés beállítása nem sikerült.', 'mtmt-sync' ),
 		);
 	}
 
 	/**
-	 * A "Teljes szinkron most" gomb — ugyanaz a kódút, amit a heti cron is
-	 * hív (`Mtmt_Sync_Runner::run('cron')`, profil-szűkítés nélkül = MINDEN
-	 * engedélyezett profil), tehát email is mehet, ha volt aktivitás. Ez
-	 * váltja ki, hogy egy email-teszthez vagy egy soron kívüli teljes
-	 * szinkronhoz konzolból kelljen `wp cron event run mtmt_weekly_sync`-ot
-	 * futtatni (megrendelői kérés, docs/decisions.md #87).
+	 * Ugyanaz a lefutás, amit a heti automatikus szinkron is elindítana —
+	 * minden bekapcsolt profilra, email-értesítéssel, ha volt aktivitás.
 	 *
 	 * @return array{type:string,message:string}
 	 */
@@ -407,7 +379,7 @@ final class Mtmt_Settings_Page {
 		if ( empty( $results ) ) {
 			return array(
 				'type'    => 'error',
-				'message' => __( 'Nincs egyetlen engedélyezett profil sem — nincs mit szinkronizálni.', 'mtmt-sync' ),
+				'message' => __( 'Nincs egyetlen bekapcsolt profil sem — nincs mit szinkronizálni.', 'mtmt-sync' ),
 			);
 		}
 

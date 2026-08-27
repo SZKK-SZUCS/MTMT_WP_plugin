@@ -1,35 +1,22 @@
 <?php
 /**
- * Email-értesítés a heti sync után, ha volt új/frissült tétel (CLAUDE.md §14/5).
+ * Email-értesítés a heti szinkron után, ha volt új/frissült tétel. A
+ * címzett-lista globális (wp_options), nem profilonkénti. A fejléc-logó a
+ * pluginba van becsomagolva (nem site-onként állítható) — minden site-on
+ * ugyanaz a logó megy ki.
  *
  * @package Mtmt_Sync
  */
 
 defined( 'ABSPATH' ) || exit;
 
-/**
- * Globális, site-szintű címzett-lista (wp_options), nem profilonkénti — lásd
- * docs/decisions.md #24/#5. Csak akkor küld, ha van legalább egy új VAGY
- * frissített (beleértve a pending-be visszaesetteket is) tétel valamelyik
- * profil eredményében.
- *
- * FRISSÍTVE (megrendelői kérés, 2026-08, docs/decisions.md #74-78): HTML-email,
- * világos, designolt háttérrel + a becsomagolt kiadói logóval (jelenleg
- * `assets/img/mfui-logo.png`, lásd LOGO_CANDIDATES). A logó a PLUGINBA van
- * becsomagolva, NEM site-onként, admin médiatárból választható — ez
- * rendszer/kiadói email (a "MTMT Sync" doboz-terméké), minden site-on
- * ugyanaz a fejléc-kép megy ki, konzisztensen a megrendelővel (nem a
- * kliens szervezet saját brandje).
- */
 final class Mtmt_Notifier {
 
 	const OPTION_RECIPIENTS = 'mtmt_notification_recipients';
 
 	/**
-	 * A becsomagolt email-logó lehetséges fájlnevei, ebben a sorrendben
-	 * próbálva (az első létező nyer). PNG/JPG ajánlott — SVG-t a legtöbb
-	 * emailkliens (pl. Outlook, Gmail-alkalmazások) NEM renderel megbízhatóan,
-	 * ezért szándékosan nincs a listában.
+	 * A becsomagolt email-logó lehetséges fájlnevei (az első létező nyer).
+	 * Csak PNG/JPG — SVG-t a legtöbb emailkliens nem renderel megbízhatóan.
 	 *
 	 * @var string[]
 	 */
@@ -105,14 +92,9 @@ final class Mtmt_Notifier {
 	}
 
 	/**
-	 * Teljes, minimális HTML-dokumentum (nem csak egy `<div>`-fragment) —
-	 * explicit, VILÁGOS `<body>`-háttér kell, mert a becsomagolt logó sötét
-	 * (navy) feliratú, átlátszó/fehér alapra tervezve (docs/decisions.md #78) —
-	 * egy esetleges sötét emailkliens-háttéren (pl. dark mode) a felirat
-	 * olvashatatlanná válna, ha nem adunk neki saját, világos "kártyát".
-	 * Csak inline stílusok (a legtöbb emailkliens nem futtat `<style>`
-	 * blokkot megbízhatóan) — nincs multipart/alternative szöveges változat,
-	 * ez tudatos egyszerűsítés.
+	 * Csak inline stílusok (emailkliensek nem futtatnak megbízhatóan
+	 * `<style>` blokkot). Explicit világos háttér, mert a becsomagolt logó
+	 * sötét feliratú, átlátszó alapra tervezve.
 	 *
 	 * @param array[]           $results
 	 * @param array<int,string> $profile_labels
@@ -122,9 +104,6 @@ final class Mtmt_Notifier {
 		$site_name = esc_html( get_bloginfo( 'name' ) );
 		$logo_url  = self::get_logo_url();
 
-		// A becsomagolt logó (assets/img/mfui-logo.png) sötét navy szín-
-		// világával összehangolt paletta — a hangsúly-szín a logó teal
-		// csík árnyalatához igazítva.
 		$navy   = '#16233f';
 		$muted  = '#5b6b7c';
 		$accent = '#16aebd';
@@ -177,7 +156,7 @@ final class Mtmt_Notifier {
 		}
 
 		$out .= '<div style="text-align:center;margin:28px 0 6px;">';
-		$out .= '<a href="' . esc_url( admin_url( 'admin.php?page=mtmt-profiles' ) ) . '" style="background-color:' . esc_attr( $accent ) . ';color:#ffffff;padding:12px 26px;border-radius:8px;text-decoration:none;font-size:14px;font-weight:bold;display:inline-block;">';
+		$out .= '<a href="' . esc_url( admin_url( 'admin.php?page=' . Mtmt_Publications_Page::PAGE_SLUG . '&status=pending' ) ) . '" style="background-color:' . esc_attr( $accent ) . ';color:#ffffff;padding:12px 26px;border-radius:8px;text-decoration:none;font-size:14px;font-weight:bold;display:inline-block;">';
 		$out .= esc_html__( 'Jóváhagyás megnyitása', 'mtmt-sync' );
 		$out .= '</a></div>';
 		$out .= '</div>'; // padding:28px 32px

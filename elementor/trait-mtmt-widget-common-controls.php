@@ -1,21 +1,6 @@
 <?php
 /**
- * Közös Elementor-controlok az "A" és "B" widgethez (Fázis 5 utólagos
- * kiegészítés, élő visszajelzés alapján, lásd docs/decisions.md #60):
- *
- * 1. Minden korábban kőbe vésett ("statikus") felirat mostantól szerkeszthető
- *    a widget Tartalom fülén ("Szövegek" szekció) — pl. a fejléc-cím, a
- *    kereső helyőrző szövege, az üres-lista üzenet, a lapozó "előző/következő"
- *    felirata.
- * 2. Egy Stílus fül (Elementor Style-tab) — színek (a widget.css-ben már
- *    amúgy is CSS-változóként tárolt kiemelő/szegély/másodlagos/halvány-háttér
- *    szín), tipográfia (cím/kártya-cím/törzsszöveg), kártya-megjelenés
- *    (háttér, lekerekítés, belső margó).
- *
- * Trait, mert két widget-osztály (`Mtmt_Widget_All_Publications`,
- * `Mtmt_Widget_Topic_Publications`) osztozik rajta — mindkettő
- * `\Elementor\Widget_Base`-t terjeszt ki, a trait csak a közös
- * control-regisztrációt DRY-osítja, nem önálló osztály.
+ * Közös Elementor-controlok (szövegek + stílus) az "A" és "B" widgethez.
  *
  * @package Mtmt_Sync
  */
@@ -25,12 +10,7 @@ defined( 'ABSPATH' ) || exit;
 trait Mtmt_Widget_Common_Controls {
 
 	/**
-	 * "Szövegek" szekció a Tartalom fülön — csak azokhoz a kulcsokhoz ad
-	 * controlt, amik szerepelnek a `$defaults`-ban, így az "A" és "B" widget
-	 * a saját releváns mezőkészletét kapja (pl. a terület-szűrő felirata csak
-	 * "A"-nál értelmes).
-	 *
-	 * @param array<string,string> $defaults kulcs => jelenlegi (korábban hardcode-olt) alapérték.
+	 * @param array<string,string> $defaults kulcs => alapérték.
 	 */
 	protected function register_mtmt_text_controls( array $defaults ): void {
 		$this->start_controls_section(
@@ -84,12 +64,6 @@ trait Mtmt_Widget_Common_Controls {
 		$this->end_controls_section();
 	}
 
-	/**
-	 * Stílus fül: színek, tipográfia, kártya-megjelenés. A színek a
-	 * widget.css-ben már meglévő CSS-változókat (`--mtmt-accent` stb.)
-	 * írják felül `{{WRAPPER}} .mtmt-widget`-en — egyetlen ponton hatnak,
-	 * a css minden szabálya ezekre a változókra épül.
-	 */
 	protected function register_mtmt_style_controls(): void {
 		$this->start_controls_section(
 			'mtmt_style_colors_section',

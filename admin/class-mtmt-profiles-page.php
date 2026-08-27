@@ -1,84 +1,45 @@
 <?php
 /**
- * Admin oldal: query profilok — "dobozos" scope-konfiguráció UI-ból.
+ * Admin oldal: query profilok — mely publikációkat kérdezze le a szinkron.
  *
  * @package Mtmt_Sync
  */
 
 defined( 'ABSPATH' ) || exit;
 
-/**
- * Settings-szerű admin képernyő a wp_mtmt_query_profiles kezelésére.
- *
- * `manage_options`-hoz kötve, KÜLÖN a mtmt_moderate/mtmt_classify
- * capability-któl (docs/decisions.md #12) — a scope beállítása site-config,
- * nem napi moderációs feladat.
- */
 final class Mtmt_Profiles_Page {
 
 	private const CAPABILITY   = 'manage_options';
 	private const NONCE_ACTION = 'mtmt_profile_action';
 	private const PAGE_SLUG    = 'mtmt-profiles';
 
-	/**
-	 * Hány mintarekordot kérünk le előnézetnél (nem mentünk, nem indítunk syncet).
-	 */
+	/** Hány mintarekordot mutat az előnézet. */
 	private const PREVIEW_SAMPLE_SIZE = 5;
 
-	/**
-	 * Ha a találatszám ennél nagyobb, figyelmeztetünk, hogy valószínűleg NEM
-	 * érvényesült a szűrés (az MTMT csendben ignorálja az ismeretlen cond-ot —
-	 * docs/field-map.md dokumentált mintája: ~5000/becsült 11M = a teljes
-	 * adatbázis). Ez csak egy heurisztikus jelzés, NEM biztos jel — a
-	 * mintarekordok vizuális átnézése a fő ellenőrzési eszköz.
-	 */
+	/** Ennél nagyobb találatszámnál figyelmeztetünk, hogy a szűrés valószínűleg hibás. */
 	private const PREVIEW_WARNING_THRESHOLD = 2000;
 
-	/**
-	 * @var Mtmt_Query_Profile_Repository
-	 */
+	/** @var Mtmt_Query_Profile_Repository */
 	private $profiles;
 
-	/**
-	 * @var Mtmt_Api_Client
-	 */
+	/** @var Mtmt_Api_Client */
 	private $api_client;
 
-	/**
-	 * Előnézet-eredmény a legutóbbi POST-ból (csak akkor van értéke, ha az
-	 * `mtmt_action=preview` sikeresen lefutott ebben a kérésben).
-	 *
-	 * @var array{total:?int,estimated:?int,looks_wide:bool,items:array[]}|null
-	 */
+	/** @var array{total:?int,estimated:?int,looks_wide:bool,items:array[]}|null */
 	private $preview_result = null;
 
-	/**
-	 * A legutóbb beküldött "Új profil" mezőértékek — előnézet (vagy sikertelen
-	 * létrehozás) után ezekkel töltjük vissza az űrlapot, hogy ne kelljen
-	 * újra begépelni.
-	 *
-	 * @var array{label:string,scope_type:string,scope_value:string,doi_only:bool}|null
-	 */
+	/** @var array{label:string,scope_type:string,scope_value:string,doi_only:bool}|null */
 	private $repopulate = null;
 
-	/**
-	 * @param Mtmt_Query_Profile_Repository $profiles
-	 * @param Mtmt_Api_Client                $api_client Csak az előnézethez kell.
-	 */
 	public function __construct( Mtmt_Query_Profile_Repository $profiles, Mtmt_Api_Client $api_client = new Mtmt_Api_Client() ) {
 		$this->profiles   = $profiles;
 		$this->api_client = $api_client;
 	}
 
-	/**
-	 * `admin_menu`-ből hívva — a top-level "MTMT" (Mtmt_Publications_Page) alá,
-	 * almenüként. `manage_options`-hoz kötve, ezért a `mtmt_moderate`-only
-	 * felhasználók a top-level "MTMT" menüt látják, de ezt az almenüt nem.
-	 */
 	public function add_menu_page(): void {
 		add_submenu_page(
 			Mtmt_Publications_Page::PAGE_SLUG,
-			__( 'MTMT — Query profilok', 'mtmt-sync' ),
+			__( 'MTMT — Profilok', 'mtmt-sync' ),
 			__( 'Profilok', 'mtmt-sync' ),
 			self::CAPABILITY,
 			self::PAGE_SLUG,
@@ -86,9 +47,6 @@ final class Mtmt_Profiles_Page {
 		);
 	}
 
-	/**
-	 * Az oldal renderelése + POST-kezelés.
-	 */
 	public function render(): void {
 		if ( ! current_user_can( self::CAPABILITY ) ) {
 			wp_die( esc_html__( 'Nincs jogosultságod ehhez az oldalhoz.', 'mtmt-sync' ) );
@@ -99,8 +57,8 @@ final class Mtmt_Profiles_Page {
 		$nonce_action = self::NONCE_ACTION;
 		?>
 		<div class="wrap">
-			<h1><?php esc_html_e( 'MTMT Publikációk — Query profilok', 'mtmt-sync' ); ?></h1>
-			<p><?php esc_html_e( 'A query profilok határozzák meg, mely MTMT-publikációkat húzza be a szinkron. Intézmény- vagy szerző-azonosító sehol nincs kódba írva — az itt, profilonként adható meg.', 'mtmt-sync' ); ?></p>
+			<h1><?php esc_html_e( 'MTMT Publikációk — Profilok', 'mtmt-sync' ); ?></h1>
+			<p><?php esc_html_e( 'Itt állíthatod be, mely publikációkat kérdezze le a rendszer az MTMT-ből.', 'mtmt-sync' ); ?></p>
 
 			<?php if ( $notice ) : ?>
 				<div class="notice notice-<?php echo esc_attr( $notice['type'] ); ?>">
@@ -113,7 +71,7 @@ final class Mtmt_Profiles_Page {
 					<tr>
 						<th><?php esc_html_e( 'ID', 'mtmt-sync' ); ?></th>
 						<th><?php esc_html_e( 'Név', 'mtmt-sync' ); ?></th>
-						<th><?php esc_html_e( 'Feltétel (cond)', 'mtmt-sync' ); ?></th>
+						<th><?php esc_html_e( 'Szűrés', 'mtmt-sync' ); ?></th>
 						<th><?php esc_html_e( 'Engedélyezve', 'mtmt-sync' ); ?></th>
 						<th><?php esc_html_e( 'Utolsó futás', 'mtmt-sync' ); ?></th>
 						<th><?php esc_html_e( 'Művelet', 'mtmt-sync' ); ?></th>
@@ -175,7 +133,7 @@ final class Mtmt_Profiles_Page {
 			</table>
 
 			<h2><?php esc_html_e( 'Új profil', 'mtmt-sync' ); ?></h2>
-			<p class="description"><?php esc_html_e( 'Egy profil határozza meg, mely MTMT-publikációkat kérdezze le a rendszer szinkronizáláskor. Egy site-on több profil is lehet (pl. kutatócsoportonként); a behúzott publikációk mindig "függőben" státusszal kerülnek be, jóváhagyás előtt nem jelennek meg nyilvánosan.', 'mtmt-sync' ); ?></p>
+			<p class="description"><?php esc_html_e( 'Több profilt is létrehozhatsz, pl. kutatócsoportonként. A behúzott publikációk mindig jóváhagyásra várnak, addig nem jelennek meg a weboldalon.', 'mtmt-sync' ); ?></p>
 
 			<?php if ( $this->preview_result ) : $pv = $this->preview_result; ?>
 				<div class="notice notice-info">
@@ -185,23 +143,23 @@ final class Mtmt_Profiles_Page {
 						if ( null !== $pv['total'] ) {
 							printf(
 								/* translators: %d: találatok száma */
-								esc_html__( 'Összesen %d találat felelne meg ennek a szűrésnek (a profil még NINCS elmentve, semmi sem került be a szinkronba).', 'mtmt-sync' ),
+								esc_html__( 'Összesen %d találat (a profil még nincs elmentve).', 'mtmt-sync' ),
 								$pv['total']
 							);
 						} elseif ( null !== $pv['estimated'] ) {
 							printf(
 								/* translators: %d: becsult talalatszam */
-								esc_html__( 'Becsült találatszám: kb. %d (az MTMT csak becslést adott vissza; a profil még NINCS elmentve).', 'mtmt-sync' ),
+								esc_html__( 'Becsült találatszám: kb. %d (a profil még nincs elmentve).', 'mtmt-sync' ),
 								$pv['estimated']
 							);
 						} else {
-							esc_html_e( 'A találatszám nem állapítható meg a válaszból (a profil még NINCS elmentve).', 'mtmt-sync' );
+							esc_html_e( 'A találatszám nem állapítható meg.', 'mtmt-sync' );
 						}
 						?>
 					</p>
 					<?php if ( $pv['looks_wide'] ) : ?>
 						<p style="color:#b32d2e;font-weight:600;">
-							<?php esc_html_e( '⚠ Ez gyanúsan nagy szám — valószínűleg NEM érvényesült a szűrésed (az MTMT csendben figyelmen kívül hagyja az ismeretlen/rosszul megadott feltételt, és gyakorlatilag a teljes MTMT-adatbázist adná vissza). Ellenőrizd az MTID-et/feltételt a mentés előtt.', 'mtmt-sync' ); ?>
+							<?php esc_html_e( '⚠ Ez gyanúsan sok találat — valószínűleg hibás a megadott azonosító vagy szűrés. Ellenőrizd mentés előtt.', 'mtmt-sync' ); ?>
 						</p>
 					<?php endif; ?>
 					<?php if ( ! empty( $pv['items'] ) ) : ?>
@@ -236,7 +194,7 @@ final class Mtmt_Profiles_Page {
 						<th><label for="mtmt-label"><?php esc_html_e( 'Profil neve', 'mtmt-sync' ); ?></label></th>
 						<td>
 							<input type="text" id="mtmt-label" name="label" class="regular-text" value="<?php echo esc_attr( $rp['label'] ); ?>" required>
-							<p class="description"><?php esc_html_e( 'Csak belső azonosításra szolgál (pl. melyik kutatócsoport/intézmény profilja) — a nyilvános oldalon sehol nem jelenik meg.', 'mtmt-sync' ); ?></p>
+							<p class="description"><?php esc_html_e( 'Csak neked segít azonosítani a profilt, a weboldalon nem jelenik meg.', 'mtmt-sync' ); ?></p>
 						</td>
 					</tr>
 					<tr>
@@ -245,7 +203,7 @@ final class Mtmt_Profiles_Page {
 							<label><input type="radio" name="scope_type" value="institute" <?php checked( $rp['scope_type'], 'institute' ); ?>> <?php esc_html_e( 'Intézmény MTID', 'mtmt-sync' ); ?></label><br>
 							<label><input type="radio" name="scope_type" value="authors" <?php checked( $rp['scope_type'], 'authors' ); ?>> <?php esc_html_e( 'Szerző MTID-lista (vesszővel elválasztva)', 'mtmt-sync' ); ?></label><br>
 							<label><input type="radio" name="scope_type" value="advanced" <?php checked( $rp['scope_type'], 'advanced' ); ?>> <?php esc_html_e( 'Haladó — nyers cond JSON', 'mtmt-sync' ); ?></label>
-							<p class="description"><?php esc_html_e( 'Melyik MTMT-mező alapján szűrjön: egy adott intézmény összes publikációja, egy konkrét szerző-lista publikációi, vagy (haladó felhasználóknak) egy tetszőleges, kézzel megadott feltétel-lista.', 'mtmt-sync' ); ?></p>
+							<p class="description"><?php esc_html_e( 'Válaszd ki, mi alapján szűrjön: egy intézmény összes publikációja, vagy konkrét szerzők publikációi. A "Haladó" beállítást csak akkor használd, ha tudod, mit csinálsz.', 'mtmt-sync' ); ?></p>
 						</td>
 					</tr>
 					<tr>
@@ -253,7 +211,7 @@ final class Mtmt_Profiles_Page {
 						<td>
 							<input type="text" id="mtmt-value" name="scope_value" class="regular-text" placeholder="pl. 19662" value="<?php echo esc_attr( $rp['value'] ); ?>">
 							<p class="description">
-								<?php esc_html_e( 'Intézmény esetén az MTMT intézmény-MTID (pl. https://m2.mtmt.hu/api/institute/19662 -> 19662). Szerzőknél MTID-lista vesszővel. Haladónál: [{"field":"...","op":"...","value":"..."}]', 'mtmt-sync' ); ?>
+								<?php esc_html_e( 'Intézménynél az MTMT-azonosító száma (pl. 19662). Szerzőknél az azonosítók vesszővel elválasztva.', 'mtmt-sync' ); ?>
 							</p>
 						</td>
 					</tr>
@@ -262,7 +220,7 @@ final class Mtmt_Profiles_Page {
 						<td>
 							<label><input type="checkbox" name="doi_only" value="1" <?php checked( $rp['doi_only'] ); ?>> <?php esc_html_e( 'Csak DOI azonosítóval rendelkező rekordok', 'mtmt-sync' ); ?></label>
 							<p class="description">
-								<?php esc_html_e( 'Tapasztalati érték: egy tesztintézményen a rekordok kb. felének volt DOI-ja — ez kb. felére csökkentheti a behúzott tételszámot.', 'mtmt-sync' ); ?>
+								<?php esc_html_e( 'Ez körülbelül a felére csökkentheti a behúzott publikációk számát.', 'mtmt-sync' ); ?>
 							</p>
 						</td>
 					</tr>
@@ -275,7 +233,7 @@ final class Mtmt_Profiles_Page {
 						<?php esc_html_e( 'Profil létrehozása', 'mtmt-sync' ); ?>
 					</button>
 				</p>
-				<p class="description"><?php esc_html_e( 'Az "Előnézet" a beírt szűrésből lekér 5 mintarekordot az MTMT-től (mentés és szinkron-indítás nélkül) — így ellenőrizhető, hogy tényleg a várt publikációk jönnének-e, mielőtt elmented a profilt.', 'mtmt-sync' ); ?></p>
+				<p class="description"><?php esc_html_e( 'Az "Előnézet" megmutat 5 mintát a szűrés eredményéből, mentés nélkül.', 'mtmt-sync' ); ?></p>
 			</form>
 		</div>
 		<?php
@@ -352,14 +310,9 @@ final class Mtmt_Profiles_Page {
 	}
 
 	/**
-	 * Előnézet: NEM ment semmit, NEM indít syncet — csak egy `size=5` mintát
-	 * kér le a beírt scope-ból, hogy elgépelt MTID/rosszul szűrő cond ne
-	 * derüljön csak az ELSŐ teljes szinkronnál ki (megrendelői kérés,
-	 * docs/roadmap.md "Profil-előnézet").
+	 * Előnézet: nem ment semmit, nem indít syncet.
 	 *
-	 * @return array{type:string,message:string}|null NULL sikeres előnézetnél —
-	 *         ilyenkor a `$this->preview_result` panel kommunikál, nincs
-	 *         szükség külön "Mentve"-szerű banner-re.
+	 * @return array{type:string,message:string}|null NULL sikeres előnézetnél.
 	 */
 	private function handle_preview(): ?array {
 		$label      = isset( $_POST['label'] ) ? sanitize_text_field( wp_unslash( $_POST['label'] ) ) : '';
@@ -382,8 +335,7 @@ final class Mtmt_Profiles_Page {
 			$conditions[] = Mtmt_Query_Profile_Repository::doi_only_condition();
 		}
 
-		// depth=1 kritikus (docs/field-map.md) -> e nélkül a mapper nem tudna
-		// szerzőneveket adni a mintasorokhoz (authorships[] csak depth=1-től jön).
+		// depth=1 kell a szerzőnevekhez.
 		$result = $this->api_client->get_page(
 			'publication',
 			$conditions,
@@ -515,12 +467,6 @@ final class Mtmt_Profiles_Page {
 	}
 
 	/**
-	 * Kézi "Szinkron most" — bármikor elindítható, nem csak cronból/CLI-ből
-	 * (CLAUDE.md §14/6). Szinkron HTTP-requestben fut; nagyobb intézménynél
-	 * ez timeoutba futhat — a `set_time_limit(0)` csak a PHP-oldali korlátot
-	 * emeli, a webszerver/proxy saját timeoutját nem. Ha ez élesben problémát
-	 * okoz, ez a pont válik async/AJAX-progress-szé (lásd docs/roadmap.md).
-	 *
 	 * @return array{type:string,message:string}
 	 */
 	private function handle_sync_now(): array {

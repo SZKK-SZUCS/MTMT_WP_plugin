@@ -7,48 +7,27 @@
 
 defined( 'ABSPATH' ) || exit;
 
-/**
- * Ez a top-level "MTMT" menü — `mtmt_moderate` capabilityhez kötve, mert ezt
- * használják nap mint nap a moderátorok (nem `manage_options`, mint a Profilok/
- * Beállítások almenük). A projektazonosító-ellenőrzés (checkbox) `mtmt_classify`-hoz
- * kötött külön (CLAUDE.md §8.3) — a form megjelenik moderate-only usernek is,
- * de az ellenőrzött-pipát nem tudja állítani.
- */
 final class Mtmt_Publications_Page {
 
 	const PAGE_SLUG = 'mtmt';
 
 	private const NONCE_ACTION_ENRICH = 'mtmt_enrich_action';
 
-	/**
-	 * @var Mtmt_Publication_Repository
-	 */
+	/** @var Mtmt_Publication_Repository */
 	private $repository;
 
-	/**
-	 * @var Mtmt_Query_Profile_Repository
-	 */
+	/** @var Mtmt_Query_Profile_Repository */
 	private $profile_repo;
 
-	/**
-	 * @var Mtmt_Topic_Area_Repository
-	 */
+	/** @var Mtmt_Topic_Area_Repository */
 	private $topic_area_repo;
 
-	/**
-	 * @param Mtmt_Publication_Repository       $repository
-	 * @param Mtmt_Query_Profile_Repository     $profile_repo
-	 * @param Mtmt_Topic_Area_Repository        $topic_area_repo
-	 */
 	public function __construct( Mtmt_Publication_Repository $repository, Mtmt_Query_Profile_Repository $profile_repo, Mtmt_Topic_Area_Repository $topic_area_repo ) {
 		$this->repository      = $repository;
 		$this->profile_repo    = $profile_repo;
 		$this->topic_area_repo = $topic_area_repo;
 	}
 
-	/**
-	 * `admin_menu`-ből hívva.
-	 */
 	public function add_menu_page(): void {
 		$pending    = $this->repository->count_by_status()['pending'] ?? 0;
 		$menu_title = __( 'MTMT', 'mtmt-sync' );
@@ -72,9 +51,7 @@ final class Mtmt_Publications_Page {
 	}
 
 	/**
-	 * `admin_init`-ből hívva — MINDEN mutáló műveletet itt kell elintézni,
-	 * MIELŐTT a page callback (render) lefutna, mert addigra a fejlécek már
-	 * elmentek és wp_safe_redirect() már nem működne.
+	 * `admin_init`-ből hívva — a redirect miatt a page callback előtt kell lefutnia.
 	 */
 	public function maybe_handle_request(): void {
 		if ( ! isset( $_GET['page'] ) || self::PAGE_SLUG !== $_GET['page'] ) {
@@ -105,9 +82,6 @@ final class Mtmt_Publications_Page {
 		}
 	}
 
-	/**
-	 * Az oldal renderelése (csak megjelenítés — a mutáció addigra megtörtént).
-	 */
 	public function render(): void {
 		if ( ! current_user_can( Mtmt_Capabilities::MODERATE ) ) {
 			wp_die( esc_html__( 'Nincs jogosultságod ehhez az oldalhoz.', 'mtmt-sync' ) );
@@ -152,9 +126,6 @@ final class Mtmt_Publications_Page {
 		exit;
 	}
 
-	/**
-	 * A WP_List_Table saját tömeges-művelet mezőit (action/action2 + id[]) dolgozza fel.
-	 */
 	private function handle_bulk_action(): void {
 		$action = '';
 		if ( ! empty( $_REQUEST['action'] ) && '-1' !== $_REQUEST['action'] ) {
@@ -200,9 +171,6 @@ final class Mtmt_Publications_Page {
 		exit;
 	}
 
-	/**
-	 * A gazdagító űrlap mentése.
-	 */
 	private function handle_save_enrichment(): void {
 		check_admin_referer( self::NONCE_ACTION_ENRICH );
 
@@ -217,8 +185,7 @@ final class Mtmt_Publications_Page {
 			'project_ids'       => isset( $_POST['project_ids'] ) ? sanitize_text_field( wp_unslash( $_POST['project_ids'] ) ) : '',
 		);
 
-		// A projektazonosító ELLENŐRZÉSE külön capability (CLAUDE.md §8.3) —
-		// moderate-only felhasználó a szöveget mentheti, a pipát nem.
+		// Az "Ellenőrizve" pipát csak classify-jogosultsággal lehet állítani.
 		if ( current_user_can( Mtmt_Capabilities::CLASSIFY ) ) {
 			$fields['project_verified'] = ! empty( $_POST['project_verified'] );
 		}
@@ -229,9 +196,7 @@ final class Mtmt_Publications_Page {
 
 		$this->repository->save_enrichment( $id, $fields, get_current_user_id() );
 
-		// A terület-besorolás is classify-hoz kötött (CLAUDE.md §7: "A besorolás
-		// kézi, a moderáció része, és külön jogosultsághoz kötött") — moderate-only
-		// user beküldése itt szerveroldalon csendben figyelmen kívül marad.
+		// A terület-besorolás is classify-jogosultsághoz kötött.
 		if ( get_option( 'mtmt_enable_topic_areas' ) && current_user_can( Mtmt_Capabilities::CLASSIFY ) ) {
 			$area_ids = isset( $_POST['topic_areas'] ) && is_array( $_POST['topic_areas'] )
 				? array_map( 'absint', wp_unslash( $_POST['topic_areas'] ) )
@@ -253,9 +218,6 @@ final class Mtmt_Publications_Page {
 		exit;
 	}
 
-	/**
-	 * A lista nézet.
-	 */
 	private function render_list_view(): void {
 		$years    = $this->repository->get_distinct_years();
 		$profiles = array_map(
@@ -282,9 +244,6 @@ final class Mtmt_Publications_Page {
 		<?php
 	}
 
-	/**
-	 * A szerkesztő/gazdagító nézet.
-	 */
 	private function render_edit_view(): void {
 		$id   = isset( $_GET['id'] ) ? absint( $_GET['id'] ) : 0;
 		$item = $id ? $this->repository->find( $id ) : null;
@@ -354,7 +313,7 @@ final class Mtmt_Publications_Page {
 								<button type="button" class="button" id="mtmt-select-thumbnail"><?php esc_html_e( 'Kép kiválasztása', 'mtmt-sync' ); ?></button>
 								<button type="button" class="button" id="mtmt-remove-thumbnail"><?php esc_html_e( 'Eltávolítás', 'mtmt-sync' ); ?></button>
 							</p>
-							<p class="description"><?php esc_html_e( 'A publikáció mellett megjelenő kép a nyilvános listában (pl. kiadói logó vagy egyedi illusztráció). Az MTMT nem ad ilyet — ha üresen hagyod, a widget egy alapértelmezett képet fog mutatni a cím alapján.', 'mtmt-sync' ); ?></p>
+							<p class="description"><?php esc_html_e( 'A publikáció mellett megjelenő kép a weboldalon. Ha nem választasz, a rendszer egy alapértelmezett képet készít a cím alapján.', 'mtmt-sync' ); ?></p>
 						</td>
 					</tr>
 					<tr>
@@ -364,7 +323,7 @@ final class Mtmt_Publications_Page {
 							<?php if ( ! empty( $item['funding_text'] ) ) : ?>
 								<p class="description"><?php esc_html_e( 'MTMT-ből importált (nem szerkeszthető, csak felülírható):', 'mtmt-sync' ); ?> <?php echo esc_html( $item['funding_text'] ); ?></p>
 							<?php endif; ?>
-							<p class="description"><?php esc_html_e( 'Milyen támogatás/pályázat állt a publikáció mögött. Az MTMT ezt jelenleg nem szolgáltatja automatikusan, ezért ez mindig kézi bevitel — ha kitöltöd, ez jelenik meg a nyilvános oldalon a publikáció mellett.', 'mtmt-sync' ); ?></p>
+							<p class="description"><?php esc_html_e( 'Milyen támogatás/pályázat állt a publikáció mögött — ha kitöltöd, megjelenik a weboldalon.', 'mtmt-sync' ); ?></p>
 						</td>
 					</tr>
 					<tr>
@@ -376,7 +335,7 @@ final class Mtmt_Publications_Page {
 							<?php elseif ( ! empty( $item['project_verified'] ) ) : ?>
 								<span class="description">✓ <?php esc_html_e( 'Ellenőrizve', 'mtmt-sync' ); ?></span>
 							<?php endif; ?>
-							<p class="description"><?php esc_html_e( 'Az NKFIH vagy más pályázati azonosító(k), amikhez a publikáció köthető (pl. "K 123456"). Az MTMT ezt sem adja automatikusan. Az "Ellenőrizve" pipa azt jelzi, hogy valaki kézzel leellenőrizte a fenti azonosító helyességét — ezt rögzíti, ki és mikor tette.', 'mtmt-sync' ); ?></p>
+							<p class="description"><?php esc_html_e( 'A publikációhoz tartozó pályázati azonosító(k), pl. "K 123456". Az "Ellenőrizve" pipa jelzi, hogy valaki már leellenőrizte.', 'mtmt-sync' ); ?></p>
 						</td>
 					</tr>
 					<?php if ( $topic_areas_on ) : ?>
@@ -415,7 +374,7 @@ final class Mtmt_Publications_Page {
 											<?php echo esc_html( $area['label'] ); ?>
 										</label>
 									<?php endforeach; ?>
-									<p class="description"><?php esc_html_e( 'Melyik szakmai terület aloldalán jelenjen meg ez a publikáció. Több is választható, vagy egy sem.', 'mtmt-sync' ); ?></p>
+									<p class="description"><?php esc_html_e( 'Melyik szakmai terület aloldalán jelenjen meg. Több is választható.', 'mtmt-sync' ); ?></p>
 								<?php endif; ?>
 							</td>
 						</tr>
@@ -425,7 +384,7 @@ final class Mtmt_Publications_Page {
 							<th><?php esc_html_e( 'Kiemelt cikk', 'mtmt-sync' ); ?></th>
 							<td>
 								<label><input type="checkbox" name="is_featured" value="1" <?php checked( ! empty( $item['is_featured'] ) ); ?>> <?php esc_html_e( 'Megjelölés kiemelt cikkként', 'mtmt-sync' ); ?></label>
-								<p class="description"><?php esc_html_e( 'A kiemelt cikként megjelölt publikációk fognak megjelenni a szakmai terület aloldalak widgetjén (csak a kiemeltek, nem az összes jóváhagyott tétel).', 'mtmt-sync' ); ?></p>
+								<p class="description"><?php esc_html_e( 'A kiemelt cikkek jelennek meg a szakmai terület aloldalak widgetjén.', 'mtmt-sync' ); ?></p>
 							</td>
 						</tr>
 					<?php endif; ?>
@@ -470,9 +429,6 @@ final class Mtmt_Publications_Page {
 		<?php
 	}
 
-	/**
-	 * Flash-üzenet a `mtmt_notice` query-argból.
-	 */
 	private function render_notice(): void {
 		if ( empty( $_GET['mtmt_notice'] ) ) {
 			return;

@@ -363,6 +363,7 @@ gombot ("Profil létrehozása" mellett, attól függetlenül) — a beírt scope
 (intézmény/szerző/haladó + DOI-only) összeépített `cond_json`-nal kimegy az
 MTMT API-hoz `size=5`, `depth=1` paraméterrel (NEM menti el a profilt, NEM
 indít syncet — csak olvas), és megmutatja:
+
 - `paging.totalElements` / `totalEstimatedElements` — ha ez gyanúsan nagy
   (küszöb: 2000, heurisztika, docs/decisions.md #71), figyelmeztet, hogy a
   cond valószínűleg nem érvényesült.
@@ -375,11 +376,13 @@ indít syncet — csak olvas), és megmutatja:
 17 unit-teszt-assertion (a `render()` valós HTML-kimenetét vizsgálva,
 stub `wp_remote_get()`-tel) — összesen 123/123 zöld a teljes suite-ban.
 
-*Kész, ha:* az Előnézet gomb nem menti el a profilt, mutatja a találatszámot
-+ mintacímeket, figyelmeztet gyanúsan nagy találatszámnál, és a "Profil
-létrehozása" gomb ezután is működik ugyanazokkal a mezőértékekkel.
+_Kész, ha:_ az Előnézet gomb nem menti el a profilt, mutatja a találatszámot
+
+- mintacímeket, figyelmeztet gyanúsan nagy találatszámnál, és a "Profil
+  létrehozása" gomb ezután is működik ugyanazokkal a mezőértékekkel.
 
 **Éles ellenőrzéshez** (Local site, wp-admin → Profilok):
+
 1. Tölts ki egy intézmény-MTID-et (pl. a JKK 19662-t), nyomj "Előnézet"-et —
    jelenjen meg a találatszám (kb. 767 körül) + 5 minta-cím/szerző, a profil
    NE kerüljön be a felső listába.
@@ -424,7 +427,7 @@ megrendelő megerősítette, hogy a javítás után a szinkron sikeres.
   mint a heti cron (minden profil + email, ha volt aktivitás), hogy ne kelljen
   konzolból `wp cron event run mtmt_weekly_sync`-ot futtatni egy email-teszthez
   vagy egy soron kívüli teljes szinkronhoz. Megrendelői kérés, docs/decisions.md #87.
-- **"Adatok törlése / alaphelyzet" gomb a Pluginok listaoldalon** — a plugin
+- **"Adatok törlése" gomb a Pluginok listaoldalon** — a plugin
   sorában (Aktiválás/Deaktiválás mellett), az 5 saját táblát üríti
   (`TRUNCATE`), a beállításokat nem érinti. Megrendelői kérés, docs/decisions.md #88.
 - **Kritikus javítás: hamis "sikeres" szinkron-jelentés üres tábla mellett**
@@ -448,11 +451,12 @@ megrendelő megerősítette, hogy a javítás után a szinkron sikeres.
   szükség manuális deaktiválás/reaktiválásra. Részletek: docs/decisions.md #90.
 
 **Éles ellenőrzés — MEGERŐSÍTVE (2026-08-27, megrendelő):**
+
 1. ✅ PUC — a telepített plugin megkapja/felkínálja az új verziót.
 2. ✅ Cron email — sikeresen megérkezik.
 3. ✅ Angol fordítás — működik.
 4. ✅ Role→capability admin UI — működik.
-5. ✅ "Adatok törlése / alaphelyzet" gomb — működik.
+5. ✅ "Adatok törlése" gomb — működik.
 6. ✅ Kézi szinkron a #90-es javítás után — a tábla ténylegesen feltöltődik
    (a korábbi "372 új, üres tábla" tünet elhárult).
 
@@ -503,6 +507,7 @@ a később pótolt ResearchGate-hez #92.
 assertion) zöld, lint tiszta.
 
 **Éles ellenőrzéshez** (Local site, Elementor szerkesztő):
+
 1. Egy publikáción, ahol van WoS/Scopus/SZTAKI/PubMed/ResearchGate
    azonosító, nézd meg a kártyát — az ikonok most már ténylegesen
    betöltve jelenjenek meg (nem feliratos pill), a szín kövesse a szöveg
@@ -511,7 +516,7 @@ assertion) zöld, lint tiszta.
 2. Widget Tartalom fülön váltogasd az "Egyéb azonosítók megjelenítése"
    beállítást Csak ikon / Csak szöveg / Mindkettő között — a kártyák
    frissüljenek megfelelően (kereséssel/lapozással AJAX-frissítés után is).
-2b. Widget Stílus fülön, "Egyéb azonosítók" szekcióban próbáld ki az "Ikon
+   2b. Widget Stílus fülön, "Egyéb azonosítók" szekcióban próbáld ki az "Ikon
    méret" csúszkát (pl. 24px vagy 30px) — az ikonok láthatóan nagyobbra
    nőjenek, "Csak ikon" módban is ugyanazt a méretet kövessék.
 3. Widget Stílus fülön, "Egyéb azonosítók" szekcióban állíts be egy eltérő
@@ -556,6 +561,7 @@ docs/decisions.md #95.
 assertion) zöld, lint tiszta, i18n újraépítve (256 string).
 
 **Éles ellenőrzéshez** (Local site, Elementor szerkesztő):
+
 1. Nyisd meg az "A" (összesítő) widgetet — az év-fülek alulvonalasak
    legyenek (nem kitöltött pill), a lista soronkénti (nem dobozolt kártya),
    vékony elválasztó vonalakkal.
@@ -598,6 +604,7 @@ Regresszió: `test-fase5-widgets.php` 46→48 assertion, teljes suite (207
 assertion) zöld, lint tiszta, i18n újraépítve (273 string).
 
 **Éles ellenőrzéshez** (Local site, Elementor szerkesztő):
+
 1. Szűkítsd le a böngésző/szerkesztő ablakot fokozatosan (asztali
    szélességtől egészen mobil-szélességig) egy olyan publikáción, aminek
    hosszú kiadványtípusa van (pl. "Folyóiratcikk", "Konferenciaközlemény")
@@ -636,6 +643,7 @@ létre új naplósort. Kiváltó ok és javítás: docs/decisions.md #97.
 zöld, lint tiszta.
 
 **Éles ellenőrzéshez** (JKK site):
+
 1. Egy sima wp-admin oldalbetöltés után (bármelyik admin-oldal) nézd meg
    `wp cron event list`-tel (ha van CLI-hozzáférésed), hogy a
    `mtmt_weekly_sync` szerepel-e a listán, VAGY egyszerűen látogasd meg
@@ -674,6 +682,7 @@ futott, tehát véletlenszerű napra/órára eshetett. Részletek: docs/decision
 assertion) zöld, lint tiszta, i18n újraépítve (289 string).
 
 **Éles ellenőrzéshez** (JKK site, wp-admin):
+
 1. MTMT → Beállítások → "Heti automatikus szinkron ütemezése" — állíts be
    egy nap/óra kombinációt, mentsd — jelenjen meg a "Következő automatikus
    futás" dátum/időpont, ami valóban a beállított napra/órára esik.
@@ -682,6 +691,30 @@ assertion) zöld, lint tiszta, i18n újraépítve (289 string).
 3. Állítsd a napot/órát a közeljövőre (pl. 10 perccel későbbre), várd
    meg — fusson le a szinkron pontosan akkor, egy "cron" sorral a
    futás-naplóban.
+
+## ✅ Teljes szöveg- és kommentár-tisztogatás
+
+**KÉSZ, még nincs élesben validálva.** Megrendelői kérés a demonstrálható
+állapot előtt: minden admin-oldal szövege legyen egyszerű, köznyelvi (a
+kezelők nem IT-szakemberek), a kód-kommentek pedig ne legyenek
+túlmagyarázottak — csak a README maradhat szakmai. Részletek:
+docs/decisions.md #99.
+
+- Végigmentünk minden admin-oldalon (Beállítások, Profilok, Jogosultságok,
+  Területek, moderációs lista+szerkesztő űrlap) és az Elementor
+  widget-kontrollokon — rövidebb, zsargon-mentes szövegek.
+- **Közben talált valódi hiba javítva**: az email "Jóváhagyás megnyitása"
+  gombja a Profilok oldalra mutatott, nem a moderációs listára — most
+  helyesen a jóváhagyásra váró listára visz.
+- A kód hosszú, narratív kommentjei lerövidítve — a részletes indoklás a
+  docs/decisions.md-ben marad, nem duplikálódik a forráskódban.
+
+Teljes suite (234 assertion) zöld, lint tiszta, i18n újraépítve.
+
+**Éles ellenőrzéshez**: menj végig minden admin-oldalon, nézd meg, hogy a
+szövegek érthetőek-e egy nem-technikai kollégának is; próbáld ki az email
+"Jóváhagyás megnyitása" gombját — a moderációs listára kell vinnie,
+"Függőben" szűrővel.
 
 ## Backlog — még nincs fázishoz kötve
 

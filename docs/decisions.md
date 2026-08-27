@@ -638,7 +638,7 @@ set_areas_for_publication()`/`delete()`, és EGYSZER egy teljes
     A [Dimensions.ai](https://www.dimensions.ai) egy ingyenes, DOI-alapú
     idézettség-adatbázis; a `badge.dimensions.ai/badge.js` script egy kis
     beágyazott jelvényt rajzol ki (`<span class="__dimensions_badge_embed__"
-    data-doi="10.xxxx/...">`), ami mutatja, hányszor idézték az adott
+data-doi="10.xxxx/...">`), ami mutatja, hányszor idézték az adott
     publikációt, és rákattintva a Dimensions saját oldalára visz (ott
     listázva az idéző műveket is). Előnye az MTMT saját idézettség-számával
     szemben: a Dimensions adatbázisa folyamatosan, automatikusan frissül a
@@ -656,7 +656,7 @@ set_areas_for_publication()`/`delete()`, és EGYSZER egy teljes
     (`assets/img/icons/{slug}.svg`) automatikusan felismeri és inline-olja
     őket (`Mtmt_External_Id_Icons::get_icon_svg()`), ikon hiányában szépen
     visszaesik a meglévő feliratos pill-badge-re. Az SVG-t NEM `<img
-    src="...">`-ként, hanem közvetlenül a HTML-markupba ágyazva adjuk ki,
+src="...">`-ként, hanem közvetlenül a HTML-markupba ágyazva adjuk ki,
     mert csak így tud a CSS `fill: currentColor`-ral színt váltani rajta —
     egy `<img>`-be ágyazott SVG-t a böngésző nem engedi CSS-ből színezni. Az
     esetleges explicit `fill="..."` attribútumokat betöltéskor eltávolítjuk
@@ -683,7 +683,7 @@ set_areas_for_publication()`/`delete()`, és EGYSZER egy teljes
     hiányzó előírása). Saját, kis PHP-tokenizeres kinyerő eszköz
     (`bin/i18n/build.php`) — WP-CLI i18n parancs vagy Node-alapú i18n-tooling
     NEM kellett hozzá (CLAUDE.md §2 "nincs build-lépés" elve), sima `php
-    bin/i18n/build.php` a teljes folyamat. A 228 kinyert string mindegyikéhez
+bin/i18n/build.php` a teljes folyamat. A 228 kinyert string mindegyikéhez
     kézzel felvett angol fordítás van (`bin/i18n/translations-en.php`, a
     kézzel karbantartott igazságforrás) — ha egy stringhez nincs fordítás,
     a szkript listázza és HIBÁVAL kilép, nem generál hiányos fájlokat.
@@ -730,7 +730,7 @@ set_areas_for_publication()`/`delete()`, és EGYSZER egy teljes
     Nincs hozzá külön unit-teszt — vékony admin-glue réteg már tesztelt
     komponensek (`Mtmt_Sync_Runner`, `Mtmt_Notifier`) fölött, valódi HTTP-t
     hívna egy mock nélkül; élő teszteléssel ellenőrzött.
-88. **"Adatok törlése / alaphelyzet" a Pluginok listaoldalon** (megrendelői
+88. **"Adatok törlése" a Pluginok listaoldalon** (megrendelői
     kérés: "kellene egy olyan gomb hogy minden adat törlése / alaphelyzetbe
     állítás. ez a táblákat kellene resetelje"). `plugin_action_links_{basename}`
     szűrővel egy piros linket told be a plugin sorába (Aktiválás/Deaktiválás/
@@ -758,11 +758,11 @@ set_areas_for_publication()`/`delete()`, és EGYSZER egy teljes
     insert-ágon, akkor is, ha a tényleges SQL-írás meghiúsult (`$wpdb->insert()`
     `false`-t ad vissza sikertelen írásnál, pl. hiányzó jogosultság vagy
     adat-integritási hiba esetén — ezt sosem néztük meg). `Mtmt_Sync::
-    run_profile()` `on_page` callbackje ezt vakon elhitte, és minden
+run_profile()` `on_page` callbackje ezt vakon elhitte, és minden
     meghiúsult írást is "sikeresen beszúrt új rekordként" számolt el — innen
     a "372 új", miközben a tábla ténylegesen üres maradt. Ugyanez a
     hibaosztály (visszatérési érték nem ellenőrzött) megvolt a `Mtmt_Reset::
-    reset_now()`-ban is: MySQL-ben a `TRUNCATE TABLE` `DROP`-jogosultságot
+reset_now()`-ban is: MySQL-ben a `TRUNCATE TABLE` `DROP`-jogosultságot
     igényel (nem elég a DELETE/INSERT/UPDATE), egy korlátozott jogú DB-
     felhasználónál ez hiányozhat, és a hívás csendben `false`-t ad vissza.
     Javítás mindhárom helyen:
@@ -785,20 +785,20 @@ set_areas_for_publication()`/`delete()`, és EGYSZER egy teljes
       hibaüzenet-tömb átadására), `maybe_show_notice()` valódi siker- vagy
       hiba-notice-ot mutat ez alapján, tranziens hiányában nem feltételez
       hamis sikert.
-    Fontos: ez a javítás MAGÁT a mögöttes DB-írási hibát nem szünteti meg —
-    azt élesben, a most már felszínre kerülő valódi `$wpdb->last_error`
-    szöveg alapján kell diagnosztizálni a megrendelő következő tesztjéből.
-    A javítás célja kettős: (a) ne jelentsünk hamis sikert, (b) adjunk elég
-    diagnosztikai infót a tényleges ok megtalálásához. Regresszió: 26
-    assertion `test-repository.php`-ban (8-10. tesztesetek, insert- és
-    update-hiba szimulációval), 20 assertion `test-reset.php`-ban (4.
-    teszteset, egy tábla szimulált TRUNCATE-hibájával) — a korábbi
-    tesztesetek (17, ill. 13 assertion) változatlanul, hamis pozitív nélkül
-    futnak tovább, mert a hand-rolled `wpdb`-stubok alapból sikeres írást
-    szimulálnak.
+      Fontos: ez a javítás MAGÁT a mögöttes DB-írási hibát nem szünteti meg —
+      azt élesben, a most már felszínre kerülő valódi `$wpdb->last_error`
+      szöveg alapján kell diagnosztizálni a megrendelő következő tesztjéből.
+      A javítás célja kettős: (a) ne jelentsünk hamis sikert, (b) adjunk elég
+      diagnosztikai infót a tényleges ok megtalálásához. Regresszió: 26
+      assertion `test-repository.php`-ban (8-10. tesztesetek, insert- és
+      update-hiba szimulációval), 20 assertion `test-reset.php`-ban (4.
+      teszteset, egy tábla szimulált TRUNCATE-hibájával) — a korábbi
+      tesztesetek (17, ill. 13 assertion) változatlanul, hamis pozitív nélkül
+      futnak tovább, mert a hand-rolled `wpdb`-stubok alapból sikeres írást
+      szimulálnak.
 90. **#89 tényleges kiváltó oka megtalálva élesben: a `wp_mtmt_publications`
     tábla fizikailag nem létezett** (`Table 'local.wp_mtmt_publications'
-    doesn't exist`, a #89-es javítás által most már felszínre hozott valódi
+doesn't exist`, a #89-es javítás által most már felszínre hozott valódi
     MySQL-hibaüzenetből kiderülve). A tábla-hiány oka önmagában rejtve marad
     (feltehetően egy DB-visszaállítás/import a lokális teszt-site-on, ami a
     `wp_options`-t érintette, a saját táblákat nem — a `mtmt_db_version`
@@ -807,7 +807,7 @@ set_areas_for_publication()`/`delete()`, és EGYSZER egy teljes
     `Mtmt_Activator::activate()` a `dbDelta()` hívások után FELTÉTEL NÉLKÜL
     beállította a `mtmt_db_version` opciót "kész"-re — a `dbDelta()` viszont
     nem dob kivételt és nem ad megbízható hibajelzést sikertelen `CREATE
-    TABLE` esetén (a visszatérési tömb csak azt írja le, MIT próbált
+TABLE` esetén (a visszatérési tömb csak azt írja le, MIT próbált
     csinálni, nem hogy sikerült-e). Emiatt a `mtmt_maybe_upgrade_db()`
     (`plugins_loaded`-kor futó önjavító upgrade-ellenőrzés,
     `mtmt-sync.php`) a verzió-opció egyezésére hagyatkozva sosem próbálta
@@ -825,9 +825,9 @@ set_areas_for_publication()`/`delete()`, és EGYSZER egy teljes
       hiányzik — ez önmagában, kód-frissítés nélkül, a legközelebbi
       oldalbetöltéskor helyreállítja a hiányzó táblákat, nem kell hozzá
       manuális deaktiválás/reaktiválás.
-    Regresszió: 3 új assertion (`test-activator.php`) — mind az 5 tábla
-    sikeres létrehozása esetén az opció beállítódik, bármelyik tábla
-    hiánya esetén NEM.
+      Regresszió: 3 új assertion (`test-activator.php`) — mind az 5 tábla
+      sikeres létrehozása esetén az opció beállítódik, bármelyik tábla
+      hiánya esetén NEM.
 91. **Betöltött egyéb-azonosítós SVG-ikonok: hiba a színezhetőségben,
     javítva + widget-vezérlők a megjelenítési módhoz/színekhez** (megrendelői
     kérés: a betöltött WoS/Scopus/SZTAKI/PubMed ikonok után "legyen
@@ -844,7 +844,7 @@ set_areas_for_publication()`/`delete()`, és EGYSZER egy teljes
       hanem egy beágyazott `<style>` blokkban, class-szelektorral (pl.
       `.cls-2 { fill: #010101; }`). Egy ilyen, az elemre KÖZVETLENÜL
       illeszkedő CSS-szabály MINDIG felülírja az öröklött `fill:
-      currentColor`-t (az öröklés a cascade leggyengébb tagja, bármelyik
+currentColor`-t (az öröklés a cascade leggyengébb tagja, bármelyik
       közvetlen találat megelőzi, specificitástól függetlenül) — a korábbi
       `get_icon_svg()` csak explicit `fill="..."` attribútumot távolított
       el, ezt a mintát nem kezelte, tehát az ikon-szín widget-beállítás
@@ -870,11 +870,11 @@ set_areas_for_publication()`/`delete()`, és EGYSZER egy teljes
       háttérszín, pill szegély szín, pill lekerekítés — mind CSS-változón
       (`--mtmt-ext-id-*`) keresztül, ugyanaz a minta, mint a meglévő
       `--mtmt-accent`/`--mtmt-border` stb.
-    Regresszió: `test-ext-id-icons.php` 6 -> 16 assertion (a WoS-fixture
-    átírva a valós class/style-alapú mintára, hogy a fix ténylegesen
-    lefedve legyen; új esetek: `text`/`icon`/érvénytelen mód, `<style>`/
-    `class=`/`fill=` teljes hiánya a kimenetből). Teljes teszt-szuit
-    (192 assertion) zöld, repo-szintű `php -l` lint tiszta.
+      Regresszió: `test-ext-id-icons.php` 6 -> 16 assertion (a WoS-fixture
+      átírva a valós class/style-alapú mintára, hogy a fix ténylegesen
+      lefedve legyen; új esetek: `text`/`icon`/érvénytelen mód, `<style>`/
+      `class=`/`fill=` teljes hiánya a kimenetből). Teljes teszt-szuit
+      (192 assertion) zöld, repo-szintű `php -l` lint tiszta.
 92. **5. egyéb-azonosítós ikon: ResearchGate.** A megrendelő egy élő
     widget-kártya screenshotján mutatta, hogy a "ResearchGate publ."
     forrás is feliratos pill-ként jelenik meg (mert eddig nem volt a
@@ -925,22 +925,22 @@ set_areas_for_publication()`/`delete()`, és EGYSZER egy teljes
       alap-rendezettséget javítja, nem egy testreszabható stílusjegy.
     - **Animáció** (mind `transition: 0.15-0.4s ease`, tehát valóban
       "visszafogott", nem feltűnő): kártya hover-emelés (`translateY(-3px)`
-      + megnövelt árnyék) + kép finom zoom (`scale(1.06)`) hoveren; kártyák
-      finom fade-in+slide-up belépő animációja (`@keyframes mtmt-card-in`),
-      ami MINDEN AJAX-fragment-cserénél újra lejátszódik (a böngésző új
-      DOM-elemként kezeli a becserélt kártyákat) — az első 8 kártyára
-      enyhe `nth-child` stagger-rel (0.02s lépésekben), hogy ne váljon
-      zajossá nagy listánál; keresőmező/terület-szűrő fókusz-gyűrű
-      (`color-mix()`-szel a widget kiemelő-színéhez igazodva, nem
-      hardcode-olt szín); év-fül/lapozó-gomb/egyéb-azonosító-badge hover-
-      átmenetek.
+      - megnövelt árnyék) + kép finom zoom (`scale(1.06)`) hoveren; kártyák
+        finom fade-in+slide-up belépő animációja (`@keyframes mtmt-card-in`),
+        ami MINDEN AJAX-fragment-cserénél újra lejátszódik (a böngésző új
+        DOM-elemként kezeli a becserélt kártyákat) — az első 8 kártyára
+        enyhe `nth-child` stagger-rel (0.02s lépésekben), hogy ne váljon
+        zajossá nagy listánál; keresőmező/terület-szűrő fókusz-gyűrű
+        (`color-mix()`-szel a widget kiemelő-színéhez igazodva, nem
+        hardcode-olt szín); év-fül/lapozó-gomb/egyéb-azonosító-badge hover-
+        átmenetek.
     - **Akadálymentesség**: teljes `@media (prefers-reduced-motion: reduce)`
       blokk a végén — minden transition/animation kikapcsolva, a
       hover-transform-ok null-ozva, azoknak a látogatóknak, akik rendszer
       szinten kikapcsolták a mozgást.
-    Nincs hozzá unit-teszt (tisztán CSS-változás, PHP-oldali logika nem
-    érintett) — a teljes PHP teszt-szuit (194 assertion) és a repo-szintű
-    `php -l` lint ettől függetlenül ellenőrizve, változatlanul zöld.
+      Nincs hozzá unit-teszt (tisztán CSS-változás, PHP-oldali logika nem
+      érintett) — a teljes PHP teszt-szuit (194 assertion) és a repo-szintű
+      `php -l` lint ettől függetlenül ellenőrizve, változatlanul zöld.
 95. **Widget vizuális referencia-igazítás egy élő screenshot alapján**
     (megrendelői kérés: "a dizájn hasonlítson jobban erre" + egy BME/TUM-stílusú
     publikációs lista screenshotja). **FONTOS**: a screenshoton szerepelt egy
@@ -1002,23 +1002,23 @@ set_areas_for_publication()`/`delete()`, és EGYSZER egy teljes
       kattintás-kezelője változtatás NÉLKÜL működik minden új gombbal is,
       mert az mindig a `data-page` attribútumot olvassa (a `disabled`
       attribútum natívan megakadályozza a kattintást a szélső oldalakon).
-    Regresszió: `test-fase5-widgets.php` 35 -> 46 assertion (Card_Renderer
-    új markup-szerkezete, számozott lapozó ellipszis-logikája, aria-label-es
-    Előző/Következő). Teljes suite (205 assertion) zöld, repo-szintű
-    `php -l` lint tiszta, i18n újraépítve (256 string, mind lefordítva).
-96. **Élesben talált reszponzivitási hiba a #95-ös típus-badge-pozicionálásban
-    + teljes körű Stílus-vezérlő lefedettség** (megrendelői visszajelzés,
-    Elementor-szerkesztő screenshottal: egy hosszú kiadványtípus-szöveg —
-    "Folyóiratcikk" — belelógott a címbe keskenyebb szélességnél; kérés:
-    "a widgetek minden utolsó elemét lehessen stílusban módosítani...
-    reszponzivitásra nagyon figyelj").
-    - **Kiváltó ok**: a #95-ös típus-badge + nyíl-CTA `position: absolute`-tal
+      Regresszió: `test-fase5-widgets.php` 35 -> 46 assertion (Card_Renderer
+      új markup-szerkezete, számozott lapozó ellipszis-logikája, aria-label-es
+      Előző/Következő). Teljes suite (205 assertion) zöld, repo-szintű
+      `php -l` lint tiszta, i18n újraépítve (256 string, mind lefordítva).
+96. \*\*Élesben talált reszponzivitási hiba a #95-ös típus-badge-pozicionálásban
+    - teljes körű Stílus-vezérlő lefedettség\*\* (megrendelői visszajelzés,
+      Elementor-szerkesztő screenshottal: egy hosszú kiadványtípus-szöveg —
+      "Folyóiratcikk" — belelógott a címbe keskenyebb szélességnél; kérés:
+      "a widgetek minden utolsó elemét lehessen stílusban módosítani...
+      reszponzivitásra nagyon figyelj").
+    * **Kiváltó ok**: a #95-ös típus-badge + nyíl-CTA `position: absolute`-tal
       volt a sor jobb szélére pozicionálva, egy TALÁLGATOTT, fix
       `padding-right: 3.4em` fölé — ez a becslés rövid feliratokra
       (SJR-kvartilis, "Q1") volt kalibrálva, egy hosszú magyar szóra
       ("Folyóiratcikk", "Konferenciaközlemény") nem volt elég hely, a badge
       kilógott a foglalt zónából és ráfeküdt a címre.
-    - **Javítás — architekturális, nem csak "nagyobb szám"**: a típus-badge +
+    * **Javítás — architekturális, nem csak "nagyobb szám"**: a típus-badge +
       nyíl-CTA mostantól egy VALÓDI flex-gyermek (`.mtmt-pub-card-side`,
       `flex: 0 0 auto`), NEM abszolút pozicionálva egy becsült térfogat
       fölé. A flexbox motor a foglalt szélességet mindig a badge tényleges
@@ -1032,7 +1032,7 @@ set_areas_for_publication()`/`delete()`, és EGYSZER egy teljes
       igazodik). Mobilon (≤600px, ahol a sor amúgy is oszloppá vált)
       `order`-rel a side-oszlop a kép ALÁ, a body FÖLÉ kerül, a nyíl-CTA
       elrejtve (a sor egésze marad kattintható).
-    - **Teljes körű Stílus-fül lefedettség** — minden eddig kódba vésett
+    * **Teljes körű Stílus-fül lefedettség** — minden eddig kódba vésett
       vizuális tulajdonság mostantól Elementor-vezérlővel felülírható:
       - Színek: + "Cím szín" (`--mtmt-heading`, korábban csak alapértékként
         létezett, control nélkül).
@@ -1053,18 +1053,18 @@ set_areas_for_publication()`/`delete()`, és EGYSZER egy teljes
       - **Új "Lapozás" szekció**: oldalszám-gombok lekerekítése + az
         aktuális oldal háttér-/szövegszíne (korábban csak a globális
         kiemelő-színt örökölte, nem volt önálló felülírása).
-      Amit SZÁNDÉKOSAN nem tettünk egyedi controllá (megfontolt, nem
-      hanyagságból hagyott hézag): SJR-/típus-badge EGYEDI (determinisztikus)
-      színei (10 külön szín, nem lenne kezelhető UI 10 külön color-pickerrel),
-      elválasztó-vonal vastagsága, animáció-időzítések — ezek implementációs
-      részletek, nem a megrendelő által ténylegesen módosítani kívánt
-      dizájn-jellemzők; ha mégis kell valamelyik, könnyen pótolható.
-    Regresszió: `test-fase5-widgets.php` 46 -> 48 assertion (a
-    `.mtmt-pub-card-side` flex-wrapper jelenléte/hiánya, pozíciója a
-    body-hoz képest). Teljes suite (207 assertion) zöld, repo-szintű
-    `php -l` lint tiszta, i18n újraépítve (273 string, mind lefordítva).
-    A Style-tab control-regisztrációhoz nincs unit-teszt (Elementor-osztályok
-    nélkül nem futtatható ebben a harnessben) — élő ellenőrzéssel validálandó.
+        Amit SZÁNDÉKOSAN nem tettünk egyedi controllá (megfontolt, nem
+        hanyagságból hagyott hézag): SJR-/típus-badge EGYEDI (determinisztikus)
+        színei (10 külön szín, nem lenne kezelhető UI 10 külön color-pickerrel),
+        elválasztó-vonal vastagsága, animáció-időzítések — ezek implementációs
+        részletek, nem a megrendelő által ténylegesen módosítani kívánt
+        dizájn-jellemzők; ha mégis kell valamelyik, könnyen pótolható.
+        Regresszió: `test-fase5-widgets.php` 46 -> 48 assertion (a
+        `.mtmt-pub-card-side` flex-wrapper jelenléte/hiánya, pozíciója a
+        body-hoz képest). Teljes suite (207 assertion) zöld, repo-szintű
+        `php -l` lint tiszta, i18n újraépítve (273 string, mind lefordítva).
+        A Style-tab control-regisztrációhoz nincs unit-teszt (Elementor-osztályok
+        nélkül nem futtatható ebben a harnessben) — élő ellenőrzéssel validálandó.
 97. **Kritikus hiba: a heti `mtmt_weekly_sync` cron-esemény sosem volt
     beütemezve a JKK élő site-on — soha nem volt sikeres automata futás.**
     Élesben, közös hibakereséssel derült ki (docs #89/#90 folytatása,
@@ -1092,7 +1092,7 @@ set_areas_for_publication()`/`delete()`, és EGYSZER egy teljes
     - **Javítás**: pontosan ugyanaz a minta, mint a séma-önjavításnál
       (#89-90) — egy `plugins_loaded`-kor futó `mtmt_maybe_reschedule_cron()`
       (`mtmt-sync.php`) minden betöltéskor ellenőrzi `wp_next_scheduled(
-      Mtmt_Cron::HOOK )`-kal, hogy be van-e ütemezve, és ha nem, meghívja
+  Mtmt_Cron::HOOK )`-kal, hogy be van-e ütemezve, és ha nem, meghívja
       `Mtmt_Cron::activate()`-et — függetlenül attól, hogy a site valaha
       ment-e keresztül a tényleges WP-aktiváláson. Ez egy sima
       oldalbetöltéssel (bármelyik admin-oldal) magától helyreállítja a
@@ -1102,16 +1102,16 @@ set_areas_for_publication()`/`delete()`, és EGYSZER egy teljes
       biztonságosan hívható minden egyes oldalbetöltésnél, gyakorlatilag
       ingyenes (egyetlen olvasás a WP saját cron-tömbjéből), nincs szükség
       a DB-önjavításnál használt drágább féken (verzió-opció) hasonlóra.
-    Regresszió: 10 új assertion (`test-cron-selfheal.php`) — `Mtmt_Cron::
-    activate()` idempotenciája (kétszeri hívás nem duplikál), az önjavító
-    minta közvetlen reprodukciója (hiányzót pótol, meglévőt nem bántja
-    ismételt hívásra sem), `deactivate()`/`add_schedule()` regressziója.
-    Teljes suite (217 assertion) zöld, repo-szintű `php -l` lint tiszta.
-    **A mögöttes ok (a Docker-image/deployment-folyamat, ami a plugint
-    eleve "aktívként" hozza létre az aktiválási hook lefuttatása nélkül)
-    NEM ennek a fixnek a hatásköre** — ez a javítás csak azt biztosítja,
-    hogy a cron-ütemezés MINDIG helyreálljon, származzon bármilyen okból a
-    hiánya.
+      Regresszió: 10 új assertion (`test-cron-selfheal.php`) — `Mtmt_Cron::
+activate()` idempotenciája (kétszeri hívás nem duplikál), az önjavító
+      minta közvetlen reprodukciója (hiányzót pótol, meglévőt nem bántja
+      ismételt hívásra sem), `deactivate()`/`add_schedule()` regressziója.
+      Teljes suite (217 assertion) zöld, repo-szintű `php -l` lint tiszta.
+      **A mögöttes ok (a Docker-image/deployment-folyamat, ami a plugint
+      eleve "aktívként" hozza létre az aktiválási hook lefuttatása nélkül)
+      NEM ennek a fixnek a hatásköre** — ez a javítás csak azt biztosítja,
+      hogy a cron-ütemezés MINDIG helyreálljon, származzon bármilyen okból a
+      hiánya.
 98. **A heti automatikus szinkron ideje (nap + óra) konfigurálhatóvá vált**
     (megrendelői kérdés: "lehet-e időzíteni a cron futását pl hétfőnként
     hajnalra"). Korábban a `Mtmt_Cron::activate()` mindig "most" (`time()`)
@@ -1124,7 +1124,7 @@ set_areas_for_publication()`/`delete()`, és EGYSZER egy teljes
       következő futás időpontját is (`wp_next_scheduled()` alapján).
     - **KRITIKUS tervezési döntés**: a korábbi, WP beépített fix
       604800 másodperces "weekly" ismétlődő ütemezés (`wp_schedule_event(...,
-      'weekly', ...)`) helyett a `Mtmt_Cron` mostantól **önmagát
+'weekly', ...)`) helyett a `Mtmt_Cron` mostantól **önmagát
       újraütemező egyszeri eseményekkel** dolgozik (`wp_schedule_single_event()`
       minden lefutás UTÁN, a KÖVETKEZŐ előfordulást frissen kiszámolva).
       Indoklás: egy fix másodperc-intervallum nyári/téli időszámítás-
@@ -1149,11 +1149,42 @@ set_areas_for_publication()`/`delete()`, és EGYSZER egy teljes
       "weekly" intervallum regisztrálása) megszűnt — a saját eseményünk
       már nem használja a WP beépített recurrence-mechanizmusát, ezért ez
       a kód dead code lett volna.
-    Regresszió: `test-cron-selfheal.php` teljesen újraírva az új
-    architektúrához (10 → 26 assertion) — nap/óra-aritmetika 6 különböző
-    forgatókönyvre (ma-még-nem-múlt-el-az-óra / ma-már-elmúlt / más napon
-    állva / hét közepén / hét végén), alapérték + érvénytelen bemenet
-    clamp-elése, `activate()`/`deactivate()`/`reschedule()` idempotencia és
-    hívás-számlálás, `save_schedule()` változás-detektálása. Teljes suite
-    (233 assertion) zöld, repo-szintű `php -l` lint tiszta, i18n
-    újraépítve (289 string, mind lefordítva).
+      Regresszió: `test-cron-selfheal.php` teljesen újraírva az új
+      architektúrához (10 → 26 assertion) — nap/óra-aritmetika 6 különböző
+      forgatókönyvre (ma-még-nem-múlt-el-az-óra / ma-már-elmúlt / más napon
+      állva / hét közepén / hét végén), alapérték + érvénytelen bemenet
+      clamp-elése, `activate()`/`deactivate()`/`reschedule()` idempotencia és
+      hívás-számlálás, `save_schedule()` változás-detektálása. Teljes suite
+      (233 assertion) zöld, repo-szintű `php -l` lint tiszta, i18n
+      újraépítve (289 string, mind lefordítva).
+99. **Teljes szöveg- és kommentár-tisztogatás** (megrendelői kérés: "nézz át
+    minden oldalt, képernyőt, filet... a felesleges szövegeket, kommenteket
+    távolítsd el... a frontenden ne jelenjen meg felesleges magyarázat...
+    nem IT szakemberek fogják kezelni... egyedül a readme lehet szakmai").
+    - **Admin-felület minden látható szövege** (Beállítások, Profilok,
+      Jogosultságok, Területek, moderációs lista+szerkesztő űrlap,
+      Elementor widget-kontrollok) átírva rövidebb, köznyelvi
+      megfogalmazásra — elhagyva a belső fejlesztési zsargont (MTID,
+      "kapabilitás", "cond JSON" API-példák stb., ahol nem elengedhetetlen),
+      a CLAUDE.md/docs cross-referenciákat, és az ismétlődő magyarázó
+      mellékmondatokat. A törlés-megerősítő szöveg (visszafordíthatatlan
+      művelet) szándékosan megmaradt kellően tájékoztató jellegűnek.
+    - **Élesben talált, valódi hiba javítva közben**: az email-értesítő
+      "Jóváhagyás megnyitása" gombja a Profilok oldalra mutatott
+      (`admin.php?page=mtmt-profiles`), NEM a moderációs listára — most
+      `Mtmt_Publications_Page::PAGE_SLUG`-ra (`&status=pending`-del)
+      mutat, ténylegesen a jóváhagyásra váró tételekhez visz.
+    - **Kód-kommentek**: a hosszú, döntés-naplózó/narratív kommentek
+      (több paragrafusnyi indoklás, `docs/decisions.md #XX`
+      kereszthivatkozások a kód belsejében) lerövidítve 1-3 soros, a
+      tényleges "miért"-re koncentráló jegyzetekre — a részletes
+      indoklás/történet ezután is megvan itt, a decisions.md-ben, nem
+      kell duplikálni a forráskódban. A genuinely kritikus, regressziót
+      megelőző figyelmeztetések (pl. Elementor hook-sorrend, `use`
+      import-elhelyezés, DST-csúszás elkerülése) rövidített formában
+      megmaradtak.
+    Regresszió: 2 teszt frissítve a megváltozott szöveghez (`test-notifier.php`
+    a link-cél javításához +1 assertion, `test-profile-preview.php` a
+    figyelmeztető szöveg új megfogalmazásához). Teljes suite (234
+    assertion) zöld, repo-szintű `php -l` lint tiszta, i18n újraépítve
+    (285 string, mind lefordítva).

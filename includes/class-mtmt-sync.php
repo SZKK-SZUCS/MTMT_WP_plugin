@@ -103,13 +103,7 @@ final class Mtmt_Sync {
 
 				$upsert = $this->publications->upsert( $mapped, $profile_id );
 
-				// KRITIKUS: az `error` mezőt MINDIG előbb kell nézni, mint az
-				// `inserted`/`content_changed`-et — egy sikertelen INSERT/UPDATE
-				// esetén ezek az értékek nem jelentenek tényleges perzisztált
-				// változást, csak azt, amit MEGPRÓBÁLTUNK volna. Élesben talált
-				// hiba (docs/decisions.md #89): korábban ez a check hiányzott,
-				// és egy meghiúsult INSERT is "sikeresen beszúrt új rekordként"
-				// lett elszámolva.
+				// Az `error` mezőt mindig előbb nézzük, mint az inserted/content_changed-et.
 				if ( ! empty( $upsert['error'] ) ) {
 					++$write_failures;
 					if ( count( $write_errors ) < 5 ) {
@@ -118,11 +112,6 @@ final class Mtmt_Sync {
 				} elseif ( $upsert['inserted'] ) {
 					++$result['inserted'];
 				} elseif ( ! empty( $upsert['content_changed'] ) ) {
-					// Csak akkor "frissített", ha a tartalom ténylegesen eltért —
-					// egy változatlan, csak újra lekérdezett rekord NEM az
-					// (különben minden heti sync "frissítettnek" jelentene
-					// mindent, és az email-értesítés mindig kimenne, lásd
-					// docs/decisions.md).
 					++$result['updated'];
 				}
 
@@ -151,7 +140,7 @@ final class Mtmt_Sync {
 		if ( is_wp_error( $pagination_result ) ) {
 			$result['errors'][]   = $pagination_result->get_error_message();
 			$result['duration_s'] = round( microtime( true ) - $started, 2 );
-			// Hibás/megszakadt lapozásnál NINCS missing-diff — lásd docs/decisions.md #11.
+			// Hibás/megszakadt lapozásnál nincs missing-diff.
 			return $result;
 		}
 

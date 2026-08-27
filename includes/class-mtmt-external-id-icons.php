@@ -1,32 +1,23 @@
 <?php
 /**
- * Egyéb azonosítós logó-gombok a widget-kártyán (CLAUDE.md §14/4).
+ * Egyéb azonosítós logó-gombok a widget-kártyán (WoS/Scopus/SZTAKI/…).
+ * A DOI és az "Egyéb URL" külön oszlopban van, ide csak a maradék
+ * azonosítók tartoznak.
  *
- * A DOI és az "Egyéb URL" külön oszlopban van (`doi`, `other_url`) — ide csak
- * a maradék identifier-ek tartoznak (`external_ids`, pl. WoS/Scopus/SZTAKI),
- * lásd Mtmt_Mapper::map_identifiers().
- *
- * FRISSÍTVE (0.9 előkészítés, 2026-08): ha a pluginba be van csomagolva egy
- * egyszínű SVG-ikon az adott forráshoz (`assets/img/icons/{slug}.svg`), azt
- * inline-olja (nem `<img>`-ként — CSS `currentColor`-ral színezhető marad,
- * lásd docs/decisions.md #81). Ikon-fájl hiányában szépen visszaesik a
- * korábbi feliratos "pill" badge-re — egyik forrásnál sem kötelező az SVG.
+ * Ha a pluginba be van csomagolva egy egyszínű SVG-ikon az adott forráshoz
+ * (`assets/img/icons/{slug}.svg`), azt inline-olja (CSS `currentColor`-ral
+ * színezhető). Ikon-fájl hiányában feliratos "pill" badge-re esik vissza.
  *
  * @package Mtmt_Sync
  */
 
 defined( 'ABSPATH' ) || exit;
 
-/**
- * Állapot nélküli renderelő.
- */
 final class Mtmt_External_Id_Icons {
 
 	/**
-	 * Ismert forrásnevek rövid, kártyára szánt felirata ÉS az ikon-fájlnév
-	 * alapja (`assets/img/icons/{slug}.svg`). Ami nincs a listában, azt a
-	 * nyers `source` névvel jelenítjük meg, SVG-ikon nélkül — új MTMT-forrás
-	 * megjelenése esetén sem tűnik el semmi, csak nincs "szép" rövidítése/ikonja.
+	 * Ismert forrásnevek rövid felirata + ikon-fájlnév (`assets/img/icons/{slug}.svg`).
+	 * Ami nincs a listában, azt a nyers `source` névvel jelenítjük meg, ikon nélkül.
 	 *
 	 * @var array<string,array{label:string,slug:string}>
 	 */
@@ -62,10 +53,8 @@ final class Mtmt_External_Id_Icons {
 
 	/**
 	 * @param string|null $external_ids_json Mtmt_Publication_Repository sorának `external_ids` mezője.
-	 * @param string      $mode              'icon' | 'text' | 'both' (alapértelmezett) — widget-szintű
-	 *                                       beállítás (Mtmt_Widget_Common_Controls). 'icon' módban, ha egy
-	 *                                       forráshoz nincs betöltött ikon-fájl, a felirat jelenik meg
-	 *                                       helyette (egy üres/névtelen gomb rosszabb lenne, mint egy felirat).
+	 * @param string      $mode              'icon' | 'text' | 'both' (alapértelmezett). 'icon' módban,
+	 *                                       ha nincs ikon-fájl, a felirat jelenik meg helyette.
 	 * @return string Kész, escape-elt HTML (üres string, ha nincs egyéb azonosító).
 	 */
 	public static function render_buttons( ?string $external_ids_json, string $mode = 'both' ): string {
@@ -130,15 +119,9 @@ final class Mtmt_External_Id_Icons {
 	}
 
 	/**
-	 * Becsomagolt, EGYSZÍNŰ SVG-ikon inline-tartalma, ha a fájl létezik —
-	 * NULL, ha még nincs elhelyezve. A fájl TARTALMA a pluginhoz csomagolt,
-	 * fejlesztő által elhelyezett, MEGBÍZHATÓ erőforrás (nem látogatói input),
-	 * ezért közvetlenül kerül a kimenetbe — ugyanaz a bizalmi szint, mint a
-	 * becsomagolt placeholder-kép/email-logó fájloknál.
-	 *
-	 * Az esetleges explicit `fill="..."` attribútumokat eltávolítjuk, hogy a
-	 * CSS (`fill: currentColor`) mindig tudja színezni az ikont, függetlenül
-	 * attól, hogyan lett exportálva az eredeti SVG.
+	 * Becsomagolt, egyszínű SVG-ikon inline-tartalma, ha a fájl létezik —
+	 * null, ha még nincs elhelyezve. Fejlesztő által elhelyezett, megbízható
+	 * fájl, ezért közvetlenül kerül a kimenetbe, escape-elés nélkül.
 	 *
 	 * @param string $slug
 	 * @return string|null
@@ -166,22 +149,12 @@ final class Mtmt_External_Id_Icons {
 		$svg = preg_replace( '/<\?xml[^>]*\?>/i', '', $svg );
 		$svg = preg_replace( '/<!DOCTYPE[^>]*>/i', '', $svg );
 
-		// KRITIKUS (élesben betöltött ikonoknál talált hiba): néhány export
-		// (pl. Illustrator "Export as SVG") a színt NEM explicit fill="..."
-		// attribútumként adja a path-ra, hanem egy beágyazott <style> blokkban,
-		// class-szelektorral (pl. ".cls-2 { fill: #010101; }"). Egy ilyen, az
-		// elemre KÖZVETLENÜL illeszkedő szabály MINDIG felülírja az öröklött
-		// `fill: currentColor`-t (az öröklés a CSS-cascade leggyengébb tagja,
-		// bármelyik közvetlenül illeszkedő szabály megelőzi, függetlenül a
-		// specificitástól) — enélkül a javítás nélkül a widget ikon-szín
-		// beállítása látszólag hatástalan maradna ezekre a fájlokra, az ikon
-		// mindig az eredeti exportált színben (itt: közel fekete) jelenne meg.
+		// Néhány export (pl. Illustrator) a színt egy beágyazott <style>
+		// blokkban, class-szelektorral adja meg (nem fill="..." attribútumként)
+		// — ez felülírná az öröklött currentColor-t, ezért ki kell szedni.
 		$svg = preg_replace( '/<style\b[^>]*>.*?<\/style>/is', '', $svg );
 		$svg = preg_replace( '/\bfill="[^"]*"/i', '', $svg );
-		// Az így "üresen maradt" class/id/data-name attribútumok nem törnek el
-		// semmit (nincs mire hivatkozniuk), de több inline-olt ikon esetén
-		// (pl. egy publikációnak WoS ÉS Scopus azonosítója is van) elkerüljük
-		// az ismétlődő id-kat egy oldalon belül.
+		// Elkerüljük az ismétlődő id-kat, ha egy publikációnak több azonosítója is van.
 		$svg = preg_replace( '/\s(?:class|id|data-name)="[^"]*"/i', '', $svg );
 		$svg = trim( $svg );
 

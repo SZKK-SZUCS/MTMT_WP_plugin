@@ -1,27 +1,17 @@
 <?php
 /**
- * "A" — összesítő központi widget (CLAUDE.md §14/10).
+ * "A" — összesítő publikációs lista widget: minden jóváhagyott tétel,
+ * év-fülekkel, kereséssel és (ha be van kapcsolva) terület-szűrővel.
  *
- * Minden jóváhagyott tétel (nem csak kiemelt), év-fülekkel, kereséssel és
- * (ha be van kapcsolva) szakmai terület szerinti szűrő-lenyílóval.
- *
- * Ez a fájl csak akkor töltődik be, ha az Elementor fut (lásd Mtmt_Elementor_Loader) —
- * ezért itt bátran ki lehet terjeszteni az \Elementor\Widget_Base-t.
- *
- * FONTOS: az Elementor néhány kódúton (pl. szerkesztő-AJAX, dokumentum-betöltés)
- * saját maga hozza létre a widget-példányt `new static($data, $args)` alakban —
- * ezért ez az osztály SZÁNDÉKOSAN nem kap semmilyen extra konstruktor-paramétert
- * (nincs dependency injection), a repository-kat a render()-ben, lazy módon építi
- * fel — ugyanaz a minta, mint a mtmt-sync.php admin-hookjaiban (`global $wpdb`).
+ * Az Elementor néhány kódúton saját maga hozza létre a widget-példányt
+ * (`new static($data, $args)`), ezért nincs egyedi konstruktor-paraméter —
+ * a repository-kat a render() építi fel.
  *
  * @package Mtmt_Sync
  */
 
 defined( 'ABSPATH' ) || exit;
 
-/**
- * Elementor widget: összesítő publikációs lista.
- */
 final class Mtmt_Widget_All_Publications extends \Elementor\Widget_Base {
 
 	use Mtmt_Widget_Common_Controls;
@@ -61,9 +51,6 @@ final class Mtmt_Widget_All_Publications extends \Elementor\Widget_Base {
 		return array( 'mtmt', 'publikáció', 'publication', 'tudományos' );
 	}
 
-	/**
-	 * Widget-beállítások (CLAUDE.md §9.1).
-	 */
 	protected function register_controls() {
 		$this->start_controls_section(
 			'mtmt_content_section',
@@ -122,7 +109,7 @@ final class Mtmt_Widget_All_Publications extends \Elementor\Widget_Base {
 				'label'       => __( 'DOI megjelenítése', 'mtmt-sync' ),
 				'type'        => \Elementor\Controls_Manager::SWITCHER,
 				'default'     => 'yes',
-				'description' => __( 'DOI hiányában ez dönti el, hogy a teljes kártya az MTMT nyilvános oldalára linkeljen-e (CLAUDE.md §14/12).', 'mtmt-sync' ),
+				'description' => __( 'DOI hiányában ez dönti el, hogy a teljes kártya az MTMT oldalára linkeljen-e.', 'mtmt-sync' ),
 			)
 		);
 
@@ -170,9 +157,7 @@ final class Mtmt_Widget_All_Publications extends \Elementor\Widget_Base {
 	}
 
 	/**
-	 * Kezdeti (nem-AJAX) szerver-oldali render — a további interakció
-	 * (keresés/év-váltás/lapozás/terület-szűrés) az assets/js/widget-frontend.js
-	 * AJAX-fragment cseréjével történik.
+	 * Kezdeti render — a keresés/év-váltás/lapozás/szűrés AJAX-frissítéssel történik.
 	 */
 	protected function render() {
 		if ( ! class_exists( 'Mtmt_Publication_Repository' ) ) {
@@ -195,8 +180,6 @@ final class Mtmt_Widget_All_Publications extends \Elementor\Widget_Base {
 		$show_sjr_badge      = 'yes' === $settings['show_sjr_badge'];
 		$ext_id_badge_mode   = in_array( $settings['ext_id_badge_mode'] ?? '', array( 'icon', 'text' ), true ) ? $settings['ext_id_badge_mode'] : 'both';
 
-		// Korábban kőbe vésett feliratok — most a widget Tartalom fülén,
-		// a "Szövegek" szekcióban szerkeszthetők (docs/decisions.md #60).
 		$header_eyebrow        = (string) $settings['header_eyebrow'];
 		$header_title          = (string) $settings['header_title'];
 		$header_subtitle       = (string) ( $settings['header_subtitle'] ?? '' );

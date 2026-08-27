@@ -21,24 +21,11 @@ define( 'MTMT_PLUGIN_FILE', __FILE__ );
 define( 'MTMT_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'MTMT_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 
-// A `use` importáló deklarációnak a fájl felső szintjén kell lennie — NEM
-// tehető feltétel (if) belsejébe, az PHP parse errort adna. Maga az alias
-// önmagában ártalmatlan (nem tölt be semmit, nem is kell hozzá, hogy a
-// PucFactory osztály ténylegesen létezzen); a tényleges betöltés/hívás
-// lent, `is_admin()` mögött történik.
+// A `use` a fájl tetején kell legyen, nem tehető if-be (parse error lenne).
 use YahnisElsts\PluginUpdateChecker\v5\PucFactory;
 
-/**
- * Fázis 6 — GitHub-alapú frissítés a Plugin Update Checker (PUC) v5-tel
- * (CLAUDE.md §10.3). A könyvtár a repóba bevendorolva (`lib/plugin-update-checker/`),
- * nem külső csomagkezelőből töltődik be futásidőben. Csak admin-kontextusban
- * kell — a frontendnek semmi köze a frissítés-ellenőrzéshez, ezért `is_admin()`
- * mögé kötve, hogy ne terheljen minden nyilvános oldalbetöltést.
- *
- * A repo PUBLIKUS (`SZKK-SZUCS/MTMT_WP_plugin`), nem kell hitelesítő token.
- * Ha valaha privátra váltana: `setAuthentication(<token>)`, a tokent SOHA ne
- * commitold — konstansként (wp-config.php) vagy szűrőn keresztül add át.
- */
+// Automatikus frissítés GitHubról (nyilvános repó, nem kell token). Csak
+// adminban fut, a frontendnek nincs köze hozzá.
 if ( is_admin() ) {
 	require_once MTMT_PLUGIN_DIR . 'lib/plugin-update-checker/plugin-update-checker.php';
 
@@ -48,9 +35,6 @@ if ( is_admin() ) {
 		'mtmt-sync'
 	);
 	$mtmt_update_checker->setBranch( 'main' );
-	// Nincs build-lépés (CLAUDE.md §2) -> a GitHub-generált forrás-zip elég,
-	// a PUC kezeli a mappa-wrappert. Ha valaha build kerülne a workflow-ba és
-	// csatolt asset-tel adnánk ki release-t, itt kellene: enableReleaseAssets().
 }
 
 require_once MTMT_PLUGIN_DIR . 'includes/class-mtmt-activator.php';
@@ -86,41 +70,23 @@ register_activation_hook( __FILE__, array( 'Mtmt_Capabilities', 'activate' ) );
 register_activation_hook( __FILE__, array( 'Mtmt_Cron', 'activate' ) );
 register_deactivation_hook( __FILE__, array( 'Mtmt_Cron', 'deactivate' ) );
 
-// NINCS 'weekly' cron_schedules filter — a Mtmt_Cron mostantól önmagát
-// újraütemező egyszeri eseményekkel dolgozik (docs/decisions.md #98), nem
-// a WP beépített fix-intervallumos ismétlődő ütemezésével, hogy a
-// nyári/téli időszámítás-váltás ne csúsztassa el a beállított órát.
 add_action( Mtmt_Cron::HOOK, array( 'Mtmt_Cron', 'run' ) );
 
-// "Adatok törlése / alaphelyzet" a Pluginok listaoldalon (CLAUDE.md §11 —
-// ez SZÁNDÉKOSAN nem az uninstall.php-hoz kötött, a plugin aktív állapotában
-// is elérhető, explicit megerősítéssel, lásd class-mtmt-reset.php).
+// "Adatok törlése" a Pluginok listaoldalon — a plugin aktív állapotában is
+// elérhető, nem csak törléskor.
 add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), array( 'Mtmt_Reset', 'add_plugin_action_link' ) );
 add_action( 'admin_init', array( 'Mtmt_Reset', 'maybe_handle_reset' ) );
 add_action( 'admin_notices', array( 'Mtmt_Reset', 'maybe_show_notice' ) );
 
-/**
- * Fordítások betöltése.
- */
 function mtmt_load_textdomain(): void {
 	load_plugin_textdomain( 'mtmt-sync', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
 }
 add_action( 'plugins_loaded', 'mtmt_load_textdomain' );
 
 /**
- * Séma-frissítés ellenőrzése minden betöltéskor — ha a tárolt DB-verzió eltér
- * a kódban lévőtől (pl. plugin-frissítés reaktiválás nélkül), újrafuttatja a
- * dbDelta-migrációt. A dbDelta idempotens: csak a hiányzó táblát/oszlopot
- * hozza létre, meglévő adatot nem érint.
- *
- * A verzió-opció ÖNMAGÁBAN nem megbízható jelzés arra, hogy a tábla
- * ténylegesen létezik (docs/decisions.md #89 folytatása, élesben talált
- * hiba: a wp_mtmt_publications tábla fizikailag hiányzott, miközben az
- * opció már a legfrissebb verzióra mutatott — pl. egy DB-visszaállítás/
- * import érintette a wp_options-t, de a saját táblákat nem). Ezért egy
- * olcsó, indexelt SHOW TABLES LIKE lekérdezéssel közvetlenül is
- * ellenőrizzük a fő tábla létét, és a verzió-egyezéstől függetlenül
- * újrafuttatjuk a migrációt, ha a tábla mégis hiányzik.
+ * Séma-frissítés ellenőrzése minden betöltéskor. A verzió-opció önmagában
+ * nem elég (előfordulhat, hogy egyezik, miközben a tábla fizikailag
+ * hiányzik), ezért a tábla tényleges létét is megnézzük.
  */
 function mtmt_maybe_upgrade_db(): void {
 	global $wpdb;
@@ -137,20 +103,10 @@ function mtmt_maybe_upgrade_db(): void {
 add_action( 'plugins_loaded', 'mtmt_maybe_upgrade_db' );
 
 /**
- * Cron-ütemezés ellenőrzése minden betöltéskor — UGYANAZ a hibaosztály és
- * javítási minta, mint a séma-önjavításnál (docs/decisions.md #89-90,
- * élesben talált folytatás: #97). A `register_activation_hook()` CSAK
- * akkor fut le, ha a plugin ténylegesen a WordPress saját "Aktiválás"
- * gombján/mechanizmusán ment keresztül — ha egy site úgy jön létre, hogy a
- * plugin már eleve "aktívként" van jelen egy DB-pillanatképben/sablon-
- * image-ben (pl. egy meglévő konténer-image-ből klónozva, aktiválás
- * kattintása nélkül), az aktiválási hook SOSEM fut le, és a heti
- * `mtmt_weekly_sync` cron-esemény örökre beütemezetlen marad — csendben,
- * hiba nélkül, a `wp-cron.php` végpont hívása HTTP 200-at ad, de nincs mit
- * feldolgoznia, mert a mi eseményünk nincs a listán. Ezért itt is egy
- * olcsó `wp_next_scheduled()` ellenőrzéssel, a tárolt állapottól
- * (aktiválva volt-e valaha) függetlenül, minden betöltéskor újra
- * beütemezzük, ha hiányzik.
+ * Cron-ütemezés ellenőrzése minden betöltéskor — ha egy site úgy jön létre,
+ * hogy a plugin már eleve "aktívként" van jelen (pl. egy meglévő konténer-
+ * image-ből klónozva), az aktiválási hook sosem fut le, és a heti esemény
+ * beütemezetlen marad. Itt pótoljuk, ha hiányzik.
  */
 function mtmt_maybe_reschedule_cron(): void {
 	if ( ! wp_next_scheduled( Mtmt_Cron::HOOK ) ) {
@@ -159,11 +115,6 @@ function mtmt_maybe_reschedule_cron(): void {
 }
 add_action( 'plugins_loaded', 'mtmt_maybe_reschedule_cron' );
 
-/**
- * Ugyanaz a minta, mint a DB-upgrade-nél: ha a plugin úgy frissül fájlszinten,
- * hogy közben nincs deaktiválás/reaktiválás, egy új capability (pl. ez a
- * Fázis 3-as mtmt_moderate/mtmt_classify) sosem kerülne rá a szerepkörökre.
- */
 function mtmt_maybe_upgrade_caps(): void {
 	if ( get_option( 'mtmt_caps_version' ) !== MTMT_CAPS_VERSION ) {
 		Mtmt_Capabilities::activate();
@@ -172,12 +123,6 @@ function mtmt_maybe_upgrade_caps(): void {
 }
 add_action( 'plugins_loaded', 'mtmt_maybe_upgrade_caps' );
 
-/**
- * Admin menü regisztrálása. A top-level "MTMT" a moderációs lista
- * (Mtmt_Publications_Page, `mtmt_moderate` capability) — ezt látják/használják
- * nap mint nap a moderátorok. A Profilok/Beállítások `manage_options`-hoz
- * kötött almenük, site-config jellegűek.
- */
 function mtmt_register_admin_pages(): void {
 	global $wpdb;
 
@@ -194,10 +139,7 @@ function mtmt_register_admin_pages(): void {
 add_action( 'admin_menu', 'mtmt_register_admin_pages' );
 
 /**
- * Minden mutáló admin-műveletet (jóváhagyás/elutasítás, tömeges művelet,
- * gazdagító űrlap mentése) itt kell elintézni — `admin_init` a fejlécek
- * elküldése ELŐTT fut, így `wp_safe_redirect()` még működik. A render()
- * callback (`admin_menu`) már túl késő lenne ehhez.
+ * Mutáló admin-műveletek (jóváhagyás, mentés) — `admin_init` a redirect miatt kell.
  */
 function mtmt_handle_admin_actions(): void {
 	global $wpdb;
@@ -210,16 +152,8 @@ function mtmt_handle_admin_actions(): void {
 }
 add_action( 'admin_init', 'mtmt_handle_admin_actions' );
 
-// Elementor-widgetek (Fázis 5) — feltétel nélkül hívható, Elementor nélkül a
-// loader belsejében felakasztott `elementor/*` action-ök egyszerűen sosem
-// tüzelnek (lásd class-mtmt-elementor-loader.php PHPDoc, CLAUDE.md §2).
 ( new Mtmt_Elementor_Loader() )->init();
 
-/**
- * Nyilvános AJAX-végpont a widget kereséséhez/lapozásához/szűréséhez —
- * Elementor-tól függetlenül regisztrált (maga a végpont csak a saját táblát
- * olvassa, `status='approved'`-ra szűkítve, lásd Mtmt_Widget_Data).
- */
 function mtmt_register_widget_ajax(): void {
 	global $wpdb;
 	( new Mtmt_Widget_Ajax( new Mtmt_Widget_Data( new Mtmt_Publication_Repository( $wpdb ), new Mtmt_Topic_Area_Repository( $wpdb ) ) ) )->register();

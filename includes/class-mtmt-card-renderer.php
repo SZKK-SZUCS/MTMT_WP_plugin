@@ -1,28 +1,17 @@
 <?php
 /**
- * Egy publikáció-kártya HTML-je — közös az "A" és "B" Elementor widget, illetve
- * az AJAX-fragment újratöltés között (docs/widget-design.md).
- *
- * Kizárólag már betöltött publikáció-sorokból (repository `get_list()`/`find()`
- * kimenete + opcionálisan `topic_area_labels`) épít HTML-t — nem hív se DB-t,
- * se az MTMT API-t. Minden MTMT-eredetű szöveget escape-el renderkor (CLAUDE.md §11).
+ * Egy publikáció-kártya HTML-je — közös az "A" és "B" Elementor widget,
+ * illetve az AJAX-fragment újratöltés között. Csak már betöltött adatból
+ * épít HTML-t, nem hív se DB-t, se az MTMT API-t.
  *
  * @package Mtmt_Sync
  */
 
 defined( 'ABSPATH' ) || exit;
 
-/**
- * Állapot nélküli renderelő.
- */
 final class Mtmt_Card_Renderer {
 
-	/**
-	 * Egyszerű, egyszínű "nyíl jobbra" ikon a sor végén lévő dekoratív CTA-körhöz
-	 * (docs/decisions.md #95 — vizuális referencia-igazítás). `aria-hidden`, mert
-	 * pusztán a sor egészének (`data-href`) kattinthatóságát jelzi vizuálisan,
-	 * nincs saját cél-URL-je.
-	 */
+	/** Dekoratív "nyíl jobbra" ikon a sor végén — csak vizuálisan jelzi a kattinthatóságot. */
 	private const ARROW_SVG = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>';
 
 	/**
@@ -77,9 +66,7 @@ final class Mtmt_Card_Renderer {
 			$out .= '</p>';
 		}
 
-		// Forrás + év — vizuálisan kiemelt (kiemelő-színű) sor, a referencia-dizájn
-		// szerint (docs/decisions.md #95), NEM tényleges link (nincs saját
-		// folyóirat-URL-mezőnk, csak a stílusa idézi a hivatkozás-jelleget).
+		// Forrás + év — kiemelő-színű sor, NEM tényleges link (nincs saját folyóirat-URL-mezőnk).
 		$has_year = ! empty( $publication['published_year'] );
 		if ( ( $full && ! empty( $publication['source_title'] ) ) || $has_year ) {
 			$out .= '<p class="mtmt-pub-card-source-line">';
@@ -115,15 +102,9 @@ final class Mtmt_Card_Renderer {
 
 		$out .= '</div>'; // .mtmt-pub-card-body vége
 
-		// KRITIKUS (élesben talált reszponzivitási hiba, docs/decisions.md #96):
-		// a típus-badge + nyíl-CTA egy VALÓDI flex-oszlopban van, NEM
-		// abszolút pozicionálva egy találgatott fix padding-right fölé — egy
-		// hosszú kiadványtípus-szöveg (pl. "Konferenciaközlemény") szélesebb
-		// lehet, mint bármilyen előre megbecsült foglalt hely, és belelógott
-		// volna a címbe. Flexbox-szal a foglalt szélesség mindig a tényleges
-		// tartalomhoz (a badge szövegének szélességéhez) igazodik, a body
-		// (`min-width:0`) pedig körülötte zsugorodik — nincs overlap-kockázat
-		// SEMMILYEN badge-szövegnél/szélességnél.
+		// A típus-badge + nyíl-CTA egy valódi flex-oszlopban van (nem abszolút
+		// pozicionálva egy becsült hely fölé), hogy hosszú típus-szövegnél se
+		// csússzon rá a címre.
 		$side_html = self::render_type_badge( $publication ) . self::render_arrow_cta( $link );
 		if ( '' !== $side_html ) {
 			$out .= '<div class="mtmt-pub-card-side">' . $side_html . '</div>';
@@ -137,7 +118,6 @@ final class Mtmt_Card_Renderer {
 	/**
 	 * DOI, ha van; különben (ha engedélyezve) az MTMT humán gui-linkje;
 	 * különben üres string (a kártya ekkor nem kattintható egészben).
-	 * VERIFIKÁLVA élesben, lásd CLAUDE.md §14/12 és docs/decisions.md #17.
 	 *
 	 * @param array $publication
 	 * @param bool  $show_doi_link
@@ -175,10 +155,7 @@ final class Mtmt_Card_Renderer {
 			return '<img class="mtmt-pub-card-img" src="' . esc_url( $generated ) . '" alt="">';
 		}
 
-		// Degradálás: nincs GD/font a szerveren -> CSS-overlay ugyanazzal az
-		// alapképpel, amit a GD-s út is használna (Mtmt_Placeholder_Image::get_base_image_url()
-		// az admin által beállított egyedi képet is figyelembe veszi) — a cím itt
-		// CSS-sel van ráhelyezve, nem a képfájlba égetve.
+		// Nincs GD/font a szerveren -> CSS-overlay ugyanazzal az alapképpel.
 		$base_url = Mtmt_Placeholder_Image::get_base_image_url();
 		$title    = trim( (string) ( $publication['title'] ?? '' ) );
 		return '<div class="mtmt-pub-card-css-placeholder" style="background-image:url(' . esc_url( $base_url ) . ')"><span>' . esc_html( $title ) . '</span></div>';
@@ -197,10 +174,7 @@ final class Mtmt_Card_Renderer {
 	}
 
 	/**
-	 * Dekoratív "nyíl jobbra" CTA-kör a sor végén — a referencia-dizájn szerint
-	 * (docs/decisions.md #95). Csak akkor jelenik meg, ha a sor egésze tényleg
-	 * kattintható (`$link` nem üres) — különben félrevezető lenne egy "menj oda"
-	 * jelzés egy nem-kattintható sornál.
+	 * Csak akkor jelenik meg, ha a sor egésze tényleg kattintható.
 	 *
 	 * @param string $link
 	 * @return string

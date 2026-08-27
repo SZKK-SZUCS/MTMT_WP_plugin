@@ -1,23 +1,14 @@
 <?php
 /**
- * "B" — terület-aloldal widget (CLAUDE.md §14/10, §14/11).
- *
- * Csak `is_featured=1` tételek, EGY konkrét szakmai területre VAGY lekérdezési
- * profilra szűkítve (CLAUDE.md §14/10: "területre/profilra szűkítve" — a két
- * mód kölcsönösen kizárja egymást a widget-beállításban). Csak akkor kerül
- * regisztrálásra (lásd Mtmt_Elementor_Loader::register_widgets()), ha a
- * "kiemelt cikk" funkció be van kapcsolva — ez FÜGGETLEN a "szakmai terület"
- * togletől, ezért a "profil" mód akkor is működik, ha a terület-funkció ki van
- * kapcsolva (docs/widget-design.md).
+ * "B" — terület-aloldal widget: egy adott szakmai terület VAGY lekérdezési
+ * profil kiemelt publikációi. Csak akkor jelenik meg a widget-listában, ha
+ * a "kiemelt cikk" funkció be van kapcsolva.
  *
  * @package Mtmt_Sync
  */
 
 defined( 'ABSPATH' ) || exit;
 
-/**
- * Elementor widget: egy terület/profil kiemelt publikációi.
- */
 final class Mtmt_Widget_Topic_Publications extends \Elementor\Widget_Base {
 
 	use Mtmt_Widget_Common_Controls;
@@ -57,10 +48,6 @@ final class Mtmt_Widget_Topic_Publications extends \Elementor\Widget_Base {
 		return array( 'mtmt', 'publikáció', 'publication', 'kiemelt', 'terület' );
 	}
 
-	/**
-	 * Widget-beállítások — a scope-választó DB-t olvas (Elementor-szerkesztő
-	 * kontextusban fut, admin-only, elfogadható).
-	 */
 	protected function register_controls() {
 		$this->start_controls_section(
 			'mtmt_scope_section',
@@ -227,9 +214,6 @@ final class Mtmt_Widget_Topic_Publications extends \Elementor\Widget_Base {
 		return $options ?: array( '0' => __( '(nincs elérhető profil)', 'mtmt-sync' ) );
 	}
 
-	/**
-	 * Kezdeti (nem-AJAX) szerver-oldali render.
-	 */
 	protected function render() {
 		if ( ! class_exists( 'Mtmt_Publication_Repository' ) ) {
 			return;

@@ -1,40 +1,25 @@
 <?php
 /**
- * Admin oldal: "Szakmai terület" definíciók kezelése (CLAUDE.md §7, §14/1).
+ * Admin oldal: "Szakmai terület" definíciók kezelése.
  *
  * @package Mtmt_Sync
  */
 
 defined( 'ABSPATH' ) || exit;
 
-/**
- * `manage_options`-hoz kötve, mint a Profilok/Beállítások — a területek
- * DEFINIÁLÁSA (mi létezik, melyik aloldalhoz tartozik) site-config. Az, hogy
- * egy KONKRÉT publikáció melyik területhez tartozzon, a moderációs
- * szerkesztő űrlapon dől el, `mtmt_classify`-hoz kötve (CLAUDE.md §7:
- * "A besorolás kézi, a moderáció része, és külön jogosultsághoz kötött").
- */
 final class Mtmt_Topic_Areas_Page {
 
 	private const CAPABILITY   = 'manage_options';
 	private const NONCE_ACTION = 'mtmt_topic_area_action';
 	private const PAGE_SLUG    = 'mtmt-topic-areas';
 
-	/**
-	 * @var Mtmt_Topic_Area_Repository
-	 */
+	/** @var Mtmt_Topic_Area_Repository */
 	private $areas;
 
-	/**
-	 * @param Mtmt_Topic_Area_Repository $areas
-	 */
 	public function __construct( Mtmt_Topic_Area_Repository $areas ) {
 		$this->areas = $areas;
 	}
 
-	/**
-	 * `admin_menu`-ből hívva — a top-level "MTMT" alá, almenüként.
-	 */
 	public function add_menu_page(): void {
 		add_submenu_page(
 			Mtmt_Publications_Page::PAGE_SLUG,
@@ -46,9 +31,6 @@ final class Mtmt_Topic_Areas_Page {
 		);
 	}
 
-	/**
-	 * Az oldal renderelése + POST-kezelés.
-	 */
 	public function render(): void {
 		if ( ! current_user_can( self::CAPABILITY ) ) {
 			wp_die( esc_html__( 'Nincs jogosultságod ehhez az oldalhoz.', 'mtmt-sync' ) );
@@ -61,7 +43,7 @@ final class Mtmt_Topic_Areas_Page {
 		<div class="wrap">
 			<h1><?php esc_html_e( 'MTMT — Szakmai területek', 'mtmt-sync' ); ?></h1>
 			<p class="description">
-				<?php esc_html_e( 'Minden "szakmai terület" egy WP-aloldalhoz van párosítva — a moderációs szerkesztő űrlapon (ha a funkció be van kapcsolva a Beállításokban) minden publikációhoz kiválasztható, melyik terület(ek)hez tartozik. Fázis 5-ben ez alapján fog szűrni a terület-aloldal widget.', 'mtmt-sync' ); ?>
+				<?php esc_html_e( 'Minden szakmai terület egy weboldalhoz van párosítva. A moderációs űrlapon minden publikációhoz kiválasztható, melyik terület(ek)hez tartozik.', 'mtmt-sync' ); ?>
 			</p>
 
 			<?php if ( $notice ) : ?>
@@ -135,7 +117,7 @@ final class Mtmt_Topic_Areas_Page {
 								)
 							);
 							?>
-							<p class="description"><?php esc_html_e( 'Melyik WP-oldalon jelenjen meg ennek a területnek a widgetje. Utólag is módosítható (törlés + újra létrehozás).', 'mtmt-sync' ); ?></p>
+							<p class="description"><?php esc_html_e( 'Melyik oldalon jelenjen meg ennek a területnek a publikációs listája.', 'mtmt-sync' ); ?></p>
 						</td>
 					</tr>
 				</table>

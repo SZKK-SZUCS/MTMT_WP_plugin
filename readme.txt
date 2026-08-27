@@ -156,7 +156,7 @@ egyikkel sem, csak a látogató-vezérelt alapbeállítással) működik, tiszt�
   feliratos pill-badge-re.
 * Kézi "Teljes szinkron most" gomb a Beállítások oldalon — ugyanazt
   futtatja, mint a heti cron (minden profil + email, ha volt aktivitás).
-* "Adatok törlése / alaphelyzet" gomb a Pluginok listaoldalon — az 5 saját
+* "Adatok törlése" gomb a Pluginok listaoldalon — az 5 saját
   táblát üríti, a beállításokat nem érinti.
 * Kritikus javítás: a kézi/cron szinkron hamis "sikeres" beszúrást
   jelentett akkor is, ha a tényleges adatbázis-írás meghiúsult (pl. mert

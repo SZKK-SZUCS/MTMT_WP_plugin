@@ -1,25 +1,18 @@
 <?php
 /**
- * Admin oldal: role→capability leképzés (CLAUDE.md §8.3, docs/decisions.md #82).
+ * Admin oldal: mely szerepkörök moderálhatnak/sorolhatnak be.
  *
  * @package Mtmt_Sync
  */
 
 defined( 'ABSPATH' ) || exit;
 
-/**
- * `manage_options`-hoz kötve, mint a Profilok/Beállítások oldal — a
- * jogosultság-kiosztás site-config/biztonsági döntés, nem napi moderáció.
- */
 final class Mtmt_Capabilities_Page {
 
 	private const CAPABILITY   = 'manage_options';
 	private const NONCE_ACTION = 'mtmt_capabilities_action';
 	private const PAGE_SLUG    = 'mtmt-capabilities';
 
-	/**
-	 * `admin_menu`-ből hívva — a top-level "MTMT" alá, almenüként.
-	 */
 	public function add_menu_page(): void {
 		add_submenu_page(
 			Mtmt_Publications_Page::PAGE_SLUG,
@@ -31,9 +24,6 @@ final class Mtmt_Capabilities_Page {
 		);
 	}
 
-	/**
-	 * Az oldal renderelése + POST-kezelés.
-	 */
 	public function render(): void {
 		if ( ! current_user_can( self::CAPABILITY ) ) {
 			wp_die( esc_html__( 'Nincs jogosultságod ehhez az oldalhoz.', 'mtmt-sync' ) );
@@ -47,7 +37,7 @@ final class Mtmt_Capabilities_Page {
 		?>
 		<div class="wrap">
 			<h1><?php esc_html_e( 'MTMT Publikációk — Jogosultságok', 'mtmt-sync' ); ?></h1>
-			<p><?php esc_html_e( 'Itt állítható be, mely WordPress-szerepkörök kapják meg a plugin két kapabilitását. A pipák azonnal érvénybe lépnek mentéskor — nem kell újra aktiválni a plugint.', 'mtmt-sync' ); ?></p>
+			<p><?php esc_html_e( 'Itt állíthatod be, mely szerepkörök tudnak moderálni és besorolni. A mentés azonnal érvénybe lép.', 'mtmt-sync' ); ?></p>
 
 			<?php if ( $notice ) : ?>
 				<div class="notice notice-<?php echo esc_attr( $notice['type'] ); ?>">
@@ -93,7 +83,7 @@ final class Mtmt_Capabilities_Page {
 						<th><?php esc_html_e( 'Moderálás', 'mtmt-sync' ); ?></th>
 						<td>
 							<p class="description">
-								<?php esc_html_e( 'Publikáció jóváhagyása/elutasítása/elutasítás-visszavonása, a moderációs lista és a gazdagító űrlap alap mezői (indexkép, támogatás felülbírálása, projektazonosító megadása, kiemelt cikk jelölő). A "mtmt_moderate" kapabilitást adja.', 'mtmt-sync' ); ?>
+								<?php esc_html_e( 'Publikációk jóváhagyása/elutasítása, borítókép és egyéb alap adatok szerkesztése.', 'mtmt-sync' ); ?>
 							</p>
 						</td>
 					</tr>
@@ -101,7 +91,7 @@ final class Mtmt_Capabilities_Page {
 						<th><?php esc_html_e( 'Besorolás', 'mtmt-sync' ); ?></th>
 						<td>
 							<p class="description">
-								<?php esc_html_e( 'Szakmai terület hozzárendelése egy publikációhoz, és a projektazonosító "Ellenőrizve" pipája. Szigorúbb kör, mint a Moderálás — ezt a jogot csak azoknak érdemes adni, akik ténylegesen felelősek a besorolás/ellenőrzés pontosságáért. A "mtmt_classify" kapabilitást adja.', 'mtmt-sync' ); ?>
+								<?php esc_html_e( 'Szakmai terület hozzárendelése egy publikációhoz, és a projektazonosító ellenőrzése.', 'mtmt-sync' ); ?>
 							</p>
 						</td>
 					</tr>

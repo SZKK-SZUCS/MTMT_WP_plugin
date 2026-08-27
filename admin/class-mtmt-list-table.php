@@ -1,6 +1,6 @@
 <?php
 /**
- * Moderációs lista (CLAUDE.md §8.1).
+ * Moderációs lista.
  *
  * @package Mtmt_Sync
  */
@@ -11,11 +11,6 @@ if ( ! class_exists( 'WP_List_Table' ) ) {
 	require_once ABSPATH . 'wp-admin/includes/class-wp-list-table.php';
 }
 
-/**
- * Oszlopok: indexkép, cím+szerzők, forrás, év, típus, SJR, MTMT-státusz,
- * linkek (DOI/MTMT), szakmai terület (csak ha be van kapcsolva), státusz.
- * Sor-műveletek és tömeges jóváhagyás/elutasítás/kiemelés.
- */
 final class Mtmt_List_Table extends WP_List_Table {
 
 	/**
@@ -312,8 +307,6 @@ final class Mtmt_List_Table extends WP_List_Table {
 	}
 
 	/**
-	 * Szűrő-lenyílók a lista felett (CLAUDE.md §8.1 "Szűrők felül").
-	 *
 	 * @param string $which
 	 * @return void
 	 */
