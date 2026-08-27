@@ -293,6 +293,37 @@ verzióbump+release-nél adódik magától, a rendes munkamenet részeként.
    lezárásakor): Pluginok oldalon jelenjen meg az "Új verzió érhető el" sáv,
    "View version X.Y.Z details" linkkel.
 
+## 🔜 Email-értesítő újratervezése
+
+**KÓD KÉSZ, ÉLES ELLENŐRZÉS MÉG NEM TÖRTÉNT.** Megrendelői kérés (2026-08) a
+Fázis 2-es sima szöveges email javítására: HTML-email, logóval. A logó a
+PLUGINBA becsomagolt statikus fájl (`assets/img/email-logo.png`, `.jpg` vagy
+`.jpeg`), NEM site-onkénti admin-beállítás — a megrendelő megerősítette:
+"ez rendszer email, én égetem be központilag a pluginba mint kiadó"
+(docs/decisions.md #66-69 az "Email-értesítő újratervezése" szakaszban).
+A profil `#ID` helyett a profil neve jelenik meg a törzsben.
+
+**A logó-fájl elhelyezése (kiadói feladat, nem admin-feladat):** tedd a képet
+`assets/img/email-logo.png` névvel a plugin repóba (JPG is jó: `.jpg`/`.jpeg`
+néven, ha az kényelmesebb) — ha egyik fájl sem létezik, az email egyszerűen
+logó nélkül megy ki, nincs hiba. Ajánlott: átlátszó hátterű PNG, kb. 400px
+széles, ésszerű fájlméret (email-kompatibilitás miatt ne legyen több száz KB).
+
+15 új/frissített teszt-assertion (`test-notifier.php`) — a teljes suite zöld.
+
+*Kész, ha:* a cron-triggerelt email HTML-ként érkezik meg (nem nyers
+`<div>`-ekkel a postaládában), a logó megjelenik (ha a fájl a helyén van),
+a profil neve (nem csak száma) olvasható, és a "Jóváhagyás megnyitása" gomb
+a Profilok oldalra visz.
+
+**Éles ellenőrzéshez** (Local site, Site Shell + postaláda):
+1. Tedd be a logó-fájlt `assets/img/email-logo.png` néven (ha még nincs ott).
+2. `wp cron event run mtmt_weekly_sync` (ha van friss aktivitás egy profilnál,
+   lásd a korábbi cron-teszt-instrukciót) — nézd meg a beérkező emailt: HTML,
+   logóval, a profil nevével (nem "#1"), rendezett kártyás megjelenéssel.
+3. Ha egy profilnál hiba volt a futás közben, azt egy kiemelt (piros) blokk
+   jelezze, ne keveredjen a sikeres profilok közé.
+
 ## Fázis 7 (opcionális) — nice-to-have-ek
 
 Változatlan (§9.2), csak külön jóváhagyással: Dimensions idézettség-badge,

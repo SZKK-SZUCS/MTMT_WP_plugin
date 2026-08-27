@@ -45,7 +45,11 @@ final class Mtmt_Sync_Runner {
 		Mtmt_Widget_Cache::bump();
 
 		if ( 'cron' === $trigger_type ) {
-			( new Mtmt_Notifier() )->notify_if_needed( $results );
+			$profile_labels = array();
+			foreach ( ( new Mtmt_Query_Profile_Repository( $wpdb ) )->get_all() as $profile ) {
+				$profile_labels[ (int) $profile['id'] ] = (string) $profile['label'];
+			}
+			( new Mtmt_Notifier() )->notify_if_needed( $results, $profile_labels );
 		}
 
 		return $results;

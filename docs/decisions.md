@@ -526,3 +526,43 @@ lásd ott. Az alábbiak az eziutáni implementációs döntések.
 65. **Nincs `enableReleaseAssets()`** — a plugin nem használ build-lépést
     (CLAUDE.md §2, §10.3), a GitHub által automatikusan generált forrás-zip
     elég a PUC-nak, a mappa-wrappelést maga a PUC kezeli.
+
+## Email-értesítő újratervezése (2026-08)
+
+> **Figyelem, párhuzamos ág:** ez a szakasz a `email-html-logo` ágon íródott,
+> `main`-ből ágaztatva, MIKÖZBEN a `profil-elonezet` ág (saját #66-73
+> bejegyzésekkel) még nincs mergelve. A két ág független munkát végzett a
+> decisions.md-n — mergeléskor várhatóan sorszám-ütközés lesz, ami kézi
+> átszámozással oldandó meg (a tartalom maga nem ütközik, csak a sorszámozás).
+
+66. **HTML email, NEM sima szöveges** — `wp_mail()` negyedik paramétereként
+    explicit `Content-Type: text/html; charset=UTF-8` header nélkül a WP
+    alapból text/plain-ként küldi, és minden HTML-jelölés nyersen látszana
+    a postafiókban. Csak inline CSS-stílusok (a legtöbb emailkliens nem
+    futtat megbízhatóan `<style>` blokkot), nincs multipart/alternative
+    szöveges verzió — tudatos egyszerűsítés, nem minden emailkliens/
+    -olvasó éri el vele ugyanazt az élményt, de a cél ("jobb legyen, legyen
+    benne logó") ezzel teljesül build-lépés/extra könyvtár nélkül.
+67. **A logó a PLUGINBA becsomagolt statikus fájl, NEM site-onkénti admin-
+    beállítás.** Eredetileg egy Beállítások-oldali média-uploadert építettem
+    (ugyanaz a minta, mint a placeholder-kép alapképnél) — a megrendelő
+    menet közben pontosított: "ez rendszer email, én égetem be központilag
+    a pluginba mint kiadó". Ez logikus is a "dobozos, több szervezetnek"
+    tervezési elvhez (CLAUDE.md §1, §7 stb.) illesztve: ez egy RENDSZER-email
+    a "MTMT Sync" terméktől/kiadótól, nem az adott kliens szervezet saját
+    brandje — minden site-on ugyanaz a fejléc-logó megy ki, verzióval együtt
+    terjesztve, nem admin-konfigurációként. A médiatáras UI-t és a hozzá
+    tartozó `mtmt_email_logo_id` optiont törölve lett (nem maradt kód-lom).
+68. **A logó-fájl helye és keresési sorrendje**: `Mtmt_Notifier::get_logo_url()`
+    sorban megnézi `assets/img/email-logo.png`, `.jpg`, `.jpeg` — az első
+    létező nyer, `file_exists()`-szel ellenőrizve (nem feltételezi, hogy a
+    fájl ott van). Ha egyik sem létezik, `null`-t ad, az email egyszerűen
+    logó nélkül megy ki — nem hiba, nem blokkol. SVG szándékosan NINCS a
+    listában: sok emailkliens (Outlook, több mobil Gmail-app) nem renderel
+    megbízhatóan SVG-t `<img>`-ben.
+69. **A profil `#ID` helyett a profil NEVE jelenik meg az emailben** — a
+    `Mtmt_Notifier::notify_if_needed()` kapott egy opcionális
+    `array $profile_labels` paramétert (`profile_id => label`), amit a
+    `Mtmt_Sync_Runner::run()` épít fel (ott már úgyis elérhető a
+    `Mtmt_Query_Profile_Repository`) — ugyanaz a minta, mint a Beállítások
+    oldal futás-naplójánál (`$profile_labels[$id] ?? ('#' . $id)` fallback).
