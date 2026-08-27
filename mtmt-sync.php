@@ -24,6 +24,7 @@ require_once MTMT_PLUGIN_DIR . 'includes/class-mtmt-activator.php';
 require_once MTMT_PLUGIN_DIR . 'includes/class-mtmt-capabilities.php';
 require_once MTMT_PLUGIN_DIR . 'includes/class-mtmt-api-client.php';
 require_once MTMT_PLUGIN_DIR . 'includes/class-mtmt-mapper.php';
+require_once MTMT_PLUGIN_DIR . 'includes/class-mtmt-widget-cache.php';
 require_once MTMT_PLUGIN_DIR . 'includes/class-mtmt-publication-repository.php';
 require_once MTMT_PLUGIN_DIR . 'includes/class-mtmt-query-profile-repository.php';
 require_once MTMT_PLUGIN_DIR . 'includes/class-mtmt-topic-area-repository.php';

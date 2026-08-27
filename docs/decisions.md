@@ -450,3 +450,20 @@ lásd ott. Az alábbiak az eziutáni implementációs döntések.
     (ne töltődjön be `\Elementor\Widget_Base`-t kiterjesztő fájl Elementor
     nélkül) továbbra is megvan: a `require_once`-ok a callback BELSEJÉBEN
     maradtak, ami Elementor nélkül sosem fut le, mert maga az akció sosem tüzel.
+
+59. **JAVÍTVA élő teszt után: jóváhagyás után akár 5 percig a régi (cache-elt)
+    listát mutatta a widget**, csak egy admin-mentés (bármilyen, nem feltétlen
+    a kapcsolódó rekordé) után frissült — ez a `Mtmt_Widget_Data` sima,
+    5 perces TTL-ű tranziens-cache-éből fakadt (a #53-ban már előre jelzett
+    kockázat, most ténylegesen élesben is jelentkezett). Megoldás:
+    `Mtmt_Widget_Cache` — egy `wp_options`-beli verziószámláló, amit minden
+    widget-láthatóságot érintő írás NÖVEL (`set_status`, `bulk_set_status`,
+    `bulk_set_featured`, `save_enrichment`, `Mtmt_Topic_Area_Repository::
+    set_areas_for_publication()`/`delete()`, és EGYSZER egy teljes
+    `Mtmt_Sync_Runner::run()` végén — nem rekordonként, hogy egy nagy
+    intézménynél ne legyen száz+ felesleges `update_option()`-hívás egy
+    szinkron alatt). A `Mtmt_Widget_Data` cache-kulcsai tartalmazzák ezt a
+    verziót — így egy admin-írás után az ELSŐ frontend-lekérdezés azonnal
+    "cache-miss" lesz. A TTL-t emiatt fel lehetett emelni 5 percről 1 órára
+    (csak biztonsági háló, ha egy írási útvonal mégis kimaradna a bump()-ból),
+    ami ritkább DB-írást is jelent a gyakori (változatlan) lekérdezéseknél.

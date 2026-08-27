@@ -4,11 +4,18 @@
  * frissítés között (Fázis 5).
  *
  * A widgetek KIZÁRÓLAG ezen keresztül, a saját táblából olvasnak — sosem
- * hívják élesben az MTMT-t (CLAUDE.md §3, §9.1). Az eredményt rövid (5 perces)
- * tranziens cache-eli a lekérdezés-aláírás szerint (CLAUDE.md §9.1
- * "Teljesítmény: object cache / transient a lekérdezett listára") — ilyen
- * rövid TTL mellett egy admin-moderálás legfeljebb 5 percen belül látszik meg
- * a frontenden, explicit cache-invalidálás nélkül is elfogadható egyszerűsítés.
+ * hívják élesben az MTMT-t (CLAUDE.md §3, §9.1). Az eredményt tranziens
+ * cache-eli a lekérdezés-aláírás SZERINT (CLAUDE.md §9.1 "Teljesítmény:
+ * object cache / transient a lekérdezett listára).
+ *
+ * FRISSÍTVE (élő visszajelzés után, docs/decisions.md #59): a cache-kulcs
+ * tartalmazza a `Mtmt_Widget_Cache::version()` értékét is — ezt minden
+ * widget-láthatóságot érintő admin-írás (jóváhagyás/elutasítás, tömeges
+ * művelet, gazdagítás, terület-hozzárendelés, egy teljes sync-futás) NÖVELI.
+ * Így egy jóváhagyás után az ELSŐ frontend-lekérdezés azonnal friss adatot
+ * kap (a régi cache-kulcs "elévül", mert a verzió megváltozott), a TTL csak
+ * biztonsági háló arra az esetre, ha valamelyik írási útvonal mégis
+ * kimaradna a bump()-olásból.
  *
  * @package Mtmt_Sync
  */
@@ -20,7 +27,9 @@ defined( 'ABSPATH' ) || exit;
  */
 final class Mtmt_Widget_Data {
 
-	private const CACHE_TTL = 5 * MINUTE_IN_SECONDS;
+	// Csak biztonsági háló — a tényleges frissesség a Mtmt_Widget_Cache
+	// verziószámlálóból jön, ld. fenti PHPDoc.
+	private const CACHE_TTL = HOUR_IN_SECONDS;
 
 	/** @var Mtmt_Publication_Repository */
 	private $repository;
@@ -65,7 +74,7 @@ final class Mtmt_Widget_Data {
 			$args
 		);
 
-		$cache_key = 'mtmt_widget_q_' . md5( wp_json_encode( $args ) );
+		$cache_key = 'mtmt_widget_q_' . md5( Mtmt_Widget_Cache::version() . '|' . wp_json_encode( $args ) );
 		$cached    = get_transient( $cache_key );
 		if ( false !== $cached ) {
 			return $cached;
@@ -136,7 +145,7 @@ final class Mtmt_Widget_Data {
 			$repo_args['ids'] = $this->topic_area_repo->get_publication_ids_for_area( (int) $scope['area_id'] );
 		}
 
-		$cache_key = 'mtmt_widget_years_' . md5( wp_json_encode( $repo_args ) );
+		$cache_key = 'mtmt_widget_years_' . md5( Mtmt_Widget_Cache::version() . '|' . wp_json_encode( $repo_args ) );
 		$cached    = get_transient( $cache_key );
 		if ( false !== $cached ) {
 			return $cached;

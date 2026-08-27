@@ -405,6 +405,10 @@ final class Mtmt_Publication_Repository {
 			array( 'id' => $id )
 		);
 
+		if ( false !== $result ) {
+			Mtmt_Widget_Cache::bump(); // Jóváhagyás/elutasítás azonnal látszódjon a widgeten (docs/decisions.md #59).
+		}
+
 		return false !== $result;
 	}
 
@@ -427,7 +431,11 @@ final class Mtmt_Publication_Repository {
 		$sql          = "UPDATE {$this->table} SET status = %s, moderated_by = %d, moderated_at = %s WHERE id IN ({$placeholders})";
 		$params       = array_merge( array( $status, $user_id, current_time( 'mysql' ) ), $ids );
 
-		return (int) $this->wpdb->query( $this->wpdb->prepare( $sql, $params ) );
+		$affected = (int) $this->wpdb->query( $this->wpdb->prepare( $sql, $params ) );
+		if ( $affected > 0 ) {
+			Mtmt_Widget_Cache::bump();
+		}
+		return $affected;
 	}
 
 	/**
@@ -448,7 +456,11 @@ final class Mtmt_Publication_Repository {
 		$sql          = "UPDATE {$this->table} SET is_featured = %d WHERE id IN ({$placeholders})";
 		$params       = array_merge( array( $featured ? 1 : 0 ), $ids );
 
-		return (int) $this->wpdb->query( $this->wpdb->prepare( $sql, $params ) );
+		$affected = (int) $this->wpdb->query( $this->wpdb->prepare( $sql, $params ) );
+		if ( $affected > 0 ) {
+			Mtmt_Widget_Cache::bump();
+		}
+		return $affected;
 	}
 
 	/**
@@ -489,6 +501,10 @@ final class Mtmt_Publication_Repository {
 		}
 
 		$result = $this->wpdb->update( $this->table, $data, array( 'id' => $id ) );
+
+		if ( false !== $result ) {
+			Mtmt_Widget_Cache::bump(); // pl. thumbnail/is_featured is befolyásolja, mit mutat a widget.
+		}
 
 		return false !== $result;
 	}
