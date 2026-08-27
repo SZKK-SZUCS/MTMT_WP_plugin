@@ -3,7 +3,7 @@
  * Plugin Name: MTMT Sync
  * Contributor: Szurofka Márton, MFÜI
  * Description: MTMT-alapú publikációs lista jóváhagyással és Elementor megjelenítéssel.
- * Version: 0.10.0
+ * Version: 0.10.1
  * Requires at least: 6.4
  * Requires PHP: 8.1
  * Text Domain: mtmt-sync
@@ -14,7 +14,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'MTMT_VERSION', '0.10.0' );
+define( 'MTMT_VERSION', '0.10.1' );
 define( 'MTMT_DB_VERSION', '3' );
 define( 'MTMT_CAPS_VERSION', '1' );
 define( 'MTMT_PLUGIN_FILE', __FILE__ );
@@ -132,6 +132,29 @@ function mtmt_maybe_upgrade_db(): void {
 	}
 }
 add_action( 'plugins_loaded', 'mtmt_maybe_upgrade_db' );
+
+/**
+ * Cron-ütemezés ellenőrzése minden betöltéskor — UGYANAZ a hibaosztály és
+ * javítási minta, mint a séma-önjavításnál (docs/decisions.md #89-90,
+ * élesben talált folytatás: #97). A `register_activation_hook()` CSAK
+ * akkor fut le, ha a plugin ténylegesen a WordPress saját "Aktiválás"
+ * gombján/mechanizmusán ment keresztül — ha egy site úgy jön létre, hogy a
+ * plugin már eleve "aktívként" van jelen egy DB-pillanatképben/sablon-
+ * image-ben (pl. egy meglévő konténer-image-ből klónozva, aktiválás
+ * kattintása nélkül), az aktiválási hook SOSEM fut le, és a heti
+ * `mtmt_weekly_sync` cron-esemény örökre beütemezetlen marad — csendben,
+ * hiba nélkül, a `wp-cron.php` végpont hívása HTTP 200-at ad, de nincs mit
+ * feldolgoznia, mert a mi eseményünk nincs a listán. Ezért itt is egy
+ * olcsó `wp_next_scheduled()` ellenőrzéssel, a tárolt állapottól
+ * (aktiválva volt-e valaha) függetlenül, minden betöltéskor újra
+ * beütemezzük, ha hiányzik.
+ */
+function mtmt_maybe_reschedule_cron(): void {
+	if ( ! wp_next_scheduled( Mtmt_Cron::HOOK ) ) {
+		Mtmt_Cron::activate();
+	}
+}
+add_action( 'plugins_loaded', 'mtmt_maybe_reschedule_cron' );
 
 /**
  * Ugyanaz a minta, mint a DB-upgrade-nél: ha a plugin úgy frissül fájlszinten,

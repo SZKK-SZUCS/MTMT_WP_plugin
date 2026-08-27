@@ -4,7 +4,7 @@ Tags: mtmt, publications, elementor, publikaciok, tudomanyos
 Requires at least: 6.4
 Tested up to: 6.7
 Requires PHP: 8.1
-Stable tag: 0.10.0
+Stable tag: 0.10.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -103,6 +103,13 @@ egyikkel sem, csak a látogató-vezérelt alapbeállítással) működik, tiszt�
 üzemeltetési döntés, telepítésenként eltérhet.
 
 == Changelog ==
+
+= 0.10.1 =
+* Kritikus javítás: a heti `mtmt_weekly_sync` cron-esemény bizonyos
+  telepítéseken (pl. már eleve "aktívként" jelenlévő plugin egy sablon
+  Docker-image-ben) sosem lett beütemezve, mert az aktiválási hook nem
+  futott le. Mostantól minden oldalbetöltéskor önjavítóan ellenőrzi és
+  pótolja a hiányzó ütemezést, kézi beavatkozás nélkül.
 
 = 0.10.0 =
 * Egyéb azonosítós (WoS/Scopus/SZTAKI/PubMed/ResearchGate) SVG-ikonok
@@ -243,6 +250,11 @@ egyikkel sem, csak a látogató-vezérelt alapbeállítással) működik, tiszt�
 * Kezdeti bootstrap: plugin-header, aktivátor (tábla-migráció dbDelta-val).
 
 == Upgrade Notice ==
+
+= 0.10.1 =
+Kritikus javítás: bizonyos telepítéseken a heti automata szinkron sosem
+futott le, mert a cron-esemény nem lett beütemezve — mostantól önjavítóan
+helyreáll. Frissítés ajánlott minden site-on.
 
 = 0.10.0 =
 Widget vizuális felfrissítés (soronkénti lista, alulvonalas év-fülek,

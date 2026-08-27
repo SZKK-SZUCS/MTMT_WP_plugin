@@ -612,6 +612,40 @@ assertion) zöld, lint tiszta, i18n újraépítve (273 string).
    nincs árnyék (flat lista), de bekapcsolva jelenjen meg egy tényleges
    box-shadow minden soron.
 
+## ✅ Kritikus javítás: sosem beütemezett heti cron a JKK site-on (0.10.1)
+
+**KÉSZ, hibajavítás (0.x.PATCH), közös hibakereséssel derült ki.** A
+megrendelő jelezte, hogy a futás-naplóban SOHA nem volt sikeres automata
+("cron" trigger-típusú) futás. Közös lépésenkénti hibakereséssel kizártuk a
+hálózatot (a pinger-domain HTTP 200-at ad) és a karbantartás-mód pluginjukat
+(kód-szinten: `template_redirect`-re van kötve, ami `wp-cron.php`-nál sosem
+fut le) — a `wp-cron.php` manuális, böngészős meglátogatása sem hozott
+létre új naplósort. Kiváltó ok és javítás: docs/decisions.md #97.
+
+- **Kiváltó ok**: `Mtmt_Cron::activate()` (a heti esemény beütemezése)
+  kizárólag `register_activation_hook()`-on keresztül futott — ez a hook
+  CSAK a WP saját "Aktiválás" mechanizmusán megy át. Ha egy site úgy jön
+  létre, hogy a plugin már eleve "aktívként" van jelen egy adatbázis-
+  pillanatképben/sablon Docker-image-ben, a hook sosem fut le, a heti
+  cron örökre beütemezetlen marad — csendben, hiba nélkül.
+- **Javítás**: `mtmt_maybe_reschedule_cron()` minden `plugins_loaded`-kor
+  ellenőrzi `wp_next_scheduled()`-del, és pótolja, ha hiányzik —
+  ugyanaz a minta, mint a séma-önjavításnál (#89-90).
+
+10 új assertion (`test-cron-selfheal.php`), teljes suite (217 assertion)
+zöld, lint tiszta.
+
+**Éles ellenőrzéshez** (JKK site):
+1. Egy sima wp-admin oldalbetöltés után (bármelyik admin-oldal) nézd meg
+   `wp cron event list`-tel (ha van CLI-hozzáférésed), hogy a
+   `mtmt_weekly_sync` szerepel-e a listán, VAGY egyszerűen látogasd meg
+   megint a `https://jkk.sze.hu/wp-cron.php?doing_wp_cron` linket, és
+   nézd meg, most már megjelenik-e egy új "cron" sor a futás-naplóban.
+2. Várd meg a legközelebbi automata (pinger-triggerelt) futást, és
+   ellenőrizd, hogy tényleg megjelenik-e "cron" trigger-típusú sor —
+   ha igen, ÉS a pinger-konténer hálózati elérése is rendben van, a heti
+   automatizmus végre ténylegesen működik.
+
 ## Backlog — még nincs fázishoz kötve
 
 Jelenleg üres.

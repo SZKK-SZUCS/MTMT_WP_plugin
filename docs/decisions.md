@@ -1065,3 +1065,50 @@ set_areas_for_publication()`/`delete()`, és EGYSZER egy teljes
     `php -l` lint tiszta, i18n újraépítve (273 string, mind lefordítva).
     A Style-tab control-regisztrációhoz nincs unit-teszt (Elementor-osztályok
     nélkül nem futtatható ebben a harnessben) — élő ellenőrzéssel validálandó.
+97. **Kritikus hiba: a heti `mtmt_weekly_sync` cron-esemény sosem volt
+    beütemezve a JKK élő site-on — soha nem volt sikeres automata futás.**
+    Élesben, közös hibakereséssel derült ki (docs #89/#90 folytatása,
+    ugyanaz a hibaosztály): a `wp-cron.php?doing_wp_cron` végpont
+    közvetlen meglátogatása (böngészőből, manuálisan) sem hozott létre új
+    "cron" trigger-típusú sort a futás-naplóban — miközben a hálózati
+    elérés és a karbantartás-mód plugin gyanúja is kizárásra került (utóbbi
+    kód-szinten: a karbantartás-plugin `template_redirect`-re van kötve,
+    ami `wp-cron.php`-nál sosem tüzel el, mert az a fájl nem megy át a
+    normál `index.php`/téma-renderelő bootstrap-on).
+    - **Kiváltó ok**: a `Mtmt_Cron::activate()` (ami `wp_schedule_event()`-tel
+      beütemezi a heti eseményt) KIZÁRÓLAG `register_activation_hook()`-on
+      keresztül volt bekötve. Ez a hook viszont CSAK akkor fut le, ha a
+      plugin ténylegesen keresztülment a WordPress saját "Aktiválás"
+      mechanizmusán (wp-admin gombnyomás vagy `wp plugin activate`). A
+      megrendelő megerősítette: "én manuálisan nem adtam hozzá semmit...
+      csak a plugint töltöttem fel" — ha egy site úgy jön létre, hogy a
+      plugin már eleve "aktívként" van jelen egy adatbázis-pillanatképben/
+      sablon-image-ben (pl. egy meglévő Docker-image-ből klónozva), az
+      aktiválási hook SOSEM fut le, és a heti esemény örökre
+      beütemezetlen marad — teljesen csendben, hiba nélkül: a
+      `wp-cron.php` maga HTTP 200-at ad (a végpont működik), csak nincs
+      mit feldolgoznia, mert a mi eseményünk nincs a WP saját
+      cron-listáján.
+    - **Javítás**: pontosan ugyanaz a minta, mint a séma-önjavításnál
+      (#89-90) — egy `plugins_loaded`-kor futó `mtmt_maybe_reschedule_cron()`
+      (`mtmt-sync.php`) minden betöltéskor ellenőrzi `wp_next_scheduled(
+      Mtmt_Cron::HOOK )`-kal, hogy be van-e ütemezve, és ha nem, meghívja
+      `Mtmt_Cron::activate()`-et — függetlenül attól, hogy a site valaha
+      ment-e keresztül a tényleges WP-aktiváláson. Ez egy sima
+      oldalbetöltéssel (bármelyik admin-oldal) magától helyreállítja a
+      hiányzó ütemezést, kézi deaktiválás/reaktiválás vagy WP-CLI-hívás
+      nélkül. `Mtmt_Cron::activate()` maga is idempotens volt már eddig is
+      (`wp_next_scheduled()`-del védett belül), úgyhogy a külső ellenőrzés
+      biztonságosan hívható minden egyes oldalbetöltésnél, gyakorlatilag
+      ingyenes (egyetlen olvasás a WP saját cron-tömbjéből), nincs szükség
+      a DB-önjavításnál használt drágább féken (verzió-opció) hasonlóra.
+    Regresszió: 10 új assertion (`test-cron-selfheal.php`) — `Mtmt_Cron::
+    activate()` idempotenciája (kétszeri hívás nem duplikál), az önjavító
+    minta közvetlen reprodukciója (hiányzót pótol, meglévőt nem bántja
+    ismételt hívásra sem), `deactivate()`/`add_schedule()` regressziója.
+    Teljes suite (217 assertion) zöld, repo-szintű `php -l` lint tiszta.
+    **A mögöttes ok (a Docker-image/deployment-folyamat, ami a plugint
+    eleve "aktívként" hozza létre az aktiválási hook lefuttatása nélkül)
+    NEM ennek a fixnek a hatásköre** — ez a javítás csak azt biztosítja,
+    hogy a cron-ütemezés MINDIG helyreálljon, származzon bármilyen okból a
+    hiánya.
