@@ -4,7 +4,7 @@ Tags: mtmt, publications, elementor, publikaciok, tudomanyos
 Requires at least: 6.4
 Tested up to: 6.7
 Requires PHP: 8.1
-Stable tag: 0.9.0
+Stable tag: 0.10.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -103,6 +103,26 @@ egyikkel sem, csak a látogató-vezérelt alapbeállítással) működik, tiszt�
 üzemeltetési döntés, telepítésenként eltérhet.
 
 == Changelog ==
+
+= 0.10.0 =
+* Egyéb azonosítós (WoS/Scopus/SZTAKI/PubMed/ResearchGate) SVG-ikonok
+  élesítve — színezhetőségi hiba javítva (beágyazott `<style>`-alapú
+  fill felülírta volna a widget színbeállítását), fájlnevek kisbetűsre
+  javítva.
+* Új widget-beállítás: "Egyéb azonosítók megjelenítése" (Ikon és szöveg /
+  Csak ikon / Csak szöveg), ikon-méret/-szín/pill-dizájn a Stílus fülön.
+* Widget vizuális felfrissítés egy megrendelői referencia-kép alapján:
+  soronkénti lista (dobozolt kártya-rács helyett), alulvonalas év-fülek,
+  forrás+év kiemelő-színű sor, típus-badge a sor jobb szélén, körkörös
+  nyíl-CTA, számozott lapozás ellipszissel.
+* Kritikus javítás: hosszú kiadványtípus-szöveg (pl. "Folyóiratcikk")
+  belelógott a címbe keskenyebb szélességnél — a típus-badge/nyíl-CTA
+  mostantól flexbox-alapú, tartalom-szélesség-érzékeny elrendezésű,
+  semmilyen szélességnél nem csúszhat rá a szövegre.
+* Teljes körű Stílus-fül lefedettség: cím-szín, tipográfia, kártya-árnyék,
+  előnézeti kép mérete/lekerekítése, badge-ek formája, nyíl-gomb
+  méret/formája, kereső mezők lekerekítése, lapozás színei/formája —
+  gyakorlatilag minden vizuális elem testreszabható lett.
 
 = 0.9.0 =
 * Angol fordítás becsomagolva (`languages/mtmt-sync-en_US.po`/`.mo`, 242 string) —
@@ -223,6 +243,13 @@ egyikkel sem, csak a látogató-vezérelt alapbeállítással) működik, tiszt�
 * Kezdeti bootstrap: plugin-header, aktivátor (tábla-migráció dbDelta-val).
 
 == Upgrade Notice ==
+
+= 0.10.0 =
+Widget vizuális felfrissítés (soronkénti lista, alulvonalas év-fülek,
+számozott lapozás), teljes körű Stílus-fül lefedettség, egyéb azonosítós
+ikonok élesítve, kritikus reszponzivitási javítás. A plugin továbbra is
+0.x verziószámon fejlődik — 1.0.0-t csak akkor kap, ha a megrendelő
+explicit jóváhagyja, hogy a rendszer kész (lásd CLAUDE.md §10.2).
 
 = 0.9.0 =
 Angol fordítás, jogosultság-admin UI, egyéb azonosítós ikonok, kézi
