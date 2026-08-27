@@ -1006,3 +1006,62 @@ set_areas_for_publication()`/`delete()`, és EGYSZER egy teljes
     új markup-szerkezete, számozott lapozó ellipszis-logikája, aria-label-es
     Előző/Következő). Teljes suite (205 assertion) zöld, repo-szintű
     `php -l` lint tiszta, i18n újraépítve (256 string, mind lefordítva).
+96. **Élesben talált reszponzivitási hiba a #95-ös típus-badge-pozicionálásban
+    + teljes körű Stílus-vezérlő lefedettség** (megrendelői visszajelzés,
+    Elementor-szerkesztő screenshottal: egy hosszú kiadványtípus-szöveg —
+    "Folyóiratcikk" — belelógott a címbe keskenyebb szélességnél; kérés:
+    "a widgetek minden utolsó elemét lehessen stílusban módosítani...
+    reszponzivitásra nagyon figyelj").
+    - **Kiváltó ok**: a #95-ös típus-badge + nyíl-CTA `position: absolute`-tal
+      volt a sor jobb szélére pozicionálva, egy TALÁLGATOTT, fix
+      `padding-right: 3.4em` fölé — ez a becslés rövid feliratokra
+      (SJR-kvartilis, "Q1") volt kalibrálva, egy hosszú magyar szóra
+      ("Folyóiratcikk", "Konferenciaközlemény") nem volt elég hely, a badge
+      kilógott a foglalt zónából és ráfeküdt a címre.
+    - **Javítás — architekturális, nem csak "nagyobb szám"**: a típus-badge +
+      nyíl-CTA mostantól egy VALÓDI flex-gyermek (`.mtmt-pub-card-side`,
+      `flex: 0 0 auto`), NEM abszolút pozicionálva egy becsült térfogat
+      fölé. A flexbox motor a foglalt szélességet mindig a badge tényleges
+      tartalmának szélességéhez igazítja, a body (`min-width: 0`) pedig
+      automatikusan zsugorodik körülötte — SEMMILYEN badge-szöveg-hossznál
+      vagy konténer-szélességnél nem lehet átfedés, nincs "elég nagy"
+      találgatott konstans, amit karban kellene tartani. A nyíl-CTA
+      függőleges középre igazítása a `.mtmt-pub-card`-on beállított
+      `align-items: stretch`-en keresztül működik (a side-oszlop a teljes
+      sor magasságára nyúlik, a nyíl `top:50%`-a EHHEZ, nem a sorhoz
+      igazodik). Mobilon (≤600px, ahol a sor amúgy is oszloppá vált)
+      `order`-rel a side-oszlop a kép ALÁ, a body FÖLÉ kerül, a nyíl-CTA
+      elrejtve (a sor egésze marad kattintható).
+    - **Teljes körű Stílus-fül lefedettség** — minden eddig kódba vésett
+      vizuális tulajdonság mostantól Elementor-vezérlővel felülírható:
+      - Színek: + "Cím szín" (`--mtmt-heading`, korábban csak alapértékként
+        létezett, control nélkül).
+      - Tipográfia: + "Felső kiskapitális felirat", + "Forrás + év sor";
+        "Törzsszöveg" mostantól az alcímet is lefedi.
+      - Kártya: + "Kártya-sor árnyéka" (`Group_Control_Box_Shadow`,
+        alapból kikapcsolva — a flat-lista dizájn nem igényel shadow-t
+        alapból, de bekapcsolható, ha a megrendelő mégis dobozolt/árnyékos
+        megjelenést akarna).
+      - **Új "Előnézeti kép" szekció**: szélesség, magasság, lekerekítés.
+      - **Új "Badge-ek" szekció**: lekerekítés + belső margó, EGYSÉGESEN a
+        típus-/SJR-/szakmai terület-badge-re (mindhárom ugyanazt az alap
+        `.mtmt-badge` osztályt használja).
+      - **Új "Nyíl-gomb" szekció**: méret (`--mtmt-arrow-size`) +
+        lekerekítés (`--mtmt-arrow-radius`, % vagy px — 50% a kör, 0 a
+        négyzet, tetszőleges köztes érték).
+      - **Új "Kereső / szűrő mezők" szekció**: lekerekítés.
+      - **Új "Lapozás" szekció**: oldalszám-gombok lekerekítése + az
+        aktuális oldal háttér-/szövegszíne (korábban csak a globális
+        kiemelő-színt örökölte, nem volt önálló felülírása).
+      Amit SZÁNDÉKOSAN nem tettünk egyedi controllá (megfontolt, nem
+      hanyagságból hagyott hézag): SJR-/típus-badge EGYEDI (determinisztikus)
+      színei (10 külön szín, nem lenne kezelhető UI 10 külön color-pickerrel),
+      elválasztó-vonal vastagsága, animáció-időzítések — ezek implementációs
+      részletek, nem a megrendelő által ténylegesen módosítani kívánt
+      dizájn-jellemzők; ha mégis kell valamelyik, könnyen pótolható.
+    Regresszió: `test-fase5-widgets.php` 46 -> 48 assertion (a
+    `.mtmt-pub-card-side` flex-wrapper jelenléte/hiánya, pozíciója a
+    body-hoz képest). Teljes suite (207 assertion) zöld, repo-szintű
+    `php -l` lint tiszta, i18n újraépítve (273 string, mind lefordítva).
+    A Style-tab control-regisztrációhoz nincs unit-teszt (Elementor-osztályok
+    nélkül nem futtatható ebben a harnessben) — élő ellenőrzéssel validálandó.

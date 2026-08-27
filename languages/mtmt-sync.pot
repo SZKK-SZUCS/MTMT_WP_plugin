@@ -7,7 +7,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-08-27T20:41:16+00:00\n"
+"POT-Creation-Date: 2026-08-27T20:54:53+00:00\n"
 "X-Generator: bin/i18n/build.php\n"
 "X-Domain: mtmt-sync\n"
 #: includes/class-mtmt-sync.php:161
@@ -94,6 +94,14 @@ msgstr ""
 msgid "Adj meg legalább egy érvényes szerző-MTID-et, vesszővel elválasztva."
 msgstr ""
 
+#: elementor/trait-mtmt-widget-common-controls.php:417
+msgid "Aktuális oldal háttérszíne"
+msgstr ""
+
+#: elementor/trait-mtmt-widget-common-controls.php:425
+msgid "Aktuális oldal szövegszíne"
+msgstr ""
+
 #: admin/class-mtmt-settings-page.php:114
 msgid "Alap placeholder-kép"
 msgstr ""
@@ -118,8 +126,16 @@ msgstr ""
 msgid "Az intézmény MTID-nek pozitív egész számnak kell lennie."
 msgstr ""
 
+#: elementor/trait-mtmt-widget-common-controls.php:294
+msgid "Badge-ek (típus, SJR, szakmai terület)"
+msgstr ""
+
 #: admin/class-mtmt-profiles-page.php:194
 msgid "Becsült találatszám: kb. %d (az MTMT csak becslést adott vissza; a profil még NINCS elmentve)."
+msgstr ""
+
+#: elementor/trait-mtmt-widget-common-controls.php:316
+msgid "Belső margó"
 msgstr ""
 
 #: admin/class-mtmt-capabilities-page.php:67 admin/class-mtmt-capabilities-page.php:83 admin/class-mtmt-capabilities-page.php:101
@@ -162,6 +178,10 @@ msgstr ""
 msgid "Cím / szerzők"
 msgstr ""
 
+#: elementor/trait-mtmt-widget-common-controls.php:137
+msgid "Cím szín (widget-cím, kártya-cím, aktív év-fül)"
+msgstr ""
+
 #: admin/class-mtmt-settings-page.php:175
 msgid "Címzettek (soronként vagy vesszővel elválasztva):"
 msgstr ""
@@ -178,7 +198,7 @@ msgstr ""
 msgid "Egy profil határozza meg, mely MTMT-publikációkat kérdezze le a rendszer szinkronizáláskor. Egy site-on több profil is lehet (pl. kutatócsoportonként); a behúzott publikációk mindig \"függőben\" státusszal kerülnek be, jóváhagyás előtt nem jelennek meg nyilvánosan."
 msgstr ""
 
-#: elementor/trait-mtmt-widget-common-controls.php:213
+#: elementor/trait-mtmt-widget-common-controls.php:436
 msgid "Egyéb azonosítók (WoS/Scopus/…)"
 msgstr ""
 
@@ -214,6 +234,10 @@ msgstr ""
 msgid "Előnézet eredménye"
 msgstr ""
 
+#: elementor/trait-mtmt-widget-common-controls.php:245
+msgid "Előnézeti kép"
+msgstr ""
+
 #: elementor/class-mtmt-widget-all-publications.php:164 elementor/class-mtmt-widget-topic-publications.php:189 includes/class-mtmt-widget-ajax.php:82 includes/class-mtmt-widget-ajax.php:137
 msgid "Előző"
 msgstr ""
@@ -246,7 +270,7 @@ msgstr ""
 msgid "Ezt az emailt a MTMT Sync plugin küldte automatikusan a(z) %s oldalról."
 msgstr ""
 
-#: elementor/trait-mtmt-widget-common-controls.php:45
+#: elementor/trait-mtmt-widget-common-controls.php:45 elementor/trait-mtmt-widget-common-controls.php:157
 msgid "Felső kiskapitális felirat"
 msgstr ""
 
@@ -256,6 +280,10 @@ msgstr ""
 
 #: admin/class-mtmt-list-table.php:82 admin/class-mtmt-settings-page.php:200
 msgid "Forrás"
+msgstr ""
+
+#: elementor/trait-mtmt-widget-common-controls.php:181
+msgid "Forrás + év sor"
 msgstr ""
 
 #: admin/class-mtmt-settings-page.php:202
@@ -326,11 +354,11 @@ msgstr ""
 msgid "Időpont"
 msgstr ""
 
-#: elementor/trait-mtmt-widget-common-controls.php:221
+#: elementor/trait-mtmt-widget-common-controls.php:444
 msgid "Ikon méret"
 msgstr ""
 
-#: elementor/trait-mtmt-widget-common-controls.php:245
+#: elementor/trait-mtmt-widget-common-controls.php:468
 msgid "Ikon szín"
 msgstr ""
 
@@ -394,6 +422,10 @@ msgstr ""
 msgid "Keresés cím, szerző vagy forrás szerint…"
 msgstr ""
 
+#: elementor/trait-mtmt-widget-common-controls.php:378
+msgid "Kereső / szűrő mezők"
+msgstr ""
+
 #: elementor/trait-mtmt-widget-common-controls.php:47
 msgid "Kereső mező helyőrző szövege"
 msgstr ""
@@ -426,24 +458,28 @@ msgstr ""
 msgid "Kompakt"
 msgstr ""
 
-#: elementor/trait-mtmt-widget-common-controls.php:175
+#: elementor/trait-mtmt-widget-common-controls.php:199
 msgid "Kártya"
 msgstr ""
 
-#: elementor/trait-mtmt-widget-common-controls.php:201
+#: elementor/trait-mtmt-widget-common-controls.php:225
 msgid "Kártya belső margó"
 msgstr ""
 
-#: elementor/trait-mtmt-widget-common-controls.php:183
+#: elementor/trait-mtmt-widget-common-controls.php:207
 msgid "Kártya háttérszíne"
 msgstr ""
 
-#: elementor/trait-mtmt-widget-common-controls.php:191
+#: elementor/trait-mtmt-widget-common-controls.php:215
 msgid "Kártya lekerekítés"
 msgstr ""
 
-#: elementor/trait-mtmt-widget-common-controls.php:157
+#: elementor/trait-mtmt-widget-common-controls.php:173
 msgid "Kártya-cím"
+msgstr ""
+
+#: elementor/trait-mtmt-widget-common-controls.php:235
+msgid "Kártya-sor árnyéka"
 msgstr ""
 
 #: admin/class-mtmt-publications-page.php:354 admin/class-mtmt-settings-page.php:125
@@ -452,6 +488,10 @@ msgstr ""
 
 #: elementor/class-mtmt-widget-all-publications.php:165 elementor/class-mtmt-widget-topic-publications.php:190 includes/class-mtmt-widget-ajax.php:85 includes/class-mtmt-widget-ajax.php:140
 msgid "Következő"
+msgstr ""
+
+#: elementor/trait-mtmt-widget-common-controls.php:399
+msgid "Lapozás"
 msgstr ""
 
 #: includes/class-mtmt-widget-ajax.php:146
@@ -464,6 +504,14 @@ msgstr ""
 
 #: elementor/trait-mtmt-widget-common-controls.php:52
 msgid "Lapozó \"következő\" felirata"
+msgstr ""
+
+#: elementor/trait-mtmt-widget-common-controls.php:281 elementor/trait-mtmt-widget-common-controls.php:302 elementor/trait-mtmt-widget-common-controls.php:386
+msgid "Lekerekítés"
+msgstr ""
+
+#: elementor/trait-mtmt-widget-common-controls.php:356
+msgid "Lekerekítés (100% = kör)"
 msgstr ""
 
 #: elementor/class-mtmt-widget-all-publications.php:158
@@ -536,6 +584,10 @@ msgstr ""
 
 #: admin/class-mtmt-list-table.php:86
 msgid "MTMT-státusz"
+msgstr ""
+
+#: elementor/trait-mtmt-widget-common-controls.php:267
+msgid "Magasság"
 msgstr ""
 
 #: admin/class-mtmt-publications-page.php:427
@@ -622,6 +674,10 @@ msgstr ""
 msgid "Még nincs egy szakmai terület sem."
 msgstr ""
 
+#: elementor/trait-mtmt-widget-common-controls.php:336
+msgid "Méret"
+msgstr ""
+
 #: admin/class-mtmt-profiles-page.php:119 admin/class-mtmt-topic-areas-page.php:78
 msgid "Művelet"
 msgstr ""
@@ -658,6 +714,10 @@ msgstr ""
 msgid "Nincs terület kijelölve."
 msgstr ""
 
+#: elementor/trait-mtmt-widget-common-controls.php:328
+msgid "Nyíl-gomb (sor jobb szélén)"
+msgstr ""
+
 #: admin/class-mtmt-profiles-page.php:115
 msgid "Név"
 msgstr ""
@@ -666,19 +726,23 @@ msgstr ""
 msgid "OK"
 msgstr ""
 
+#: elementor/trait-mtmt-widget-common-controls.php:407
+msgid "Oldalszám-gombok lekerekítése"
+msgstr ""
+
 #: elementor/class-mtmt-widget-all-publications.php:157
 msgid "PUBLIKÁCIÓK"
 msgstr ""
 
-#: elementor/trait-mtmt-widget-common-controls.php:261
+#: elementor/trait-mtmt-widget-common-controls.php:484
 msgid "Pill háttérszín"
 msgstr ""
 
-#: elementor/trait-mtmt-widget-common-controls.php:277
+#: elementor/trait-mtmt-widget-common-controls.php:500
 msgid "Pill lekerekítés"
 msgstr ""
 
-#: elementor/trait-mtmt-widget-common-controls.php:269
+#: elementor/trait-mtmt-widget-common-controls.php:492
 msgid "Pill szegély szín"
 msgstr ""
 
@@ -786,11 +850,15 @@ msgstr ""
 msgid "Szinkron most"
 msgstr ""
 
+#: elementor/trait-mtmt-widget-common-controls.php:253
+msgid "Szélesség"
+msgstr ""
+
 #: elementor/trait-mtmt-widget-common-controls.php:97
 msgid "Színek"
 msgstr ""
 
-#: elementor/trait-mtmt-widget-common-controls.php:253
+#: elementor/trait-mtmt-widget-common-controls.php:476
 msgid "Szöveg szín"
 msgstr ""
 
@@ -862,7 +930,7 @@ msgstr ""
 msgid "Területek kezelése"
 msgstr ""
 
-#: elementor/trait-mtmt-widget-common-controls.php:140
+#: elementor/trait-mtmt-widget-common-controls.php:148
 msgid "Tipográfia"
 msgstr ""
 
@@ -886,8 +954,8 @@ msgstr ""
 msgid "Törlés"
 msgstr ""
 
-#: elementor/trait-mtmt-widget-common-controls.php:165
-msgid "Törzsszöveg (szerzők, meta)"
+#: elementor/trait-mtmt-widget-common-controls.php:189
+msgid "Törzsszöveg (alcím, szerzők, meta)"
 msgstr ""
 
 #: admin/class-mtmt-settings-page.php:189
@@ -922,7 +990,7 @@ msgstr ""
 msgid "Widget alcíme (leíró mondat a cím alatt)"
 msgstr ""
 
-#: elementor/trait-mtmt-widget-common-controls.php:149
+#: elementor/trait-mtmt-widget-common-controls.php:165
 msgid "Widget cím"
 msgstr ""
 

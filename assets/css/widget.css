@@ -128,12 +128,15 @@
 	text-align: center;
 }
 
+/* align-items: stretch (NEM flex-start) -> a .mtmt-pub-card-side gyermek
+   a teljes sor magasságára nyúlik, hogy a benne lévő nyíl-CTA a SOR
+   közepéhez tudjon igazodni (top:50% a side-on belül) — lásd lent. */
 .mtmt-pub-card {
 	display: flex;
-	align-items: flex-start;
+	align-items: stretch;
 	gap: 1.25em;
 	margin: 0 -1em;
-	padding: 1.25em 3.4em 1.25em 1em;
+	padding: 1.25em 1em;
 	border: none;
 	border-bottom: 1px solid var(--mtmt-border);
 	border-radius: 10px;
@@ -229,26 +232,40 @@
 	overflow: hidden;
 }
 
-/* A típus-badge és a nyíl-CTA a SOR (nem a kép) jobb szélén ülnek,
-   egymástól függetlenül pozicionálva — a sor jobb oldali paddingje
-   (lásd .mtmt-pub-card) tartja fenn nekik a helyet. */
+/* A típus-badge és a nyíl-CTA a SOR jobb szélén ülnek, DE — élesben talált
+   reszponzivitási hiba után (docs/decisions.md #96) — VALÓDI flex-elemként,
+   nem egy találgatott fix padding fölé abszolút pozicionálva. Így a
+   foglalt szélesség mindig a badge tényleges szövegének szélességéhez
+   igazodik (`flex: 0 0 auto`), akármilyen hosszú kiadványtípus-szöveg
+   esetén sem csúszhat rá a címre — a body (`min-width:0`) egyszerűen
+   zsugorodik körülötte. A `.mtmt-pub-card`-on beállított `align-items:
+   stretch` teszi lehetővé, hogy ez az oszlop a teljes sor magasságára
+   nyúljon, amihez a nyíl `top:50%`-a (a side-hoz, NEM a sorhoz képest)
+   igazodik. */
+.mtmt-pub-card-side {
+	flex: 0 0 auto;
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-end;
+	min-width: 2.2em;
+}
+
 .mtmt-pub-card-type-badge {
-	position: absolute;
-	top: 1.25em;
-	right: 1em;
+	white-space: nowrap;
 }
 
 .mtmt-pub-card-arrow {
 	position: absolute;
 	top: 50%;
-	right: 1em;
+	right: 0;
 	transform: translateY(-50%);
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	width: 2.2em;
-	height: 2.2em;
-	border-radius: 50%;
+	width: var(--mtmt-arrow-size, 2.2em);
+	height: var(--mtmt-arrow-size, 2.2em);
+	border-radius: var(--mtmt-arrow-radius, 50%);
 	border: 1px solid var(--mtmt-border);
 	color: var(--mtmt-accent);
 	transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
@@ -505,17 +522,28 @@
 @media (max-width: 600px) {
 	.mtmt-pub-card {
 		flex-direction: column;
-		padding-right: 1em;
 	}
 	.mtmt-pub-card-media {
 		width: 100%;
 		flex-basis: auto;
 		height: 150px;
+		order: 0;
 	}
-	.mtmt-pub-card-type-badge {
-		position: static;
-		display: inline-block;
-		margin-bottom: 0.5em;
+	/* Mobilon a side-oszlop (típus-badge) egy sima, teljes szélességű sor
+	   lesz a kép ALATT, a törzstartalom (cím/szerzők/…) FÖLÖTT — `order`-rel
+	   biztosítva, hogy pontosan ebben a sorrendben jelenjen meg (a DOM-sorrend
+	   itt media -> body -> side lenne, ami rosszabbul nézne ki). A nyíl-CTA
+	   mobilon elrejtve (a teljes sor amúgy is kattintható marad). */
+	.mtmt-pub-card-side {
+		order: 1;
+		width: 100%;
+		flex-direction: row;
+		align-items: center;
+		min-width: 0;
+		margin-bottom: 0.4em;
+	}
+	.mtmt-pub-card-body {
+		order: 2;
 	}
 	.mtmt-pub-card-arrow {
 		display: none;

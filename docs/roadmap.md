@@ -572,6 +572,46 @@ assertion) zöld, lint tiszta, i18n újraépítve (256 string).
    nyíl-gomb kitöltődjön a kiemelő-színnel; kattints a nyíl-gomb köré nem
    eső részre — navigáljon (DOI/MTMT-link).
 
+## ✅ Reszponzivitási hiba javítva + teljes körű Stílus-vezérlő lefedettség
+
+**KÉSZ, még nincs élesben validálva.** Élesben talált hiba (Elementor-
+szerkesztő screenshot): egy hosszú kiadványtípus-szöveg ("Folyóiratcikk")
+belelógott a címbe keskenyebb szélességnél — a típus-badge/nyíl-CTA egy
+találgatott fix hely fölé volt abszolút pozicionálva. Megrendelői kérés:
+"a widgetek minden utolsó elemét lehessen stílusban módosítani... a
+reszponzivitásra nagyon figyelj". Részletek: docs/decisions.md #96.
+
+- **A hiba architekturálisan javítva**, nem csak egy nagyobb becsült
+  értékkel: a típus-badge + nyíl-CTA mostantól valódi flex-gyermek
+  (`.mtmt-pub-card-side`), a foglalt szélesség mindig a tényleges
+  tartalomhoz igazodik — SEMMILYEN badge-szöveg-hossznál vagy
+  konténer-szélességnél nem csúszhat rá a címre.
+- **Minden eddig kódba vésett vizuális tulajdonság mostantól Elementor
+  Stílus-vezérlővel állítható**: cím-szín, felső-felirat/forrás-sor
+  tipográfia, kártya-árnyék (alapból kikapcsolva), előnézeti kép
+  szélessége/magassága/lekerekítése, badge-ek lekerekítése/belső margója
+  (egységesen típus/SJR/terület), nyíl-gomb mérete/lekerekítése (kör vagy
+  négyzet), kereső/szűrő mezők lekerekítése, lapozás oldalszám-gombjainak
+  lekerekítése + aktuális oldal háttér-/szövegszíne.
+
+Regresszió: `test-fase5-widgets.php` 46→48 assertion, teljes suite (207
+assertion) zöld, lint tiszta, i18n újraépítve (273 string).
+
+**Éles ellenőrzéshez** (Local site, Elementor szerkesztő):
+1. Szűkítsd le a böngésző/szerkesztő ablakot fokozatosan (asztali
+   szélességtől egészen mobil-szélességig) egy olyan publikáción, aminek
+   hosszú kiadványtípusa van (pl. "Folyóiratcikk", "Konferenciaközlemény")
+   — a badge SOHA ne fedje/lógja bele a címbe, semmilyen szélességnél.
+2. 600px alatt: a típus-badge kerüljön a kép alá, a cím fölé (nem a lista
+   legvégén); a nyíl-gomb tűnjön el (a sor egésze marad kattintható).
+3. Widget Stílus fülön menj végig minden szekción (Színek, Tipográfia,
+   Kártya, Előnézeti kép, Badge-ek, Nyíl-gomb, Kereső/szűrő mezők,
+   Lapozás, Egyéb azonosítók) — mindegyik kontroll ténylegesen hasson a
+   megfelelő elemre a frontenden.
+4. Próbáld ki a "Kártya-sor árnyéka" kontrollt (Kártya szekció) — alapból
+   nincs árnyék (flat lista), de bekapcsolva jelenjen meg egy tényleges
+   box-shadow minden soron.
+
 ## Backlog — még nincs fázishoz kötve
 
 Jelenleg üres.

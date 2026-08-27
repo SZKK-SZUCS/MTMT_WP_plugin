@@ -115,8 +115,19 @@ final class Mtmt_Card_Renderer {
 
 		$out .= '</div>'; // .mtmt-pub-card-body vége
 
-		$out .= self::render_type_badge( $publication );
-		$out .= self::render_arrow_cta( $link );
+		// KRITIKUS (élesben talált reszponzivitási hiba, docs/decisions.md #96):
+		// a típus-badge + nyíl-CTA egy VALÓDI flex-oszlopban van, NEM
+		// abszolút pozicionálva egy találgatott fix padding-right fölé — egy
+		// hosszú kiadványtípus-szöveg (pl. "Konferenciaközlemény") szélesebb
+		// lehet, mint bármilyen előre megbecsült foglalt hely, és belelógott
+		// volna a címbe. Flexbox-szal a foglalt szélesség mindig a tényleges
+		// tartalomhoz (a badge szövegének szélességéhez) igazodik, a body
+		// (`min-width:0`) pedig körülötte zsugorodik — nincs overlap-kockázat
+		// SEMMILYEN badge-szövegnél/szélességnél.
+		$side_html = self::render_type_badge( $publication ) . self::render_arrow_cta( $link );
+		if ( '' !== $side_html ) {
+			$out .= '<div class="mtmt-pub-card-side">' . $side_html . '</div>';
+		}
 
 		$out .= '</div>'; // .mtmt-pub-card vége
 

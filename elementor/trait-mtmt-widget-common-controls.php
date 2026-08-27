@@ -131,6 +131,14 @@ trait Mtmt_Widget_Common_Controls {
 				'selectors' => array( '{{WRAPPER}} .mtmt-widget' => '--mtmt-bg-soft: {{VALUE}};' ),
 			)
 		);
+		$this->add_control(
+			'heading_color',
+			array(
+				'label'     => __( 'Cím szín (widget-cím, kártya-cím, aktív év-fül)', 'mtmt-sync' ),
+				'type'      => \Elementor\Controls_Manager::COLOR,
+				'selectors' => array( '{{WRAPPER}} .mtmt-widget' => '--mtmt-heading: {{VALUE}};' ),
+			)
+		);
 
 		$this->end_controls_section();
 
@@ -142,6 +150,14 @@ trait Mtmt_Widget_Common_Controls {
 			)
 		);
 
+		$this->add_group_control(
+			\Elementor\Group_Control_Typography::get_type(),
+			array(
+				'name'     => 'eyebrow_typography',
+				'label'    => __( 'Felső kiskapitális felirat', 'mtmt-sync' ),
+				'selector' => '{{WRAPPER}} .mtmt-eyebrow',
+			)
+		);
 		$this->add_group_control(
 			\Elementor\Group_Control_Typography::get_type(),
 			array(
@@ -161,9 +177,17 @@ trait Mtmt_Widget_Common_Controls {
 		$this->add_group_control(
 			\Elementor\Group_Control_Typography::get_type(),
 			array(
+				'name'     => 'source_typography',
+				'label'    => __( 'Forrás + év sor', 'mtmt-sync' ),
+				'selector' => '{{WRAPPER}} .mtmt-pub-card-source-line',
+			)
+		);
+		$this->add_group_control(
+			\Elementor\Group_Control_Typography::get_type(),
+			array(
 				'name'     => 'body_typography',
-				'label'    => __( 'Törzsszöveg (szerzők, meta)', 'mtmt-sync' ),
-				'selector' => '{{WRAPPER}} .mtmt-pub-card-authors, {{WRAPPER}} .mtmt-pub-card-meta',
+				'label'    => __( 'Törzsszöveg (alcím, szerzők, meta)', 'mtmt-sync' ),
+				'selector' => '{{WRAPPER}} .mtmt-widget-subtitle, {{WRAPPER}} .mtmt-pub-card-authors, {{WRAPPER}} .mtmt-pub-card-meta',
 			)
 		);
 
@@ -202,6 +226,205 @@ trait Mtmt_Widget_Common_Controls {
 				'type'       => \Elementor\Controls_Manager::DIMENSIONS,
 				'size_units' => array( 'px', 'em', '%' ),
 				'selectors'  => array( '{{WRAPPER}} .mtmt-pub-card' => 'padding: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};' ),
+			)
+		);
+		$this->add_group_control(
+			\Elementor\Group_Control_Box_Shadow::get_type(),
+			array(
+				'name'     => 'card_shadow',
+				'label'    => __( 'Kártya-sor árnyéka', 'mtmt-sync' ),
+				'selector' => '{{WRAPPER}} .mtmt-pub-card',
+			)
+		);
+
+		$this->end_controls_section();
+
+		$this->start_controls_section(
+			'mtmt_style_media_section',
+			array(
+				'label' => __( 'Előnézeti kép', 'mtmt-sync' ),
+				'tab'   => \Elementor\Controls_Manager::TAB_STYLE,
+			)
+		);
+
+		$this->add_responsive_control(
+			'media_width',
+			array(
+				'label'      => __( 'Szélesség', 'mtmt-sync' ),
+				'type'       => \Elementor\Controls_Manager::SLIDER,
+				'size_units' => array( 'px' ),
+				'range'      => array( 'px' => array( 'min' => 60, 'max' => 320 ) ),
+				'default'    => array(
+					'unit' => 'px',
+					'size' => 112,
+				),
+				'selectors'  => array( '{{WRAPPER}} .mtmt-pub-card-media' => 'width: {{SIZE}}{{UNIT}}; flex-basis: {{SIZE}}{{UNIT}};' ),
+			)
+		);
+		$this->add_responsive_control(
+			'media_height',
+			array(
+				'label'      => __( 'Magasság', 'mtmt-sync' ),
+				'type'       => \Elementor\Controls_Manager::SLIDER,
+				'size_units' => array( 'px' ),
+				'range'      => array( 'px' => array( 'min' => 40, 'max' => 260 ) ),
+				'default'    => array(
+					'unit' => 'px',
+					'size' => 78,
+				),
+				'selectors'  => array( '{{WRAPPER}} .mtmt-pub-card-media' => 'height: {{SIZE}}{{UNIT}};' ),
+			)
+		);
+		$this->add_responsive_control(
+			'media_border_radius',
+			array(
+				'label'      => __( 'Lekerekítés', 'mtmt-sync' ),
+				'type'       => \Elementor\Controls_Manager::SLIDER,
+				'size_units' => array( 'px' ),
+				'range'      => array( 'px' => array( 'min' => 0, 'max' => 40 ) ),
+				'selectors'  => array( '{{WRAPPER}} .mtmt-pub-card-media' => 'border-radius: {{SIZE}}{{UNIT}};' ),
+			)
+		);
+
+		$this->end_controls_section();
+
+		$this->start_controls_section(
+			'mtmt_style_badges_section',
+			array(
+				'label' => __( 'Badge-ek (típus, SJR, szakmai terület)', 'mtmt-sync' ),
+				'tab'   => \Elementor\Controls_Manager::TAB_STYLE,
+			)
+		);
+
+		$this->add_responsive_control(
+			'badge_border_radius',
+			array(
+				'label'      => __( 'Lekerekítés', 'mtmt-sync' ),
+				'type'       => \Elementor\Controls_Manager::SLIDER,
+				'size_units' => array( 'px' ),
+				'range'      => array( 'px' => array( 'min' => 0, 'max' => 30 ) ),
+				'default'    => array(
+					'unit' => 'px',
+					'size' => 999,
+				),
+				'selectors'  => array( '{{WRAPPER}} .mtmt-badge' => 'border-radius: {{SIZE}}{{UNIT}};' ),
+			)
+		);
+		$this->add_responsive_control(
+			'badge_padding',
+			array(
+				'label'      => __( 'Belső margó', 'mtmt-sync' ),
+				'type'       => \Elementor\Controls_Manager::DIMENSIONS,
+				'size_units' => array( 'px', 'em' ),
+				'selectors'  => array( '{{WRAPPER}} .mtmt-badge' => 'padding: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};' ),
+			)
+		);
+
+		$this->end_controls_section();
+
+		$this->start_controls_section(
+			'mtmt_style_arrow_section',
+			array(
+				'label' => __( 'Nyíl-gomb (sor jobb szélén)', 'mtmt-sync' ),
+				'tab'   => \Elementor\Controls_Manager::TAB_STYLE,
+			)
+		);
+
+		$this->add_responsive_control(
+			'arrow_size',
+			array(
+				'label'      => __( 'Méret', 'mtmt-sync' ),
+				'type'       => \Elementor\Controls_Manager::SLIDER,
+				'size_units' => array( 'px', 'em' ),
+				'range'      => array(
+					'px' => array(
+						'min' => 16,
+						'max' => 56,
+					),
+					'em' => array(
+						'min'  => 1,
+						'max'  => 4,
+						'step' => 0.1,
+					),
+				),
+				'selectors'  => array( '{{WRAPPER}} .mtmt-widget' => '--mtmt-arrow-size: {{SIZE}}{{UNIT}};' ),
+			)
+		);
+		$this->add_responsive_control(
+			'arrow_border_radius',
+			array(
+				'label'      => __( 'Lekerekítés (100% = kör)', 'mtmt-sync' ),
+				'type'       => \Elementor\Controls_Manager::SLIDER,
+				'size_units' => array( '%', 'px' ),
+				'range'      => array(
+					'%'  => array(
+						'min' => 0,
+						'max' => 50,
+					),
+					'px' => array(
+						'min' => 0,
+						'max' => 30,
+					),
+				),
+				'selectors'  => array( '{{WRAPPER}} .mtmt-widget' => '--mtmt-arrow-radius: {{SIZE}}{{UNIT}};' ),
+			)
+		);
+
+		$this->end_controls_section();
+
+		$this->start_controls_section(
+			'mtmt_style_form_section',
+			array(
+				'label' => __( 'Kereső / szűrő mezők', 'mtmt-sync' ),
+				'tab'   => \Elementor\Controls_Manager::TAB_STYLE,
+			)
+		);
+
+		$this->add_responsive_control(
+			'form_border_radius',
+			array(
+				'label'      => __( 'Lekerekítés', 'mtmt-sync' ),
+				'type'       => \Elementor\Controls_Manager::SLIDER,
+				'size_units' => array( 'px' ),
+				'range'      => array( 'px' => array( 'min' => 0, 'max' => 30 ) ),
+				'selectors'  => array( '{{WRAPPER}} .mtmt-search-input, {{WRAPPER}} .mtmt-area-filter' => 'border-radius: {{SIZE}}{{UNIT}};' ),
+			)
+		);
+
+		$this->end_controls_section();
+
+		$this->start_controls_section(
+			'mtmt_style_pagination_section',
+			array(
+				'label' => __( 'Lapozás', 'mtmt-sync' ),
+				'tab'   => \Elementor\Controls_Manager::TAB_STYLE,
+			)
+		);
+
+		$this->add_responsive_control(
+			'pagination_border_radius',
+			array(
+				'label'      => __( 'Oldalszám-gombok lekerekítése', 'mtmt-sync' ),
+				'type'       => \Elementor\Controls_Manager::SLIDER,
+				'size_units' => array( 'px' ),
+				'range'      => array( 'px' => array( 'min' => 0, 'max' => 30 ) ),
+				'selectors'  => array( '{{WRAPPER}} .mtmt-page-btn-number' => 'border-radius: {{SIZE}}{{UNIT}};' ),
+			)
+		);
+		$this->add_control(
+			'pagination_active_bg_color',
+			array(
+				'label'     => __( 'Aktuális oldal háttérszíne', 'mtmt-sync' ),
+				'type'      => \Elementor\Controls_Manager::COLOR,
+				'selectors' => array( '{{WRAPPER}} .mtmt-page-btn-number.is-current' => 'background-color: {{VALUE}};' ),
+			)
+		);
+		$this->add_control(
+			'pagination_active_text_color',
+			array(
+				'label'     => __( 'Aktuális oldal szövegszíne', 'mtmt-sync' ),
+				'type'      => \Elementor\Controls_Manager::COLOR,
+				'selectors' => array( '{{WRAPPER}} .mtmt-page-btn-number.is-current' => 'color: {{VALUE}};' ),
 			)
 		);
 
