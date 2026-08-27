@@ -109,9 +109,25 @@ add_action( 'plugins_loaded', 'mtmt_load_textdomain' );
  * a kódban lévőtől (pl. plugin-frissítés reaktiválás nélkül), újrafuttatja a
  * dbDelta-migrációt. A dbDelta idempotens: csak a hiányzó táblát/oszlopot
  * hozza létre, meglévő adatot nem érint.
+ *
+ * A verzió-opció ÖNMAGÁBAN nem megbízható jelzés arra, hogy a tábla
+ * ténylegesen létezik (docs/decisions.md #89 folytatása, élesben talált
+ * hiba: a wp_mtmt_publications tábla fizikailag hiányzott, miközben az
+ * opció már a legfrissebb verzióra mutatott — pl. egy DB-visszaállítás/
+ * import érintette a wp_options-t, de a saját táblákat nem). Ezért egy
+ * olcsó, indexelt SHOW TABLES LIKE lekérdezéssel közvetlenül is
+ * ellenőrizzük a fő tábla létét, és a verzió-egyezéstől függetlenül
+ * újrafuttatjuk a migrációt, ha a tábla mégis hiányzik.
  */
 function mtmt_maybe_upgrade_db(): void {
-	if ( get_option( 'mtmt_db_version' ) !== MTMT_DB_VERSION ) {
+	global $wpdb;
+
+	$version_matches = get_option( 'mtmt_db_version' ) === MTMT_DB_VERSION;
+
+	$publications_table = $wpdb->prefix . 'mtmt_publications';
+	$table_exists        = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $publications_table ) ) === $publications_table;
+
+	if ( ! $version_matches || ! $table_exists ) {
 		Mtmt_Activator::activate();
 	}
 }

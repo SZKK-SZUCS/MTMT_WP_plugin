@@ -126,6 +126,34 @@ final class Mtmt_Activator {
 		dbDelta( $sql_topic_areas );
 		dbDelta( $sql_pub_topic_area );
 
+		// KRITIKUS (docs/decisions.md #89 folytatása, élesben talált hiba: a
+		// wp_mtmt_publications tábla fizikailag hiányzott, miközben a
+		// 'mtmt_db_version' opció a legfrissebb verzióra volt állítva, ami
+		// megakadályozta az önjavító mtmt_maybe_upgrade_db()-t attól, hogy
+		// újra megpróbálja). A dbDelta() nem dob kivételt és nem ad
+		// megbízható hibajelzést sikertelen CREATE TABLE esetén — a
+		// visszatérési tömb csak azt írja le, MIT próbált csinálni, nem azt,
+		// hogy ténylegesen sikerült-e. Ezért itt EXPLICITEN ellenőrizzük,
+		// hogy mind az 5 tábla ténylegesen létrejött-e, mielőtt a
+		// verzió-opciót "kész"-re állítanánk. Ha bármelyik hiányzik, az
+		// opció SZÁNDÉKOSAN nem frissül, hogy a legközelebbi oldalbetöltéskor
+		// az upgrade-ellenőrzés újra megpróbálja létrehozni — nem hazudunk
+		// magunknak "sikeres migrációt".
+		$required_tables = array(
+			$publications_table,
+			$profiles_table,
+			$sync_log_table,
+			$topic_areas_table,
+			$pub_topic_area_table,
+		);
+
+		foreach ( $required_tables as $table ) {
+			$exists = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) );
+			if ( $table !== $exists ) {
+				return;
+			}
+		}
+
 		update_option( 'mtmt_db_version', MTMT_DB_VERSION );
 	}
 }

@@ -435,6 +435,15 @@ lista arra, mi kerüljön a 0.9-es kiadásba az "alpha" verzió előtt
   meghiúsulhatott). A mögöttes DB-írási hiba TÉNYLEGES oka még nyitott — ez a
   javítás azt teszi lehetővé, hogy a következő éles teszt már a valódi
   hibaüzenetet mutassa. Részletek: docs/decisions.md #89.
+- **A #89 valódi kiváltó oka megtalálva és javítva**: a `wp_mtmt_publications`
+  tábla fizikailag nem létezett, miközben a `mtmt_db_version` opció már a
+  legfrissebb verzióra mutatott, ezért az önjavító séma-ellenőrzés sosem
+  próbálta újra létrehozni. `Mtmt_Activator::activate()` mostantól
+  explicit ellenőrzi mind az 5 tábla tényleges létét (`SHOW TABLES LIKE`)
+  a verzió-opció beállítása előtt; `mtmt_maybe_upgrade_db()` a verzió-
+  egyezéstől függetlenül is újrafuttatja a migrációt, ha a fő tábla mégis
+  hiányzik. Ez az egyszerű oldalbetöltéssel önmagát helyreállítja, nincs
+  szükség manuális deaktiválás/reaktiválásra. Részletek: docs/decisions.md #90.
 
 **Éles ellenőrzéshez** (Local site, wp-admin):
 1. Állítsd a WordPress nyelvét angolra (Beállítások → Általános → Site
@@ -458,10 +467,12 @@ lista arra, mi kerüljön a 0.9-es kiadásba az "alpha" verzió előtt
    funkció-kapcsolók, Jogosultságok oldal) viszont maradjon változatlan.
 6. Futtasd újra a kézi szinkront (Beállítások → "Teljes szinkron most", vagy
    Profilok oldal → "Szinkron most") azon a profilon/site-on, ahol korábban
-   "372 új" jelent meg, de a tábla üres maradt. Ha most is meghiúsul az írás,
-   az admin-notice-ban/futás-naplóban mostantól a VALÓDI MySQL-hibaüzenetnek
-   kell megjelennie (nem hamis sikernek) — ez a szöveg kell a tényleges ok
-   (pl. hiányzó jogosultság, adat-integritási hiba) diagnosztizálásához.
+   "372 új" jelent meg, de a tábla üres maradt — a `wp_mtmt_publications`
+   tábla hiánya miatt (docs/decisions.md #90). Elég egy sima wp-admin
+   oldalbetöltés (bármelyik admin-oldal) az új kód telepítése UTÁN — a
+   séma-ellenőrzés automatikusan helyreállítja a hiányzó táblát, kézi
+   deaktiválás/reaktiválás nélkül. Utána a szinkron már ténylegesen töltse
+   fel a táblát a jelentett darabszámmal.
 
 ## Backlog — még nincs fázishoz kötve
 

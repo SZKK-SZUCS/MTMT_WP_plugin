@@ -796,3 +796,35 @@ set_areas_for_publication()`/`delete()`, és EGYSZER egy teljes
     tesztesetek (17, ill. 13 assertion) változatlanul, hamis pozitív nélkül
     futnak tovább, mert a hand-rolled `wpdb`-stubok alapból sikeres írást
     szimulálnak.
+90. **#89 tényleges kiváltó oka megtalálva élesben: a `wp_mtmt_publications`
+    tábla fizikailag nem létezett** (`Table 'local.wp_mtmt_publications'
+    doesn't exist`, a #89-es javítás által most már felszínre hozott valódi
+    MySQL-hibaüzenetből kiderülve). A tábla-hiány oka önmagában rejtve marad
+    (feltehetően egy DB-visszaállítás/import a lokális teszt-site-on, ami a
+    `wp_options`-t érintette, a saját táblákat nem — a `mtmt_db_version`
+    opció a legfrissebb verzióra mutatott, miközben a tábla nem létezett).
+    A mélyebb, architekturális probléma ugyanaz a hibaosztály, mint #89:
+    `Mtmt_Activator::activate()` a `dbDelta()` hívások után FELTÉTEL NÉLKÜL
+    beállította a `mtmt_db_version` opciót "kész"-re — a `dbDelta()` viszont
+    nem dob kivételt és nem ad megbízható hibajelzést sikertelen `CREATE
+    TABLE` esetén (a visszatérési tömb csak azt írja le, MIT próbált
+    csinálni, nem hogy sikerült-e). Emiatt a `mtmt_maybe_upgrade_db()`
+    (`plugins_loaded`-kor futó önjavító upgrade-ellenőrzés,
+    `mtmt-sync.php`) a verzió-opció egyezésére hagyatkozva sosem próbálta
+    újra létrehozni a táblát, hiába hiányzott fizikailag.
+    Javítás mindkét helyen:
+    - `Mtmt_Activator::activate()` — az 5 `dbDelta()` hívás UTÁN egy
+      `SHOW TABLES LIKE` lekérdezéssel explicit ellenőrzi mind az 5 tábla
+      tényleges létét, és a `mtmt_db_version` opció CSAK akkor frissül, ha
+      mindegyik létrejött. Ha bármelyik hiányzik, az opció szándékosan
+      nem frissül (nem "hazudik" sikeres migrációt).
+    - `mtmt_maybe_upgrade_db()` (`mtmt-sync.php`) — mostantól a verzió-
+      opció-egyezés MELLETT egy közvetlen `SHOW TABLES LIKE`-ot is végez a
+      `wp_mtmt_publications` táblára, és a verzió-egyezéstől függetlenül is
+      újrafuttatja `Mtmt_Activator::activate()`-et, ha a tábla mégis
+      hiányzik — ez önmagában, kód-frissítés nélkül, a legközelebbi
+      oldalbetöltéskor helyreállítja a hiányzó táblákat, nem kell hozzá
+      manuális deaktiválás/reaktiválás.
+    Regresszió: 3 új assertion (`test-activator.php`) — mind az 5 tábla
+    sikeres létrehozása esetén az opció beállítódik, bármelyik tábla
+    hiánya esetén NEM.
