@@ -4,7 +4,7 @@ Tags: mtmt, publications, elementor, publikaciok, tudomanyos
 Requires at least: 6.4
 Tested up to: 6.7
 Requires PHP: 8.1
-Stable tag: 0.3.0
+Stable tag: 0.4.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -41,6 +41,20 @@ a `CLAUDE.md` és a `docs/roadmap.md` fájlokban vannak dokumentálva.
    automatikus futást (ha a cron-ütemezés már él).
 
 == Changelog ==
+
+= 0.4.0 =
+* "Szakmai terület" taxonómia (a korábbi "kutatócsoport" fogalom átnevezve,
+  megrendelővel egyeztetve ugyanaz a mechanizmus): saját tábla + pivot tábla
+  (nem WP-taxonómia, mivel a publikáció nem post-típus), publikációnként több
+  terület is rendelhető.
+* Új "Területek" admin almenü: terület létrehozása/törlése, mindegyikhez
+  opcionálisan egy WP-oldal párosítható (a jövőbeli szakmai aloldalakhoz).
+* Terület-hozzárendelés a szerkesztő/gazdagító űrlapon, `mtmt_classify`
+  jogosultsághoz kötve (szerveroldalon is védve, nem csak a UI-ban elrejtve).
+* A moderációs listán "Szakmai terület" oszlop + szűrő-lenyíló.
+* Teljes funkció opt-in plugin-beállítás (Beállítások → Funkciók) — kikapcsolva
+  a terület-UI sehol nem jelenik meg, a korábban elmentett hozzárendelések
+  megmaradnak a DB-ben.
 
 = 0.3.0 =
 * Moderációs lista (jóváhagyás/elutasítás, tömeges műveletek, szűrés
@@ -80,6 +94,11 @@ a `CLAUDE.md` és a `docs/roadmap.md` fájlokban vannak dokumentálva.
 * Kezdeti bootstrap: plugin-header, aktivátor (tábla-migráció dbDelta-val).
 
 == Upgrade Notice ==
+
+= 0.4.0 =
+"Szakmai terület" taxonómia + aloldal-előkészítés, opt-in beállítással. A plugin
+továbbra is 0.x verziószámon fejlődik — 1.0.0-t csak akkor kap, ha a megrendelő
+explicit jóváhagyja, hogy a rendszer kész (lásd CLAUDE.md §10.2).
 
 = 0.3.0 =
 Moderáció + jogosultságok. A plugin továbbra is 0.x verziószámon fejlődik —

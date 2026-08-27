@@ -154,9 +154,9 @@ tényleg elrejti/mutatja a checkboxot.
    capability-szétválasztás elvi ellenőrzése, nem éles korlátozás — a
    finomabb role-mapping később, ha kell).
 
-## 🔜 Fázis 4 — Taxonómia + aloldalak ("Szakmai terület")
+## ✅ Fázis 4 — Taxonómia + aloldalak ("Szakmai terület")
 
-**KÓD KÉSZ, ág: `fazis-4-topic-areas`, ÉLES ELLENŐRZÉS MÉG NEM TÖRTÉNT.**
+**KÉSZ, mergelve (PR #3), élesben validálva. 0.4.0-ban kiadva.**
 Eredeti scope (§7), a megbeszélésen **megerősítve átnevezve** "Szakmai terület"-re
 (docs/decisions.md #18) — NEM külön, második kategória-rendszer a kutatócsoport
 mellett, ugyanaz a mechanizmus.
