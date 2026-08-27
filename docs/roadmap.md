@@ -40,11 +40,12 @@ automatikus futtatásba kerül (különben az első automata re-sync már a rég
   megfelelő). Cond: `identifiers.source.name;eq;DOI`, VERIFIKÁLVA. Profilonként
   kapcsolható, nem globális.
 
-*Kész, ha:* egy már `approved` teszt-rekord MTMT-oldali módosítás után
+_Kész, ha:_ egy már `approved` teszt-rekord MTMT-oldali módosítás után
 újraszinkronizálva visszaesik `pending`-be; egy profil DOI-only kapcsolóval
 létrehozva ténylegesen csak DOI-s rekordokat húz be.
 
 **Éles ellenőrzéshez** (Local site, Site Shell):
+
 1. `wp mtmt sync` — futtasd újra a JKK profilt, kézi teszthez jó, ha wp-adminban
    előtte kézzel `approved`-re állítasz egy rekordot ($wpdb-n vagy közvetlen SQL-lel,
    admin UI még nincs Fázis 3-ig) — utána a `content_changed`/`reverted_to_pending`
@@ -74,11 +75,12 @@ Eredeti scope (§6) + két új pont a megbeszélésből:
   intézménynél timeout-kockázatot itt kell kezelni (emelt `set_time_limit` vagy
   async/AJAX-progress).
 
-*Kész, ha:* ütemezetten fut, napló látszik adminban, `DISABLE_WP_CRON`-nal
+_Kész, ha:_ ütemezetten fut, napló látszik adminban, `DISABLE_WP_CRON`-nal
 rendszer-cronból is hívható, email megérkezik új tételnél, a gomb megnyomható
 és nem fut timeoutba a JKK-méretű profilon.
 
 **Éles ellenőrzéshez** (Local site, Site Shell + wp-admin):
+
 1. **Regresszió a "frissített" számlálóra** (a legfontosabb, saját teszt közben
    találtam hibát benne, most javítva): `wp mtmt sync --profile=<jkk-id>`
    kétszer egymás után, rövid időn belül. A MÁSODIK futásnak ~0 "frissítve"-t
@@ -121,18 +123,19 @@ Eredeti scope (§8) + két új mező a megbeszélésből:
   (`mtmt_moderate` capability — ezt látják a moderátorok), a Profilok/
   Beállítások `manage_options`-hoz kötött almenükké váltak (a moderátorok nem
   is látják őket). Menü-badge: függőben lévők száma piros buborékban.
-- *Előkészítve Fázis 4-hez, de még nem építve*: a "szakmai terület" választó
+- _Előkészítve Fázis 4-hez, de még nem építve_: a "szakmai terület" választó
   helye a formban egyelőre nincs is jelen (nem csak elrejtve) — Fázis 4
   fogja ténylegesen hozzáadni a feltételes blokkot.
 
-*Kész, ha:* jóváhagyás/elutasítás/visszavonás megy (sor-műveletként ÉS a
+_Kész, ha:_ jóváhagyás/elutasítás/visszavonás megy (sor-műveletként ÉS a
 szerkesztő űrlapon is), tömeges jóváhagyás/elutasítás a listából, kézi mezők
-(thumbnail, funding_override, project_*, is_featured) syncnél túlélnek,
+(thumbnail, `funding_override`, `project_*`, is_featured) syncnél túlélnek,
 jogosultságok elkülönülnek (moderate-only user nem tudja a projekt-ellenőrzés
 pipát állítani), nonce+capability mindenhol, a kiemelt-cikk toggle ki/bekapcsolva
 tényleg elrejti/mutatja a checkboxot.
 
 **Éles ellenőrzéshez** (Local site, wp-admin):
+
 1. A bal oldali admin menüben most már **"MTMT"** a top-level tétel a
    moderációs listával landol, és ha van függőben lévő tétel, piros
    buborékban mutatja a darabszámot. "Profilok" és "Beállítások" almenüként
@@ -179,7 +182,7 @@ mellett, ugyanaz a mechanizmus.
   felül, mindkettő feltételes a toggle szerint (CLAUDE.md §8.1 eredetileg is
   előírta a "kutatócsoport" szűrőt, ez pótolja).
 
-*Kész, ha:* a terület-hozzárendelés menti/tölti magát a szerkesztő űrlapon;
+_Kész, ha:_ a terület-hozzárendelés menti/tölti magát a szerkesztő űrlapon;
 a lista szűrhető/oszloppal mutatja a területet; a funkció kikapcsolva a
 moderációs form és a lista is korrektül eltünteti a terület-UI-t. **A "egy
 terület aloldalán csak az adott terület tételei jönnek" kritérium csak
@@ -188,6 +191,7 @@ csak az adatmodellt + admin UI-t adja, a `get_publication_ids_for_area()`
 repository-metódus már készen áll a Fázis 5-ös widget számára.
 
 **Éles ellenőrzéshez** (Local site, wp-admin):
+
 1. Beállítások → "Szakmai terület" funkció engedélyezése.
 2. MTMT → Területek (új almenü) → hozz létre 1-2 területet, mindegyikhez
    válassz egy meglévő WP-oldalt.
@@ -233,11 +237,12 @@ placeholder-kép módja, év-fülek) a build előtt eldőlt — lásd widget-des
 valódi WoS/Scopus/SZTAKI logó-fájlok az egyéb-azonosítós gombokhoz (jelenleg
 feliratos pill-badge helyettesíti, lecserélhető bármikor).
 
-*Kész, ha:* mindkét widget csak approved (ill. "B" esetén approved+featured)
+_Kész, ha:_ mindkét widget csak approved (ill. "B" esetén approved+featured)
 tételt mutat, csak a saját táblát hívja, a linkviselkedés és a mezőkészlet a
 widget-design.md szerint működik.
 
 **Éles ellenőrzéshez** (Local site, Elementor szerkesztő + wp-admin):
+
 1. Egy oldalon, Elementorral, húzd be az "MTMT publikációk – összesítő" ("A")
    widgetet — jelenjen meg év-fülekkel, kereső mezővel, kártyákkal.
 2. Keress rá egy ismert címre/szerzőre a keresőben — a lista AJAX-szal
@@ -278,7 +283,7 @@ mögé kötve (frontendnek nincs köze a frissítés-ellenőrzéshez). Repo publ
 (`SZKK-SZUCS/MTMT_WP_plugin`), nincs token. `setBranch('main')`, nincs
 `enableReleaseAssets()` (nincs build-lépés, a GitHub forrás-zip elég).
 
-*Kész, ha:* egy teszt-oldal (pl. a Local site) a Pluginok oldalon frissülést
+_Kész, ha:_ egy teszt-oldal (pl. a Local site) a Pluginok oldalon frissülést
 lát, amikor egy ÚJABB verziójú GitHub Release kerül ki, mint ami a site-on
 fut. A 0.6.0 kiadásakor a PUC-kód maga is 0.6.0-t futtat, tehát ekkor még nem
 mutatna frissítést (ez nem hiba, csak a teszt sorrendje) — a tényleges
@@ -286,12 +291,45 @@ mutatna frissítést (ez nem hiba, csak a teszt sorrendje) — a tényleges
 verzióbump+release-nél adódik magától, a rendes munkamenet részeként.
 
 **Éles ellenőrzéshez** (Local site):
+
 1. Aktiváld/frissítsd a plugint a Local site-on erre a verzióra.
 2. wp-admin → Pluginok — NE legyen PHP hiba/fatal a plugin-listánál (a PUC
    betöltése ne törje el az oldalt Elementor/egyéb pluginok mellett sem).
 3. A KÖVETKEZŐ verzióbump + GitHub Release után (a következő fázis/javítás
    lezárásakor): Pluginok oldalon jelenjen meg az "Új verzió érhető el" sáv,
    "View version X.Y.Z details" linkkel.
+
+## 🔜 Email-értesítő újratervezése
+
+**KÓD KÉSZ, ÉLES ELLENŐRZÉS MÉG NEM TÖRTÉNT.** Megrendelői kérés (2026-08) a
+Fázis 2-es sima szöveges email javítására: HTML-email, logóval. A logó a
+PLUGINBA becsomagolt statikus fájl (`assets/img/mfui-logo.png`, `.jpg` vagy
+`.jpeg`), NEM site-onkénti admin-beállítás — a megrendelő megerősítette:
+"ez rendszer email, én égetem be központilag a pluginba mint kiadó"
+(docs/decisions.md #74-78 az "Email-értesítő újratervezése" szakaszban).
+A profil `#ID` helyett a profil neve jelenik meg a törzsben.
+
+**A logó-fájl elhelyezése (kiadói feladat, nem admin-feladat):** tedd a képet
+`assets/img/mfui-logo.png` névvel a plugin repóba (JPG is jó: `.jpg`/`.jpeg`
+néven, ha az kényelmesebb) — ha egyik fájl sem létezik, az email egyszerűen
+logó nélkül megy ki, nincs hiba. Ajánlott: átlátszó hátterű PNG, kb. 400px
+széles, ésszerű fájlméret (email-kompatibilitás miatt ne legyen több száz KB).
+
+15 új/frissített teszt-assertion (`test-notifier.php`) — a teljes suite zöld.
+
+_Kész, ha:_ a cron-triggerelt email HTML-ként érkezik meg (nem nyers
+`<div>`-ekkel a postaládában), a logó megjelenik (ha a fájl a helyén van),
+a profil neve (nem csak száma) olvasható, és a "Jóváhagyás megnyitása" gomb
+a Profilok oldalra visz.
+
+**Éles ellenőrzéshez** (Local site, Site Shell + postaláda):
+
+1. Tedd be a logó-fájlt `assets/img/mfui-logo.png` néven (ha még nincs ott).
+2. `wp cron event run mtmt_weekly_sync` (ha van friss aktivitás egy profilnál,
+   lásd a korábbi cron-teszt-instrukciót) — nézd meg a beérkező emailt: HTML,
+   logóval, a profil nevével (nem "#1"), rendezett kártyás megjelenéssel.
+3. Ha egy profilnál hiba volt a futás közben, azt egy kiemelt (piros) blokk
+   jelezze, ne keveredjen a sikeres profilok közé.
 
 ## Fázis 7 (opcionális) — nice-to-have-ek
 

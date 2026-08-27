@@ -176,7 +176,7 @@ final class Mtmt_Settings_Page {
 					<textarea id="mtmt-recipients" name="recipients" rows="4" class="large-text code"><?php echo esc_textarea( $recipients ); ?></textarea>
 				</p>
 				<p class="description">
-					<?php esc_html_e( 'Ha üres, nem megy ki email. Csak a heti automatikus (cron) futásról küld értesítést, ha volt új vagy frissült tétel — kézi/CLI szinkronnál nem, mert azt az admin úgyis a képernyőn látja.', 'mtmt-sync' ); ?>
+					<?php esc_html_e( 'Ha üres, nem megy ki email. Csak a heti automatikus (cron) futásról küld értesítést, ha volt új vagy frissült tétel — kézi/CLI szinkronnál nem, mert azt az admin úgyis a képernyőn látja. Az email fejlécében megjelenő logó a pluginba van beégetve (kiadói/rendszer-email), nem site-onként állítható — lásd assets/img/mfui-logo.png.', 'mtmt-sync' ); ?>
 				</p>
 				<?php submit_button( __( 'Mentés', 'mtmt-sync' ) ); ?>
 			</form>

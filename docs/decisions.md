@@ -308,7 +308,7 @@ dokumentálás közben, nem csak leírtam:
 
 41. **Bulk kiemelés/kiemelés-visszavonás** a moderációs listán — a meglévő
     tömeges jóváhagyás/elutasítás mintájára. `Mtmt_Publication_Repository::
-    bulk_set_featured()`, a `Mtmt_List_Table` bulk-action listája és a
+bulk_set_featured()`, a `Mtmt_List_Table` bulk-action listája és a
     státusz-oszlop csak akkor mutatja/ajánlja fel, ha a "kiemelt cikk"
     funkció be van kapcsolva (`mtmt_enable_featured`) — ugyanaz a
     feltétel-mintázat, mint az egyes-tételes checkboxnál. A státusz oszlopban
@@ -352,7 +352,7 @@ dokumentálás közben, nem csak leírtam:
     lefut és nem esik vissza "nincs szűrés"-re.
 
 47. **`page_id=0` normalizálva `NULL`-ra tároláskor** (`Mtmt_Topic_Area_
-    Repository::create()`), mert a `wp_dropdown_pages()` "— nincs kiválasztva —"
+Repository::create()`), mert a `wp_dropdown_pages()` "— nincs kiválasztva —"
     opciója `0`-t küld, de `0` nem érvényes post ID — a `NULL` egyértelműbben
     jelzi "nincs hozzárendelt oldal", mint egy hamis `0` post ID.
 
@@ -360,7 +360,7 @@ dokumentálás közben, nem csak leírtam:
     kritérium (eredeti roadmap-szöveg) **csak Fázis 5 után zárható le
     ténylegesen** — widget nélkül nincs mit "aloldalon" megjeleníteni. Fázis 4
     az adatmodellt + admin UI-t adja, és előkészíti a `get_publication_ids_
-    for_area()` metódust, amit a Fázis 5-ös "B" widget közvetlenül hívhat majd.
+for_area()` metódust, amit a Fázis 5-ös "B" widget közvetlenül hívhat majd.
 
 ## Fázis 5 — Elementor widgetek (2026-08)
 
@@ -438,7 +438,7 @@ lásd ott. Az alábbiak az eziutáni implementációs döntések.
 
 58. **JAVÍTVA élő teszt után: a widgetek nem jelentek meg az Elementor
     widget-panelen.** Az eredeti `Mtmt_Elementor_Loader` az `elementor/widgets/
-    register` és `elementor/elements/categories_registered` felakasztását egy
+register` és `elementor/elements/categories_registered` felakasztását egy
     `elementor/loaded`-re kötött `boot()` mögé rejtette. Ez hook-sorrendi hiba:
     az Elementor a Widgets_Manager/Elements_Manager saját inicializálása
     során, MÉG az `elementor/loaded` tényleges kitüzelése ELŐTT elsüti ezeket
@@ -459,7 +459,7 @@ lásd ott. Az alábbiak az eziutáni implementációs döntések.
     `Mtmt_Widget_Cache` — egy `wp_options`-beli verziószámláló, amit minden
     widget-láthatóságot érintő írás NÖVEL (`set_status`, `bulk_set_status`,
     `bulk_set_featured`, `save_enrichment`, `Mtmt_Topic_Area_Repository::
-    set_areas_for_publication()`/`delete()`, és EGYSZER egy teljes
+set_areas_for_publication()`/`delete()`, és EGYSZER egy teljes
     `Mtmt_Sync_Runner::run()` végén — nem rekordonként, hogy egy nagy
     intézménynél ne legyen száz+ felesleges `update_option()`-hívás egy
     szinkron alatt). A `Mtmt_Widget_Data` cache-kulcsai tartalmazzák ezt a
@@ -589,3 +589,45 @@ lásd ott. Az alábbiak az eziutáni implementációs döntések.
     a `Mtmt_Profiles_Page` egy privát property-jében (`$preview_result`),
     ami minden oldalbetöltéskor újraépül vagy üres. Ez szándékos: az
     előnézet definíció szerint egyszeri, nem kell hozzá state.
+
+## Email-értesítő újratervezése (2026-08)
+
+74. **HTML email, NEM sima szöveges** — `wp_mail()` negyedik paramétereként
+    explicit `Content-Type: text/html; charset=UTF-8` header nélkül a WP
+    alapból text/plain-ként küldi, és minden HTML-jelölés nyersen látszana
+    a postafiókban. Csak inline CSS-stílusok (a legtöbb emailkliens nem
+    futtat megbízhatóan `<style>` blokkot), nincs multipart/alternative
+    szöveges verzió — tudatos egyszerűsítés, nem minden emailkliens/
+    -olvasó éri el vele ugyanazt az élményt, de a cél ("jobb legyen, legyen
+    benne logó") ezzel teljesül build-lépés/extra könyvtár nélkül.
+75. **A logó a PLUGINBA becsomagolt statikus fájl, NEM site-onkénti admin-
+    beállítás.** Eredetileg egy Beállítások-oldali média-uploadert építettem
+    (ugyanaz a minta, mint a placeholder-kép alapképnél) — a megrendelő
+    menet közben pontosított: "ez rendszer email, én égetem be központilag
+    a pluginba mint kiadó". Ez logikus is a "dobozos, több szervezetnek"
+    tervezési elvhez (CLAUDE.md §1, §7 stb.) illesztve: ez egy RENDSZER-email
+    a "MTMT Sync" terméktől/kiadótól, nem az adott kliens szervezet saját
+    brandje — minden site-on ugyanaz a fejléc-logó megy ki, verzióval együtt
+    terjesztve, nem admin-konfigurációként. A médiatáras UI-t és a hozzá
+    tartozó `mtmt_email_logo_id` optiont törölve lett (nem maradt kód-lom).
+76. **A logó-fájl helye és keresési sorrendje**: `Mtmt_Notifier::get_logo_url()`
+    sorban megnézi `assets/img/mfui-logo.png`, `.jpg`, `.jpeg` — az első
+    létező nyer, `file_exists()`-szel ellenőrizve (nem feltételezi, hogy a
+    fájl ott van). Ha egyik sem létezik, `null`-t ad, az email egyszerűen
+    logó nélkül megy ki — nem hiba, nem blokkol. SVG szándékosan NINCS a
+    listában: sok emailkliens (Outlook, több mobil Gmail-app) nem renderel
+    megbízhatóan SVG-t `<img>`-ben.
+77. **A profil `#ID` helyett a profil NEVE jelenik meg az emailben** — a
+    `Mtmt_Notifier::notify_if_needed()` kapott egy opcionális
+    `array $profile_labels` paramétert (`profile_id => label`), amit a
+    `Mtmt_Sync_Runner::run()` épít fel (ott már úgyis elérhető a
+    `Mtmt_Query_Profile_Repository`) — ugyanaz a minta, mint a Beállítások
+    oldal futás-naplójánál (`$profile_labels[$id] ?? ('#' . $id)` fallback).
+78. **Világos, designolt háttér a sötét feliratú logóhoz** — a becsomagolt
+    logó (`assets/img/mfui-logo.png`, MFÜI/Széchenyi István Egyetem) sötét
+    navy feliratú, átlátszó alapra tervezve. A `build_html_body()` ezért
+    teljes HTML-dokumentumot ad vissza (nem csak egy `<div>`-fragmentet),
+    explicit világos `<body>`-háttérrel (`#eef2f6`) egy fehér, lekerekített
+    "kártya" körül, a logó saját navy/teal színvilágához igazított
+    paletta — enélkül egy sötét emailkliens-háttéren (dark mode) a sötét
+    felirat olvashatatlanná válna.
