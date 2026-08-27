@@ -1,0 +1,14 @@
+# CLAUDE.md §10.4 — Node/IDE/OS szemét, log, lokális env. A lib/plugin-update-checker/
+# (ha bekerül) verziózva marad, kivéve ha git-almodulként húzzuk be.
+
+node_modules/
+*.log
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# Lokális WP env / titkok — sosem kerülnek a repóba.
+wp-config-local.php
+.env

@@ -40,7 +40,7 @@ használják, ezen felül semmit a kártyán.
 |---|---|---|
 | Előnézeti kép | `thumbnail_id`, üresnél §14/8 placeholder+cím | |
 | Cím | `title` | |
-| Szerzők | `authors_text` | **NYITOTT**: a mockupon rövidített forma volt ("S. Goblirsch, M. Piccinini"), a séma teljes névvel tárol (§5.4). A megbeszélés ezt NEM tisztázta — marad nyitott kérdés, ld. lent. |
+| Szerzők | `authors_text` | **RESOLVED (2026-08)**: teljes név (`authors_text`, §5.4 szerint épített), de sok szerzőnél (küszöb: 5) a kártyán a lista rövidül, ld. lent. |
 | Szakmai terület | ÚJ mező, §14/1 | csak akkor jelenik meg, ha a terület-funkció be van kapcsolva a beállításokban |
 | Forrás (folyóirat / kötet) | `source_title` | a mockupon kék linkként; kötet/füzet/oldaltartomány NEM külön kártya-mező, csak a `source_title` |
 | DOI | `doi` | a teljes kártya linkcélja is ebből épül, nem csak szövegként jelenik meg |
@@ -67,7 +67,7 @@ belül), `other_url`.
 ## Nyitott kérdések Fázis 5 előtt
 
 1. ~~Kell-e a Kód/Videó linkekhez új kézi mező?~~ **RESOLVED**: nem kellenek, helyettük egyéb azonosítós logó-gombok.
-2. **Szerzőnév a widgeten: rövidített (monogram) vagy teljes forma?** — még mindig nyitott, a megbeszélés nem tisztázta.
+2. ~~Szerzőnév a widgeten: rövidített (monogram) vagy teljes forma?~~ **RESOLVED (2026-08)**: teljes név, de listakorlátozással — a kártyán legfeljebb 5 szerző jelenik meg névvel (`authors_raw` JSON-ból, `listPosition` szerint), afölött "… és N további szerző" utótaggal. NEM az `authors_text` string vágása (törékeny lenne, ha egy név vesszőt tartalmazna) — az `authors_raw` struktúrált tömbből épül újra renderkor, külön (widget-oldali) formázó segédfüggvénnyel.
 3. ~~A körkörös nyíl-gomb hova vezet?~~ **RESOLVED**: nem számít a gomb pozíciója, a teljes kártya DOI-ra (vagy MTMT gui-linkre) vezet.
-4. Év-fülek (tab) a végleges megoldás — a "dátum lapozó" megfogalmazás ezt erősíti, de explicit visszaigazolás nem volt.
-5. Placeholder-kép generálása: CSS-overlay vs. szerver-oldali (GD/Imagick) képgenerálás — lásd CLAUDE.md §14/8, még nem eldöntött.
+4. ~~Év-fülek (tab) a végleges megoldás?~~ **RESOLVED (2026-08)**: igen, év-fülek (nem accordion).
+5. ~~Placeholder-kép generálása: CSS-overlay vs. szerver-oldali (GD/Imagick)?~~ **RESOLVED (2026-08)**: szerver-oldali, GD/Imagick-kal beégetett cím, cache-elve az uploads mappában. Előny: OG-megosztásnál (Facebook/LinkedIn) is helyes preview-t ad, mert a cím ténylegesen a képfájlban van, nem csak CSS-overlay-jel rárakva (amit egy közösségi crawler nem futtat le).

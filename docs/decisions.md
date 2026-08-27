@@ -361,3 +361,77 @@ dokumentálás közben, nem csak leírtam:
     ténylegesen** — widget nélkül nincs mit "aloldalon" megjeleníteni. Fázis 4
     az adatmodellt + admin UI-t adja, és előkészíti a `get_publication_ids_
     for_area()` metódust, amit a Fázis 5-ös "B" widget közvetlenül hívhat majd.
+
+## Fázis 5 — Elementor widgetek (2026-08)
+
+Előzetesen egyeztetett 3 döntés (AskUserQuestion): teljes szerzőnév
+listakorlátozással (nem monogram), szerver-oldali (GD) placeholder-kép-
+generálás (nem CSS-overlay), és év-fülek (nem accordion) — ezek CLAUDE.md
+§14/8-at és a docs/widget-design.md "Nyitott kérdések" szakaszát véglegesítik,
+lásd ott. Az alábbiak az eziutáni implementációs döntések.
+
+49. **Elementor widget-osztályok NEM kapnak dependency injectiont a
+    konstruktorban.** Az Elementor több kódúton (szerkesztő-AJAX, dokumentum-
+    betöltés) saját maga hozza létre a widget-példányt `new static($data, $args)`
+    alakban — egy egyedi, kötelező konstruktor-paraméter ezeken az útvonalakon
+    eldobná a widgetet. A repository-kat/`Mtmt_Widget_Data`-t ezért a `render()`-en
+    belül, lazy módon építik fel (`global $wpdb`), ugyanaz a minta, mint a
+    mtmt-sync.php admin-hookjaiban.
+
+50. **A "B" widget scope-ja terület VAGY lekérdezési profil lehet**, nem csak
+    terület — a CLAUDE.md §14/10 eredeti "területre/profilra szűkítve"
+    megfogalmazását szó szerint vettem: ha a "szakmai terület" funkció ki van
+    kapcsolva egy site-on, a "B" widget így is használható marad (profil-módban),
+    a regisztráció egyedüli feltétele a "kiemelt cikk" toggle (widget-design.md,
+    FÜGGETLEN a terület-togletől).
+
+51. **Font-választás a placeholder-képhez: becsomagolt Open Sans Bold**
+    (SIL OFL 1.1, `assets/fonts/OpenSans-Bold.ttf` + `OFL.txt`), NEM a szerver
+    esetleges rendszer-betűtípusa. Indoklás: (a) rendszer-font elérhetősége/útja
+    nem garantálható különböző hosting-környezetek között, (b) a magyar ékezetes
+    karakterek (különösen ő/ű, a duplavesszős variánsok) nem minden fontban
+    szerepelnek — élőben, ténylegesen legenerált teszt-képpel verifikálva, hogy
+    az Open Sans helyesen rendereli az "ŐŰ" karaktereket is. Felülírható
+    (`mtmt_placeholder_font_path` option), de nincs hozzá admin UI — ez csak
+    programozott/advanced use-case, a becsomagolt font az elvárt alapeset.
+
+52. **Placeholder-kép cache: nincs automatikus törlés/GC.** A generált fájl neve
+    `md5(mtid|cím|alapkép-útvonal|alapkép-mtime)` — cím- vagy alapkép-csere
+    automatikusan új fájlt generál, de a régi (immár hivatkozatlan) fájl a
+    lemezen marad. Tudatos egyszerűsítés ebben a körben (nincs cron-alapú
+    cache-tisztító job) — ha a lemezhasználat gondot okozna élesben, ez egy
+    külön, kis backlog-tétel lehet.
+
+53. **`Mtmt_Widget_Data` cache: 5 perces tranziens, nincs explicit invalidálás**
+    admin-mentéskor. A CLAUDE.md §9.1 "object cache/tranziens" javaslatát a
+    legegyszerűbb formában valósítja meg — egy moderációs jóváhagyás legfeljebb
+    5 percen belül látszik meg a frontenden. Ha ez élesben túl lassúnak
+    bizonyul, a következő lépés egy verzió-számláló opció lenne, amit minden
+    repository-írás (upsert/set_status/save_enrichment) növelne, és ami a
+    tranziens-kulcs része lenne — nem épült be most, hogy ne nőjön feleslegesen
+    a kód, amíg nincs bizonyíték rá, hogy kell.
+
+54. **Whole-card link mindig új fülön nyílik** (`target="_blank"`), a cím-linkre
+    ÉS a JS-es "bárhol a kártyán" kattintásra is egyformán — konzisztencia
+    kedvéért (kezdetben csak a JS-utat terveztem `window.open`-nel, a valódi
+    `<a>` címlinket alapból ugyanígy kellett módosítani, különben a két
+    navigációs útvonal eltérően viselkedett volna).
+
+55. **"Hivatkozás-stílus: kompakt/teljes" (CLAUDE.md §9.1) értelmezése**: mivel
+    a spec nem részletezi, mit takar pontosan — kompakt módban a forrás-sor
+    (`source_title`) és az egyéb-azonosítós logó-gombok elmaradnak a kártyáról,
+    minden más (cím, szerzők, terület-badge, év, SJR, DOI-szöveg) megmarad.
+    Élő megtekintés után finomítható, ha a megrendelő mást vár ez alatt.
+
+56. **Szerzőnév-levágás szövege angol ("…, and N more")**, nem magyar
+    ("és N további szerző") — konzisztens az `authors_text` mögötti
+    `join_with_and()` meglévő, már élesben validált angol "and"-konvenciójával
+    (CLAUDE.md §5.4, a megrendelő saját mintadokumentuma). Ha a megrendelő
+    inkább magyar utótagot szeretne, ez egy lokalizált string-csere,
+    `Mtmt_Author_Formatter::format_for_card()`-ban.
+
+57. **Év-fülekhez hozzáadva egy "Összes" fül** (0 = nincs év-szűrés) — a
+    widget-design.md konkrét évszámokat sorol fel (2026|2025|...), egy
+    "minden év" opciót nem említ explicit, de hasznos kiegészítésnek tűnt (pl.
+    keresésnél ne kelljen évenként külön kattintani). Élő visszajelzés után
+    törölhető, ha a megrendelő nem akarja.

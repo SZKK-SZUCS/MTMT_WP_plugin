@@ -18,6 +18,7 @@ define( 'MTMT_DB_VERSION', '3' );
 define( 'MTMT_CAPS_VERSION', '1' );
 define( 'MTMT_PLUGIN_FILE', __FILE__ );
 define( 'MTMT_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
+define( 'MTMT_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 
 require_once MTMT_PLUGIN_DIR . 'includes/class-mtmt-activator.php';
 require_once MTMT_PLUGIN_DIR . 'includes/class-mtmt-capabilities.php';
@@ -31,11 +32,18 @@ require_once MTMT_PLUGIN_DIR . 'includes/class-mtmt-sync-log-repository.php';
 require_once MTMT_PLUGIN_DIR . 'includes/class-mtmt-notifier.php';
 require_once MTMT_PLUGIN_DIR . 'includes/class-mtmt-sync-runner.php';
 require_once MTMT_PLUGIN_DIR . 'includes/class-mtmt-cron.php';
+require_once MTMT_PLUGIN_DIR . 'includes/class-mtmt-author-formatter.php';
+require_once MTMT_PLUGIN_DIR . 'includes/class-mtmt-external-id-icons.php';
+require_once MTMT_PLUGIN_DIR . 'includes/class-mtmt-placeholder-image.php';
+require_once MTMT_PLUGIN_DIR . 'includes/class-mtmt-card-renderer.php';
+require_once MTMT_PLUGIN_DIR . 'includes/class-mtmt-widget-data.php';
+require_once MTMT_PLUGIN_DIR . 'includes/class-mtmt-widget-ajax.php';
 require_once MTMT_PLUGIN_DIR . 'admin/class-mtmt-list-table.php';
 require_once MTMT_PLUGIN_DIR . 'admin/class-mtmt-publications-page.php';
 require_once MTMT_PLUGIN_DIR . 'admin/class-mtmt-profiles-page.php';
 require_once MTMT_PLUGIN_DIR . 'admin/class-mtmt-settings-page.php';
 require_once MTMT_PLUGIN_DIR . 'admin/class-mtmt-topic-areas-page.php';
+require_once MTMT_PLUGIN_DIR . 'elementor/class-mtmt-elementor-loader.php';
 
 register_activation_hook( __FILE__, array( 'Mtmt_Activator', 'activate' ) );
 register_activation_hook( __FILE__, array( 'Mtmt_Capabilities', 'activate' ) );
@@ -115,6 +123,22 @@ function mtmt_handle_admin_actions(): void {
 	) )->maybe_handle_request();
 }
 add_action( 'admin_init', 'mtmt_handle_admin_actions' );
+
+// Elementor-widgetek (Fázis 5) — a loader maga is ellenőrzi az Elementor
+// jelenlétét (`elementor/loaded` mögé kötve), itt bátran példányosítható,
+// Elementor nélkül egyszerűen sosem fut le a boot() (CLAUDE.md §2).
+( new Mtmt_Elementor_Loader() )->init();
+
+/**
+ * Nyilvános AJAX-végpont a widget kereséséhez/lapozásához/szűréséhez —
+ * Elementor-tól függetlenül regisztrált (maga a végpont csak a saját táblát
+ * olvassa, `status='approved'`-ra szűkítve, lásd Mtmt_Widget_Data).
+ */
+function mtmt_register_widget_ajax(): void {
+	global $wpdb;
+	( new Mtmt_Widget_Ajax( new Mtmt_Widget_Data( new Mtmt_Publication_Repository( $wpdb ), new Mtmt_Topic_Area_Repository( $wpdb ) ) ) )->register();
+}
+add_action( 'init', 'mtmt_register_widget_ajax' );
 
 if ( defined( 'WP_CLI' ) && WP_CLI ) {
 	require_once MTMT_PLUGIN_DIR . 'includes/class-mtmt-cli.php';

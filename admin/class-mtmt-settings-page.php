@@ -59,9 +59,12 @@ final class Mtmt_Settings_Page {
 			wp_die( esc_html__( 'Nincs jogosultságod ehhez az oldalhoz.', 'mtmt-sync' ) );
 		}
 
-		$notice       = $this->handle_request();
-		$recipients   = get_option( Mtmt_Notifier::OPTION_RECIPIENTS, '' );
-		$logs         = $this->log_repo->get_recent( 20 );
+		wp_enqueue_media();
+
+		$notice              = $this->handle_request();
+		$recipients          = get_option( Mtmt_Notifier::OPTION_RECIPIENTS, '' );
+		$placeholder_image_id = absint( get_option( 'mtmt_placeholder_base_image_id' ) );
+		$logs                 = $this->log_repo->get_recent( 20 );
 		$profile_labels = array();
 		foreach ( $this->profile_repo->get_all() as $profile ) {
 			$profile_labels[ (int) $profile['id'] ] = $profile['label'];
@@ -101,6 +104,68 @@ final class Mtmt_Settings_Page {
 				</p>
 				<?php submit_button( __( 'Mentés', 'mtmt-sync' ) ); ?>
 			</form>
+
+			<h2><?php esc_html_e( 'Widget — placeholder-kép', 'mtmt-sync' ); ?></h2>
+			<form method="post">
+				<?php wp_nonce_field( $nonce_action ); ?>
+				<input type="hidden" name="mtmt_action" value="save_widget">
+				<table class="form-table">
+					<tr>
+						<th><?php esc_html_e( 'Alap placeholder-kép', 'mtmt-sync' ); ?></th>
+						<td>
+							<div id="mtmt-placeholder-preview">
+								<?php if ( $placeholder_image_id ) : ?>
+									<?php echo wp_get_attachment_image( $placeholder_image_id, 'medium' ); ?>
+								<?php else : ?>
+									<img src="<?php echo esc_url( MTMT_PLUGIN_URL . 'assets/img/placeholder-default.png' ); ?>" style="max-width:300px;height:auto;" alt="">
+								<?php endif; ?>
+							</div>
+							<input type="hidden" name="placeholder_base_image_id" id="mtmt-placeholder-id" value="<?php echo esc_attr( (string) $placeholder_image_id ); ?>">
+							<p>
+								<button type="button" class="button" id="mtmt-select-placeholder"><?php esc_html_e( 'Kép kiválasztása', 'mtmt-sync' ); ?></button>
+								<button type="button" class="button" id="mtmt-remove-placeholder"><?php esc_html_e( 'Visszaállítás alapértelmezettre', 'mtmt-sync' ); ?></button>
+							</p>
+							<p class="description">
+								<?php esc_html_e( 'Ez a kép jelenik meg a widget-kártyán azoknál a jóváhagyott publikációknál, amelyekhez nincs feltöltve egyedi indexkép — a publikáció címe automatikusan rákerül a kép aljára (CLAUDE.md §14/8). Ha üresen hagyod, a pluginhoz csomagolt alapértelmezett képet használja.', 'mtmt-sync' ); ?>
+							</p>
+						</td>
+					</tr>
+				</table>
+				<?php submit_button( __( 'Mentés', 'mtmt-sync' ) ); ?>
+			</form>
+			<script>
+			( function() {
+				var frame;
+				var selectBtn = document.getElementById( 'mtmt-select-placeholder' );
+				var removeBtn = document.getElementById( 'mtmt-remove-placeholder' );
+
+				selectBtn.addEventListener( 'click', function ( e ) {
+					e.preventDefault();
+					if ( frame ) {
+						frame.open();
+						return;
+					}
+					frame = wp.media( {
+						title: <?php echo wp_json_encode( __( 'Placeholder-kép kiválasztása', 'mtmt-sync' ) ); ?>,
+						multiple: false,
+						library: { type: 'image' }
+					} );
+					frame.on( 'select', function () {
+						var attachment = frame.state().get( 'selection' ).first().toJSON();
+						var url = ( attachment.sizes && attachment.sizes.medium ) ? attachment.sizes.medium.url : attachment.url;
+						document.getElementById( 'mtmt-placeholder-id' ).value = attachment.id;
+						document.getElementById( 'mtmt-placeholder-preview' ).innerHTML = '<img src="' + url + '" style="max-width:300px;height:auto;">';
+					} );
+					frame.open();
+				} );
+
+				removeBtn.addEventListener( 'click', function ( e ) {
+					e.preventDefault();
+					document.getElementById( 'mtmt-placeholder-id' ).value = '';
+					document.getElementById( 'mtmt-placeholder-preview' ).innerHTML = '<img src="<?php echo esc_url( MTMT_PLUGIN_URL . 'assets/img/placeholder-default.png' ); ?>" style="max-width:300px;height:auto;">';
+				} );
+			} )();
+			</script>
 
 			<h2><?php esc_html_e( 'Email-értesítés', 'mtmt-sync' ); ?></h2>
 			<form method="post">
@@ -199,6 +264,15 @@ final class Mtmt_Settings_Page {
 			return array(
 				'type'    => 'success',
 				'message' => __( 'Mentve.', 'mtmt-sync' ),
+			);
+		}
+
+		if ( 'save_widget' === $action ) {
+			update_option( 'mtmt_placeholder_base_image_id', isset( $_POST['placeholder_base_image_id'] ) ? absint( $_POST['placeholder_base_image_id'] ) : 0 );
+
+			return array(
+				'type'    => 'success',
+				'message' => __( 'Mentve. Az újonnan generált placeholder-képek már az új alapképet használják — a korábban legenerált (cache-elt) képek a lemezen maradnak, de a widget nem hivatkozik rájuk többé.', 'mtmt-sync' ),
 			);
 		}
 
