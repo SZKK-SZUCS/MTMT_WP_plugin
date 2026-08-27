@@ -4,7 +4,7 @@ Tags: mtmt, publications, elementor, publikaciok, tudomanyos
 Requires at least: 6.4
 Tested up to: 6.7
 Requires PHP: 8.1
-Stable tag: 0.8.0
+Stable tag: 0.9.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -104,6 +104,30 @@ egyikkel sem, csak a látogató-vezérelt alapbeállítással) működik, tiszt�
 
 == Changelog ==
 
+= 0.9.0 =
+* Angol fordítás becsomagolva (`languages/mtmt-sync-en_US.po`/`.mo`, 242 string) —
+  angol WP-locale-lal futó telepítéseken az admin-felület automatikusan
+  angolul jelenik meg.
+* README kiegészítve az éles (production) cron-ütemezés két bevett
+  megoldásával (rendszeres `wp-cron.php`-poke, ill. `DISABLE_WP_CRON` +
+  rendszer-cron/WP-CLI), központi cron-pinger-példával.
+* Új "Jogosultságok" admin almenü: minden WordPress-szerepkörhöz
+  beállítható, kapja-e meg a `mtmt_moderate`/`mtmt_classify`
+  kapabilitást — mentéskor azonnal érvénybe lép, korábbi
+  szerepkör-testreszabás pluginfrissítéskor sem vész el.
+* Egyéb azonosítós (WoS/Scopus/SZTAKI/PubMed) SVG-ikon támogatás a
+  widget-kártyán — a fájl hiányában szépen visszaesik a meglévő
+  feliratos pill-badge-re.
+* Kézi "Teljes szinkron most" gomb a Beállítások oldalon — ugyanazt
+  futtatja, mint a heti cron (minden profil + email, ha volt aktivitás).
+* "Adatok törlése / alaphelyzet" gomb a Pluginok listaoldalon — az 5 saját
+  táblát üríti, a beállításokat nem érinti.
+* Kritikus javítás: a kézi/cron szinkron hamis "sikeres" beszúrást
+  jelentett akkor is, ha a tényleges adatbázis-írás meghiúsult (pl. mert
+  a tábla fizikailag hiányzott) — mostantól a valódi hiba jelenik meg, és
+  egy hiányzó tábla a séma-ellenőrzés automatikus önjavításával, kézi
+  deaktiválás/reaktiválás nélkül helyreáll.
+
 = 0.8.0 =
 * Email-értesítő újratervezve: HTML-email (a korábbi sima szöveg helyett),
   világos, designolt háttérrel és a pluginba becsomagolt kiadói logóval
@@ -199,6 +223,14 @@ egyikkel sem, csak a látogató-vezérelt alapbeállítással) működik, tiszt�
 * Kezdeti bootstrap: plugin-header, aktivátor (tábla-migráció dbDelta-val).
 
 == Upgrade Notice ==
+
+= 0.9.0 =
+Angol fordítás, jogosultság-admin UI, egyéb azonosítós ikonok, kézi
+teljes-szinkron és adat-reset gomb, valamint egy kritikus javítás (a
+szinkron mostantól nem jelent hamis sikert, ha a mögöttes DB-írás
+meghiúsul). A plugin továbbra is 0.x verziószámon fejlődik — 1.0.0-t csak
+akkor kap, ha a megrendelő explicit jóváhagyja, hogy a rendszer kész
+(lásd CLAUDE.md §10.2).
 
 = 0.8.0 =
 Email-értesítő újratervezve: HTML + kiadói logó. A plugin továbbra is 0.x

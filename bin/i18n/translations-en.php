@@ -252,4 +252,7 @@ return array(
 	'Ugyanazt futtatja le, mint a heti automatikus (cron) futás — MINDEN engedélyezett profilt, ÉS ha volt új/frissült tétel, kimegy az email-értesítés is a fenti címzetteknek. (A profilonkénti "Szinkron most" gomb a Profilok oldalon ezzel szemben szándékosan NEM küld emailt, mert azt ott úgyis a képernyőn látod.) Ezzel nem kell konzolból WP-CLI-t futtatni ("wp cron event run mtmt_weekly_sync") egy email-teszthez vagy egy soron kívüli teljes szinkronhoz.' => 'Runs the same thing as the weekly automatic (cron) run — EVERY enabled profile, AND if there were new/updated items, the email notification also goes out to the recipients above. (By contrast, the per-profile "Sync now" button on the Profiles page deliberately does NOT send an email, since you already see the result on screen there.) This means you don\'t have to run WP-CLI from the console ("wp cron event run mtmt_weekly_sync") for an email test or an off-schedule full sync.',
 	'email-értesítés kiküldve.' => 'email notification sent.',
 	'lett volna email, de nincs megadva címzett.' => 'an email would have been sent, but no recipient is configured.',
+	'%1$d rekord mentése sikertelen (adatbázis-hiba). Minta: %2$s' => '%1$d record(s) failed to save (database error). Sample: %2$s',
+	'Az MTMT Sync adatai NEM törlődtek (teljesen vagy részben) — adatbázis-hiba:' => 'MTMT Sync data was NOT deleted (fully or partially) — database error:',
+	'Ismeretlen adatbázis-hiba.' => 'Unknown database error.',
 );
