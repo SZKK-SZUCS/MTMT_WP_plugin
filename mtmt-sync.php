@@ -78,6 +78,7 @@ require_once MTMT_PLUGIN_DIR . 'admin/class-mtmt-profiles-page.php';
 require_once MTMT_PLUGIN_DIR . 'admin/class-mtmt-settings-page.php';
 require_once MTMT_PLUGIN_DIR . 'admin/class-mtmt-topic-areas-page.php';
 require_once MTMT_PLUGIN_DIR . 'admin/class-mtmt-capabilities-page.php';
+require_once MTMT_PLUGIN_DIR . 'includes/class-mtmt-reset.php';
 require_once MTMT_PLUGIN_DIR . 'elementor/class-mtmt-elementor-loader.php';
 
 register_activation_hook( __FILE__, array( 'Mtmt_Activator', 'activate' ) );
@@ -87,6 +88,13 @@ register_deactivation_hook( __FILE__, array( 'Mtmt_Cron', 'deactivate' ) );
 
 add_filter( 'cron_schedules', array( 'Mtmt_Cron', 'add_schedule' ) ); // phpcs:ignore WordPress.WP.CronInterval.ChangeDetected
 add_action( Mtmt_Cron::HOOK, array( 'Mtmt_Cron', 'run' ) );
+
+// "Adatok törlése / alaphelyzet" a Pluginok listaoldalon (CLAUDE.md §11 —
+// ez SZÁNDÉKOSAN nem az uninstall.php-hoz kötött, a plugin aktív állapotában
+// is elérhető, explicit megerősítéssel, lásd class-mtmt-reset.php).
+add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), array( 'Mtmt_Reset', 'add_plugin_action_link' ) );
+add_action( 'admin_init', array( 'Mtmt_Reset', 'maybe_handle_reset' ) );
+add_action( 'admin_notices', array( 'Mtmt_Reset', 'maybe_show_notice' ) );
 
 /**
  * Fordítások betöltése.

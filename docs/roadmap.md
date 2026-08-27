@@ -422,6 +422,9 @@ lista arra, mi kerüljön a 0.9-es kiadásba az "alpha" verzió előtt
   mint a heti cron (minden profil + email, ha volt aktivitás), hogy ne kelljen
   konzolból `wp cron event run mtmt_weekly_sync`-ot futtatni egy email-teszthez
   vagy egy soron kívüli teljes szinkronhoz. Megrendelői kérés, docs/decisions.md #87.
+- **"Adatok törlése / alaphelyzet" gomb a Pluginok listaoldalon** — a plugin
+  sorában (Aktiválás/Deaktiválás mellett), az 5 saját táblát üríti
+  (`TRUNCATE`), a beállításokat nem érinti. Megrendelői kérés, docs/decisions.md #88.
 
 **Éles ellenőrzéshez** (Local site, wp-admin):
 1. Állítsd a WordPress nyelvét angolra (Beállítások → Általános → Site
@@ -438,6 +441,11 @@ lista arra, mi kerüljön a 0.9-es kiadásba az "alpha" verzió előtt
    profilonkénti összefoglaló admin-notice-ban, és ha volt aktivitás és van
    megadott címzett, kapj róla emailt is (ugyanaz a HTML-email, mint a
    cronnál) — a futás-naplóban is jelenjen meg egy "cron" trigger-típusú sor.
+5. wp-admin → Pluginok — az MTMT Sync sorában, Deaktiválás mellett jelenjen
+   meg piros "Adatok törlése / alaphelyzet" link. Kattintásra jöjjön egy
+   `confirm()` dialog; OK után a moderációs lista, a Profilok, a Területek
+   ürüljön ki, a futás-napló is legyen üres — a Beállítások (címzettek,
+   funkció-kapcsolók, Jogosultságok oldal) viszont maradjon változatlan.
 
 ## Backlog — még nincs fázishoz kötve
 

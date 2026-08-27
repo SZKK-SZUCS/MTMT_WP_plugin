@@ -13,6 +13,9 @@
  * @package Mtmt_Sync
  */
 return array(
+	'Adatok törlése / alaphelyzet' => 'Delete all data / reset',
+	'Az MTMT Sync összes tábla-adata törölve — a szinkron a legközelebbi futáskor mindent újnak fog látni.' => 'All MTMT Sync table data has been deleted — the next sync will treat everything as new.',
+	'Ez VÉGLEGESEN törli az összes MTMT-adatot: minden szinkronizált publikációt, jóváhagyási státuszt, query-profilt, szakmai területet és a futás-naplót. A beállítások (címzettek, funkció-kapcsolók, jogosultság-leképzés, placeholder-kép) megmaradnak. Ez NEM vonható vissza. Biztosan folytatod?' => 'This will PERMANENTLY delete all MTMT data: every synced publication, approval status, query profile, topic area, and the run log. Settings (recipients, feature toggles, permission mapping, placeholder image) are kept. This CANNOT be undone. Are you sure you want to continue?',
 	'%1$s: %2$d új, %3$d frissítve (%4$d visszaesett pending-be), %5$d hiányzó' => '%1$s: %2$d new, %3$d updated (%4$d reverted to pending), %5$d missing',
 	'%1$s: HIBA — %2$s' => '%1$s: ERROR — %2$s',
 	'%1$d új · %2$d frissítve (ebből %3$d visszaesett pending-be) · %4$d hiányzóként jelölve' => '%1$d new · %2$d updated (of which %3$d reverted to pending) · %4$d marked missing',

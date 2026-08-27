@@ -7,7 +7,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"PO-Revision-Date: 2026-08-27T13:33:55+00:00\n"
+"PO-Revision-Date: 2026-08-27T13:49:24+00:00\n"
 "Language: en_US\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: bin/i18n/build.php\n"
@@ -84,6 +84,10 @@ msgstr "The topic area name is required."
 msgid "A(z) %s oldalon lezajlott heti MTMT-szinkron az alábbi eredménnyel futott le:"
 msgstr "The weekly MTMT sync on %s completed with the following result:"
 
+#: includes/class-mtmt-reset.php:51
+msgid "Adatok törlése / alaphelyzet"
+msgstr "Delete all data / reset"
+
 #: admin/class-mtmt-profiles-page.php:443
 msgid "Add meg az értéket a választott típushoz."
 msgstr "Enter a value for the selected type."
@@ -99,6 +103,10 @@ msgstr "Default placeholder image"
 #: admin/class-mtmt-profiles-page.php:278
 msgid "Az \"Előnézet\" a beírt szűrésből lekér 5 mintarekordot az MTMT-től (mentés és szinkron-indítás nélkül) — így ellenőrizhető, hogy tényleg a várt publikációk jönnének-e, mielőtt elmented a profilt."
 msgstr "\"Preview\" fetches 5 sample records from MTMT based on the filter you entered (without saving or starting a sync) — so you can check whether the expected publications would actually come through before you save the profile."
+
+#: includes/class-mtmt-reset.php:90
+msgid "Az MTMT Sync összes tábla-adata törölve — a szinkron a legközelebbi futáskor mindent újnak fog látni."
+msgstr "All MTMT Sync table data has been deleted — the next sync will treat everything as new."
 
 #: admin/class-mtmt-publications-page.php:379
 msgid "Az NKFIH vagy más pályázati azonosító(k), amikhez a publikáció köthető (pl. \"K 123456\"). Az MTMT ezt sem adja automatikusan. Az \"Ellenőrizve\" pipa azt jelzi, hogy valaki kézzel leellenőrizte a fenti azonosító helyességét — ezt rögzíti, ki és mikor tette."
@@ -203,6 +211,10 @@ msgstr "Enabled"
 #: admin/class-mtmt-profiles-page.php:159
 msgid "Engedélyezés"
 msgstr "Enable"
+
+#: includes/class-mtmt-reset.php:45
+msgid "Ez VÉGLEGESEN törli az összes MTMT-adatot: minden szinkronizált publikációt, jóváhagyási státuszt, query-profilt, szakmai területet és a futás-naplót. A beállítások (címzettek, funkció-kapcsolók, jogosultság-leképzés, placeholder-kép) megmaradnak. Ez NEM vonható vissza. Biztosan folytatod?"
+msgstr "This will PERMANENTLY delete all MTMT data: every synced publication, approval status, query profile, topic area, and the run log. Settings (recipients, feature toggles, permission mapping, placeholder image) are kept. This CANNOT be undone. Are you sure you want to continue?"
 
 #: admin/class-mtmt-settings-page.php:129
 msgid "Ez a kép jelenik meg a widget-kártyán azoknál a jóváhagyott publikációknál, amelyekhez nincs feltöltve egyedi indexkép — a publikáció címe automatikusan rákerül a kép aljára (CLAUDE.md §14/8). Ha üresen hagyod, a pluginhoz csomagolt alapértelmezett képet használja."
@@ -580,7 +592,7 @@ msgstr "No publication matches this filter."
 msgid "Nincs egyetlen engedélyezett profil sem — nincs mit szinkronizálni."
 msgstr "There isn't a single enabled profile — nothing to sync."
 
-#: admin/class-mtmt-capabilities-page.php:127 admin/class-mtmt-profiles-page.php:295 admin/class-mtmt-settings-page.php:255 admin/class-mtmt-topic-areas-page.php:159
+#: admin/class-mtmt-capabilities-page.php:127 admin/class-mtmt-profiles-page.php:295 admin/class-mtmt-settings-page.php:255 admin/class-mtmt-topic-areas-page.php:159 includes/class-mtmt-reset.php:70
 msgid "Nincs jogosultságod ehhez a művelethez."
 msgstr "You don't have permission to perform this action."
 

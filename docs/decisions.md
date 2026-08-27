@@ -730,3 +730,22 @@ set_areas_for_publication()`/`delete()`, és EGYSZER egy teljes
     Nincs hozzá külön unit-teszt — vékony admin-glue réteg már tesztelt
     komponensek (`Mtmt_Sync_Runner`, `Mtmt_Notifier`) fölött, valódi HTTP-t
     hívna egy mock nélkül; élő teszteléssel ellenőrzött.
+88. **"Adatok törlése / alaphelyzet" a Pluginok listaoldalon** (megrendelői
+    kérés: "kellene egy olyan gomb hogy minden adat törlése / alaphelyzetbe
+    állítás. ez a táblákat kellene resetelje"). `plugin_action_links_{basename}`
+    szűrővel egy piros linket told be a plugin sorába (Aktiválás/Deaktiválás/
+    Szerkesztés mellé) — SZÁNDÉKOSAN nem az `uninstall.php`-hoz kötve, a
+    plugin aktív állapotában is elérhető, hogy teszt-adatok kitakarításához
+    ne kelljen a pluginot törölni/újratelepíteni. Csak a TÁBLÁKAT üríti
+    (`TRUNCATE`, nem `DROP`+`dbDelta`, hogy a séma biztosan változatlan
+    maradjon) — a `wp_options`-beli beállításokat (címzettek, funkció-
+    kapcsolók, jogosultság-leképzés, placeholder-kép) SZÁNDÉKOSAN nem érinti,
+    mert a megrendelői kérés kifejezetten "a táblákat" említette, nem a
+    site-konfigurációt. Védelem: `manage_options` capability-ellenőrzés +
+    nonce + JS `confirm()` (a link maga is csak akkor jelenik meg, ha a
+    felhasználónak van jogosultsága). `Mtmt_Reset::reset_now()` a tényleges
+    művelet a HTTP-folyamatvezérléstől (redirect+`exit`) külön választva,
+    hogy unit-tesztelhető legyen `exit` hívása nélkül — 13 assertion
+    (test-reset.php), lefedve az 5 tábla helyes TRUNCATE-jét, a pivot tábla
+    elsőbbségét, a widget-cache bump-olását, és a jogosultság-alapú
+    link-megjelenítést.
