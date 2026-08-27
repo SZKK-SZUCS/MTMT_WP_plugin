@@ -13,11 +13,13 @@ defined( 'ABSPATH' ) || exit;
  * frissített (beleértve a pending-be visszaesetteket is) tétel valamelyik
  * profil eredményében.
  *
- * FRISSÍTVE (megrendelői kérés, 2026-08, docs/decisions.md #66-69): HTML-email,
- * opcionális logóval. A logó a PLUGINBA van becsomagolva (`assets/img/email-logo.*`),
- * NEM site-onként, admin médiatárból választható — ez rendszer/kiadói email
- * (a "MTMT Sync" doboz-terméké), minden site-on ugyanaz a fejléc-kép megy ki,
- * konzisztensen a megrendelővel (nem a kliens szervezet saját brandje).
+ * FRISSÍTVE (megrendelői kérés, 2026-08, docs/decisions.md #66-70): HTML-email,
+ * világos, designolt háttérrel + a becsomagolt kiadói logóval (jelenleg
+ * `assets/img/mfui-logo.png`, lásd LOGO_CANDIDATES). A logó a PLUGINBA van
+ * becsomagolva, NEM site-onként, admin médiatárból választható — ez
+ * rendszer/kiadói email (a "MTMT Sync" doboz-terméké), minden site-on
+ * ugyanaz a fejléc-kép megy ki, konzisztensen a megrendelővel (nem a
+ * kliens szervezet saját brandje).
  */
 final class Mtmt_Notifier {
 
@@ -32,7 +34,7 @@ final class Mtmt_Notifier {
 	 * @var string[]
 	 */
 	private const LOGO_CANDIDATES = array(
-		'assets/img/email-logo.png',
+		'assets/img/mfui-logo.png',
 		'assets/img/email-logo.jpg',
 		'assets/img/email-logo.jpeg',
 	);
@@ -103,9 +105,14 @@ final class Mtmt_Notifier {
 	}
 
 	/**
-	 * Egyszerű, csak-inline-stílusú HTML (a legtöbb emailkliens nem futtat
-	 * `<style>` blokkot megbízhatóan) — nincs multipart/alternative szöveges
-	 * változat, ez tudatos egyszerűsítés (docs/decisions.md #76).
+	 * Teljes, minimális HTML-dokumentum (nem csak egy `<div>`-fragment) —
+	 * explicit, VILÁGOS `<body>`-háttér kell, mert a becsomagolt logó sötét
+	 * (navy) feliratú, átlátszó/fehér alapra tervezve (docs/decisions.md #70) —
+	 * egy esetleges sötét emailkliens-háttéren (pl. dark mode) a felirat
+	 * olvashatatlanná válna, ha nem adunk neki saját, világos "kártyát".
+	 * Csak inline stílusok (a legtöbb emailkliens nem futtat `<style>`
+	 * blokkot megbízhatóan) — nincs multipart/alternative szöveges változat,
+	 * ez tudatos egyszerűsítés.
 	 *
 	 * @param array[]           $results
 	 * @param array<int,string> $profile_labels
@@ -115,15 +122,30 @@ final class Mtmt_Notifier {
 		$site_name = esc_html( get_bloginfo( 'name' ) );
 		$logo_url  = self::get_logo_url();
 
-		$out  = '<div style="font-family:Arial,Helvetica,sans-serif;max-width:600px;margin:0 auto;color:#33404f;">';
+		// A becsomagolt logó (assets/img/mfui-logo.png) sötét navy szín-
+		// világával összehangolt paletta — a hangsúly-szín a logó teal
+		// csík árnyalatához igazítva.
+		$navy   = '#16233f';
+		$muted  = '#5b6b7c';
+		$accent = '#16aebd';
+		$border = '#e1e6ea';
+		$page   = '#eef2f6';
+
+		$out  = '<!DOCTYPE html><html lang="hu"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>' . esc_html__( 'MTMT szinkron-értesítő', 'mtmt-sync' ) . '</title></head>';
+		$out .= '<body style="margin:0;padding:0;background-color:' . esc_attr( $page ) . ';">';
+		$out .= '<div style="background-color:' . esc_attr( $page ) . ';padding:32px 16px;">';
+		$out .= '<div style="max-width:600px;margin:0 auto;background-color:#ffffff;border-radius:12px;overflow:hidden;border:1px solid ' . esc_attr( $border ) . ';font-family:Arial,Helvetica,sans-serif;">';
+
 		if ( $logo_url ) {
-			$out .= '<div style="text-align:center;padding:20px 0;">';
-			$out .= '<img src="' . esc_url( $logo_url ) . '" alt="' . esc_attr( $site_name ) . '" style="max-width:220px;height:auto;">';
+			$out .= '<div style="background-color:#ffffff;padding:28px 32px 22px;text-align:center;">';
+			$out .= '<img src="' . esc_url( $logo_url ) . '" alt="' . esc_attr( $site_name ) . '" style="max-width:280px;height:auto;display:inline-block;">';
 			$out .= '</div>';
 		}
+		$out .= '<div style="height:4px;background-color:' . esc_attr( $accent ) . ';line-height:4px;font-size:0;">&nbsp;</div>';
 
-		$out .= '<h2 style="color:#2e5f8a;font-size:18px;margin:0 0 12px;">' . esc_html__( 'Új MTMT publikációk a heti szinkronból', 'mtmt-sync' ) . '</h2>';
-		$out .= '<p style="font-size:14px;line-height:1.5;">' . sprintf(
+		$out .= '<div style="padding:28px 32px;">';
+		$out .= '<h1 style="color:' . esc_attr( $navy ) . ';font-size:19px;margin:0 0 14px;">' . esc_html__( 'Új MTMT publikációk a heti szinkronból', 'mtmt-sync' ) . '</h1>';
+		$out .= '<p style="color:' . esc_attr( $muted ) . ';font-size:14px;line-height:1.6;margin:0 0 20px;">' . sprintf(
 			/* translators: %s: site name */
 			esc_html__( 'A(z) %s oldalon lezajlott heti MTMT-szinkron az alábbi eredménnyel futott le:', 'mtmt-sync' ),
 			$site_name
@@ -134,38 +156,41 @@ final class Mtmt_Notifier {
 			$label      = $profile_labels[ $profile_id ] ?? ( '#' . $profile_id );
 
 			if ( ! empty( $result['errors'] ) ) {
-				$out .= '<div style="border:1px solid #f5c2c0;background:#fdecec;border-radius:6px;padding:12px 16px;margin-bottom:10px;font-size:14px;">';
-				$out .= '<strong>' . esc_html( $label ) . '</strong> — <span style="color:#a3311f;">' . esc_html__( 'HIBA a futás közben', 'mtmt-sync' ) . '</span><br>';
-				$out .= '<span style="color:#a3311f;">' . esc_html( implode( '; ', $result['errors'] ) ) . '</span>';
+				$out .= '<div style="background-color:#fdf1f1;border-left:4px solid #d64545;border-radius:6px;padding:14px 18px;margin-bottom:12px;">';
+				$out .= '<strong style="color:' . esc_attr( $navy ) . ';font-size:14px;">' . esc_html( $label ) . '</strong> — <span style="color:#c23b3b;font-weight:bold;font-size:13px;">' . esc_html__( 'HIBA a futás közben', 'mtmt-sync' ) . '</span><br>';
+				$out .= '<span style="color:#c23b3b;font-size:13px;">' . esc_html( implode( '; ', $result['errors'] ) ) . '</span>';
 				$out .= '</div>';
 				continue;
 			}
 
-			$out .= '<div style="border:1px solid #dfe4ea;border-radius:6px;padding:12px 16px;margin-bottom:10px;font-size:14px;">';
-			$out .= '<strong>' . esc_html( $label ) . '</strong><br>';
-			$out .= sprintf(
+			$out .= '<div style="background-color:#f6fafb;border-left:4px solid ' . esc_attr( $accent ) . ';border-radius:6px;padding:14px 18px;margin-bottom:12px;">';
+			$out .= '<strong style="color:' . esc_attr( $navy ) . ';font-size:14px;">' . esc_html( $label ) . '</strong><br>';
+			$out .= '<span style="color:' . esc_attr( $muted ) . ';font-size:13px;">' . sprintf(
 				/* translators: 1: uj, 2: frissitett, 3: visszaesett, 4: hianyzo */
 				esc_html__( '%1$d új · %2$d frissítve (ebből %3$d visszaesett pending-be) · %4$d hiányzóként jelölve', 'mtmt-sync' ),
 				(int) ( $result['inserted'] ?? 0 ),
 				(int) ( $result['updated'] ?? 0 ),
 				(int) ( $result['reverted_to_pending'] ?? 0 ),
 				(int) ( $result['missing'] ?? 0 )
-			);
+			) . '</span>';
 			$out .= '</div>';
 		}
 
-		$out .= '<p style="text-align:center;margin:24px 0;">';
-		$out .= '<a href="' . esc_url( admin_url( 'admin.php?page=mtmt-profiles' ) ) . '" style="background:#2e5f8a;color:#ffffff;padding:10px 22px;border-radius:6px;text-decoration:none;font-size:14px;display:inline-block;">';
+		$out .= '<div style="text-align:center;margin:28px 0 6px;">';
+		$out .= '<a href="' . esc_url( admin_url( 'admin.php?page=mtmt-profiles' ) ) . '" style="background-color:' . esc_attr( $accent ) . ';color:#ffffff;padding:12px 26px;border-radius:8px;text-decoration:none;font-size:14px;font-weight:bold;display:inline-block;">';
 		$out .= esc_html__( 'Jóváhagyás megnyitása', 'mtmt-sync' );
-		$out .= '</a></p>';
+		$out .= '</a></div>';
+		$out .= '</div>'; // padding:28px 32px
 
-		$out .= '<p style="color:#667085;font-size:12px;text-align:center;margin-top:24px;">' . sprintf(
+		$out .= '<div style="background-color:' . esc_attr( $page ) . ';padding:16px 32px;text-align:center;border-top:1px solid ' . esc_attr( $border ) . ';">';
+		$out .= '<p style="color:#8a97a6;font-size:12px;margin:0;">' . sprintf(
 			/* translators: %s: site name */
 			esc_html__( 'Ezt az emailt a MTMT Sync plugin küldte automatikusan a(z) %s oldalról.', 'mtmt-sync' ),
 			$site_name
 		) . '</p>';
-
 		$out .= '</div>';
+
+		$out .= '</div></div></body></html>';
 
 		return $out;
 	}

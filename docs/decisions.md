@@ -308,7 +308,7 @@ dokumentálás közben, nem csak leírtam:
 
 41. **Bulk kiemelés/kiemelés-visszavonás** a moderációs listán — a meglévő
     tömeges jóváhagyás/elutasítás mintájára. `Mtmt_Publication_Repository::
-    bulk_set_featured()`, a `Mtmt_List_Table` bulk-action listája és a
+bulk_set_featured()`, a `Mtmt_List_Table` bulk-action listája és a
     státusz-oszlop csak akkor mutatja/ajánlja fel, ha a "kiemelt cikk"
     funkció be van kapcsolva (`mtmt_enable_featured`) — ugyanaz a
     feltétel-mintázat, mint az egyes-tételes checkboxnál. A státusz oszlopban
@@ -352,7 +352,7 @@ dokumentálás közben, nem csak leírtam:
     lefut és nem esik vissza "nincs szűrés"-re.
 
 47. **`page_id=0` normalizálva `NULL`-ra tároláskor** (`Mtmt_Topic_Area_
-    Repository::create()`), mert a `wp_dropdown_pages()` "— nincs kiválasztva —"
+Repository::create()`), mert a `wp_dropdown_pages()` "— nincs kiválasztva —"
     opciója `0`-t küld, de `0` nem érvényes post ID — a `NULL` egyértelműbben
     jelzi "nincs hozzárendelt oldal", mint egy hamis `0` post ID.
 
@@ -360,7 +360,7 @@ dokumentálás közben, nem csak leírtam:
     kritérium (eredeti roadmap-szöveg) **csak Fázis 5 után zárható le
     ténylegesen** — widget nélkül nincs mit "aloldalon" megjeleníteni. Fázis 4
     az adatmodellt + admin UI-t adja, és előkészíti a `get_publication_ids_
-    for_area()` metódust, amit a Fázis 5-ös "B" widget közvetlenül hívhat majd.
+for_area()` metódust, amit a Fázis 5-ös "B" widget közvetlenül hívhat majd.
 
 ## Fázis 5 — Elementor widgetek (2026-08)
 
@@ -438,7 +438,7 @@ lásd ott. Az alábbiak az eziutáni implementációs döntések.
 
 58. **JAVÍTVA élő teszt után: a widgetek nem jelentek meg az Elementor
     widget-panelen.** Az eredeti `Mtmt_Elementor_Loader` az `elementor/widgets/
-    register` és `elementor/elements/categories_registered` felakasztását egy
+register` és `elementor/elements/categories_registered` felakasztását egy
     `elementor/loaded`-re kötött `boot()` mögé rejtette. Ez hook-sorrendi hiba:
     az Elementor a Widgets_Manager/Elements_Manager saját inicializálása
     során, MÉG az `elementor/loaded` tényleges kitüzelése ELŐTT elsüti ezeket
@@ -459,7 +459,7 @@ lásd ott. Az alábbiak az eziutáni implementációs döntések.
     `Mtmt_Widget_Cache` — egy `wp_options`-beli verziószámláló, amit minden
     widget-láthatóságot érintő írás NÖVEL (`set_status`, `bulk_set_status`,
     `bulk_set_featured`, `save_enrichment`, `Mtmt_Topic_Area_Repository::
-    set_areas_for_publication()`/`delete()`, és EGYSZER egy teljes
+set_areas_for_publication()`/`delete()`, és EGYSZER egy teljes
     `Mtmt_Sync_Runner::run()` végén — nem rekordonként, hogy egy nagy
     intézménynél ne legyen száz+ felesleges `update_option()`-hívás egy
     szinkron alatt). A `Mtmt_Widget_Data` cache-kulcsai tartalmazzák ezt a
@@ -554,7 +554,7 @@ lásd ott. Az alábbiak az eziutáni implementációs döntések.
     terjesztve, nem admin-konfigurációként. A médiatáras UI-t és a hozzá
     tartozó `mtmt_email_logo_id` optiont törölve lett (nem maradt kód-lom).
 68. **A logó-fájl helye és keresési sorrendje**: `Mtmt_Notifier::get_logo_url()`
-    sorban megnézi `assets/img/email-logo.png`, `.jpg`, `.jpeg` — az első
+    sorban megnézi `assets/img/mfui-logo.png`, `.jpg`, `.jpeg` — az első
     létező nyer, `file_exists()`-szel ellenőrizve (nem feltételezi, hogy a
     fájl ott van). Ha egyik sem létezik, `null`-t ad, az email egyszerűen
     logó nélkül megy ki — nem hiba, nem blokkol. SVG szándékosan NINCS a
