@@ -7,7 +7,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-08-27T21:28:09+00:00\n"
+"POT-Creation-Date: 2026-08-27T22:03:00+00:00\n"
 "X-Generator: bin/i18n/build.php\n"
 "X-Domain: mtmt-sync\n"
 #: includes/class-mtmt-sync.php:161
@@ -18,11 +18,11 @@ msgstr ""
 msgid "%1$d új · %2$d frissítve (ebből %3$d visszaesett pending-be) · %4$d hiányzóként jelölve"
 msgstr ""
 
-#: admin/class-mtmt-settings-page.php:342
+#: admin/class-mtmt-settings-page.php:436
 msgid "%1$s: %2$d új, %3$d frissítve (%4$d visszaesett pending-be), %5$d hiányzó"
 msgstr ""
 
-#: admin/class-mtmt-settings-page.php:333
+#: admin/class-mtmt-settings-page.php:427
 msgid "%1$s: HIBA — %2$s"
 msgstr ""
 
@@ -102,7 +102,7 @@ msgstr ""
 msgid "Aktuális oldal szövegszíne"
 msgstr ""
 
-#: admin/class-mtmt-settings-page.php:114
+#: admin/class-mtmt-settings-page.php:127
 msgid "Alap placeholder-kép"
 msgstr ""
 
@@ -174,6 +174,10 @@ msgstr ""
 msgid "Csak szöveg"
 msgstr ""
 
+#: admin/class-mtmt-settings-page.php:78
+msgid "Csütörtök"
+msgstr ""
+
 #: admin/class-mtmt-list-table.php:81
 msgid "Cím / szerzők"
 msgstr ""
@@ -182,7 +186,7 @@ msgstr ""
 msgid "Cím szín (widget-cím, kártya-cím, aktív év-fül)"
 msgstr ""
 
-#: admin/class-mtmt-settings-page.php:175
+#: admin/class-mtmt-settings-page.php:188
 msgid "Címzettek (soronként vagy vesszővel elválasztva):"
 msgstr ""
 
@@ -242,7 +246,7 @@ msgstr ""
 msgid "Előző"
 msgstr ""
 
-#: admin/class-mtmt-settings-page.php:170
+#: admin/class-mtmt-settings-page.php:183
 msgid "Email-értesítés"
 msgstr ""
 
@@ -258,11 +262,15 @@ msgstr ""
 msgid "Ez VÉGLEGESEN törli az összes MTMT-adatot: minden szinkronizált publikációt, jóváhagyási státuszt, query-profilt, szakmai területet és a futás-naplót. A beállítások (címzettek, funkció-kapcsolók, jogosultság-leképzés, placeholder-kép) megmaradnak. Ez NEM vonható vissza. Biztosan folytatod?"
 msgstr ""
 
-#: admin/class-mtmt-settings-page.php:129
+#: admin/class-mtmt-settings-page.php:142
 msgid "Ez a kép jelenik meg a widget-kártyán azoknál a jóváhagyott publikációknál, amelyekhez nincs feltöltve egyedi indexkép — a publikáció címe automatikusan rákerül a kép aljára (CLAUDE.md §14/8). Ha üresen hagyod, a pluginhoz csomagolt alapértelmezett képet használja."
 msgstr ""
 
-#: admin/class-mtmt-settings-page.php:94
+#: admin/class-mtmt-settings-page.php:235
+msgid "Ez csak akkor fut le ténylegesen a megadott időpontban, ha van, ami kiváltja a WP-cron feldolgozását (látogató-vezérelt oldalbetöltés, vagy egy külső \"pinger\", ami rendszeresen meglátogatja a wp-cron.php végpontot) — lásd a README cron-dokumentációját."
+msgstr ""
+
+#: admin/class-mtmt-settings-page.php:107
 msgid "Ezen a site-on kategorizálod-e a publikációkat szakmai terület szerint (pl. \"Autonóm járművek\", \"Robotika\"), mindegyik területhez egy külön WP-aloldallal. Nem minden telepítésen kell — ha kikapcsolod: a gazdagító űrlapon nincs terület-választó, a widgeteken nincs terület-badge/szűrő. A területek listáját a \"Területek\" almenüben szerkesztheted."
 msgstr ""
 
@@ -278,7 +286,7 @@ msgstr ""
 msgid "Feltétel (cond)"
 msgstr ""
 
-#: admin/class-mtmt-list-table.php:82 admin/class-mtmt-settings-page.php:200
+#: admin/class-mtmt-list-table.php:82 admin/class-mtmt-settings-page.php:256
 msgid "Forrás"
 msgstr ""
 
@@ -286,15 +294,15 @@ msgstr ""
 msgid "Forrás + év sor"
 msgstr ""
 
-#: admin/class-mtmt-settings-page.php:202
+#: admin/class-mtmt-settings-page.php:258
 msgid "Frissített"
 msgstr ""
 
-#: admin/class-mtmt-settings-page.php:83
+#: admin/class-mtmt-settings-page.php:96
 msgid "Funkciók"
 msgstr ""
 
-#: admin/class-mtmt-settings-page.php:194
+#: admin/class-mtmt-settings-page.php:250
 msgid "Futás-napló (utolsó 20)"
 msgstr ""
 
@@ -310,7 +318,7 @@ msgstr ""
 msgid "Ha egy forráshoz nincs betöltve ikon-fájl, \"Csak ikon\" módban is a felirat jelenik meg helyette."
 msgstr ""
 
-#: admin/class-mtmt-settings-page.php:179
+#: admin/class-mtmt-settings-page.php:192
 msgid "Ha üres, nem megy ki email. Csak a heti automatikus (cron) futásról küld értesítést, ha volt új vagy frissült tétel — kézi/CLI szinkronnál nem, mert azt az admin úgyis a képernyőn látja. Az email fejlécében megjelenő logó a pluginba van beégetve (kiadói/rendszer-email), nem site-onként állítható — lásd assets/img/mfui-logo.png."
 msgstr ""
 
@@ -322,8 +330,8 @@ msgstr ""
 msgid "Halvány háttérszín"
 msgstr ""
 
-#: includes/class-mtmt-cron.php:33
-msgid "Hetente"
+#: admin/class-mtmt-settings-page.php:197
+msgid "Heti automatikus szinkron ütemezése"
 msgstr ""
 
 #: admin/class-mtmt-profiles-page.php:555
@@ -338,7 +346,7 @@ msgstr ""
 msgid "Hivatkozás-stílus"
 msgstr ""
 
-#: admin/class-mtmt-settings-page.php:204
+#: admin/class-mtmt-settings-page.php:260
 msgid "Hiányzó"
 msgstr ""
 
@@ -346,11 +354,15 @@ msgstr ""
 msgid "Hozzárendelt aloldal"
 msgstr ""
 
+#: admin/class-mtmt-settings-page.php:75
+msgid "Hétfő"
+msgstr ""
+
 #: admin/class-mtmt-profiles-page.php:114
 msgid "ID"
 msgstr ""
 
-#: admin/class-mtmt-settings-page.php:198
+#: admin/class-mtmt-settings-page.php:254
 msgid "Időpont"
 msgstr ""
 
@@ -398,6 +410,10 @@ msgstr ""
 msgid "Itt állítható be, mely WordPress-szerepkörök kapják meg a plugin két kapabilitását. A pipák azonnal érvénybe lépnek mentéskor — nem kell újra aktiválni a plugint."
 msgstr ""
 
+#: admin/class-mtmt-settings-page.php:233
+msgid "Jelenleg nincs beütemezve automatikus futás — mentsd el az ütemezést, hogy létrejöjjön."
+msgstr ""
+
 #: admin/class-mtmt-publications-page.php:323
 msgid "Jelenlegi státusz: %s"
 msgstr ""
@@ -416,6 +432,10 @@ msgstr ""
 
 #: includes/class-mtmt-notifier.php:181
 msgid "Jóváhagyás megnyitása"
+msgstr ""
+
+#: admin/class-mtmt-settings-page.php:76
+msgid "Kedd"
 msgstr ""
 
 #: elementor/class-mtmt-widget-all-publications.php:160 elementor/class-mtmt-widget-topic-publications.php:186
@@ -438,7 +458,7 @@ msgstr ""
 msgid "Kiemelt cikk"
 msgstr ""
 
-#: admin/class-mtmt-settings-page.php:103
+#: admin/class-mtmt-settings-page.php:116
 msgid "Kiemelt cikkeket lehet megjelölni a moderációs listán, és külön widgettel (szakmai terület aloldalakon) csak ezeket lehet majd kiemelten megjeleníteni. Ha ki van kapcsolva: a gazdagító űrlapon nincs \"kiemelt cikk\" jelölő, és a hozzá tartozó widget nem lesz elérhető Elementorban."
 msgstr ""
 
@@ -482,12 +502,16 @@ msgstr ""
 msgid "Kártya-sor árnyéka"
 msgstr ""
 
-#: admin/class-mtmt-publications-page.php:354 admin/class-mtmt-settings-page.php:125
+#: admin/class-mtmt-publications-page.php:354 admin/class-mtmt-settings-page.php:138
 msgid "Kép kiválasztása"
 msgstr ""
 
 #: elementor/class-mtmt-widget-all-publications.php:165 elementor/class-mtmt-widget-topic-publications.php:190 includes/class-mtmt-widget-ajax.php:85 includes/class-mtmt-widget-ajax.php:140
 msgid "Következő"
+msgstr ""
+
+#: admin/class-mtmt-settings-page.php:228
+msgid "Következő automatikus futás: %s (a site saját időzónájában, Beállítások → Általános)."
 msgstr ""
 
 #: elementor/trait-mtmt-widget-common-controls.php:399
@@ -542,7 +566,7 @@ msgstr ""
 msgid "MTMT Publikációk"
 msgstr ""
 
-#: admin/class-mtmt-settings-page.php:46 admin/class-mtmt-settings-page.php:75
+#: admin/class-mtmt-settings-page.php:46 admin/class-mtmt-settings-page.php:88
 msgid "MTMT Publikációk — Beállítások"
 msgstr ""
 
@@ -606,7 +630,19 @@ msgstr ""
 msgid "Melyik szakmai terület aloldalán jelenjen meg ez a publikáció. Több is választható, vagy egy sem."
 msgstr ""
 
-#: admin/class-mtmt-publications-page.php:484 admin/class-mtmt-settings-page.php:266 admin/class-mtmt-settings-page.php:276
+#: admin/class-mtmt-settings-page.php:374
+msgid "Mentve (nem változott az ütemezés)."
+msgstr ""
+
+#: admin/class-mtmt-settings-page.php:383
+msgid "Mentve, az ütemezés frissítve. Következő automatikus futás: %s."
+msgstr ""
+
+#: admin/class-mtmt-settings-page.php:386
+msgid "Mentve, de az újraütemezés valamiért nem sikerült — ellenőrizd a WP-cron beállításait."
+msgstr ""
+
+#: admin/class-mtmt-publications-page.php:484 admin/class-mtmt-settings-page.php:322 admin/class-mtmt-settings-page.php:332
 msgid "Mentve."
 msgstr ""
 
@@ -614,11 +650,11 @@ msgstr ""
 msgid "Mentve. A jogosultságok azonnal érvénybe léptek."
 msgstr ""
 
-#: admin/class-mtmt-settings-page.php:285
+#: admin/class-mtmt-settings-page.php:341
 msgid "Mentve. Az újonnan generált placeholder-képek már az új alapképet használják — a korábban legenerált (cache-elt) képek a lemezen maradnak, de a widget nem hivatkozik rájuk többé."
 msgstr ""
 
-#: admin/class-mtmt-capabilities-page.php:110 admin/class-mtmt-publications-page.php:434 admin/class-mtmt-settings-page.php:105 admin/class-mtmt-settings-page.php:134 admin/class-mtmt-settings-page.php:181
+#: admin/class-mtmt-capabilities-page.php:110 admin/class-mtmt-publications-page.php:434 admin/class-mtmt-settings-page.php:118 admin/class-mtmt-settings-page.php:147 admin/class-mtmt-settings-page.php:194
 msgid "Mentés"
 msgstr ""
 
@@ -658,7 +694,7 @@ msgstr ""
 msgid "Másodlagos szöveg szín"
 msgstr ""
 
-#: admin/class-mtmt-settings-page.php:211
+#: admin/class-mtmt-settings-page.php:267
 msgid "Még nem futott szinkron."
 msgstr ""
 
@@ -682,15 +718,19 @@ msgstr ""
 msgid "Művelet"
 msgstr ""
 
+#: admin/class-mtmt-settings-page.php:203
+msgid "Nap"
+msgstr ""
+
 #: elementor/class-mtmt-widget-all-publications.php:163 includes/class-mtmt-widget-ajax.php:79
 msgid "Nincs a szűrésnek megfelelő publikáció."
 msgstr ""
 
-#: admin/class-mtmt-settings-page.php:316
+#: admin/class-mtmt-settings-page.php:410
 msgid "Nincs egyetlen engedélyezett profil sem — nincs mit szinkronizálni."
 msgstr ""
 
-#: admin/class-mtmt-capabilities-page.php:127 admin/class-mtmt-profiles-page.php:295 admin/class-mtmt-settings-page.php:255 admin/class-mtmt-topic-areas-page.php:159 includes/class-mtmt-reset.php:70
+#: admin/class-mtmt-capabilities-page.php:127 admin/class-mtmt-profiles-page.php:295 admin/class-mtmt-settings-page.php:311 admin/class-mtmt-topic-areas-page.php:159 includes/class-mtmt-reset.php:70
 msgid "Nincs jogosultságod ehhez a művelethez."
 msgstr ""
 
@@ -722,7 +762,7 @@ msgstr ""
 msgid "Név"
 msgstr ""
 
-#: admin/class-mtmt-settings-page.php:233
+#: admin/class-mtmt-settings-page.php:289
 msgid "OK"
 msgstr ""
 
@@ -750,11 +790,11 @@ msgstr ""
 msgid "Pl. \"Autonóm járművek\", \"Robotika\" — ez fog megjelenni a moderációs űrlapon és a widget szűrőjében."
 msgstr ""
 
-#: admin/class-mtmt-settings-page.php:149
+#: admin/class-mtmt-settings-page.php:162
 msgid "Placeholder-kép kiválasztása"
 msgstr ""
 
-#: admin/class-mtmt-settings-page.php:199
+#: admin/class-mtmt-settings-page.php:255
 msgid "Profil"
 msgstr ""
 
@@ -798,6 +838,10 @@ msgstr ""
 msgid "Publikáció jóváhagyása/elutasítása/elutasítás-visszavonása, a moderációs lista és a gazdagító űrlap alap mezői (indexkép, támogatás felülbírálása, projektazonosító megadása, kiemelt cikk jelölő). A \"mtmt_moderate\" kapabilitást adja."
 msgstr ""
 
+#: admin/class-mtmt-settings-page.php:79
+msgid "Péntek"
+msgstr ""
+
 #: admin/class-mtmt-list-table.php:85
 msgid "SJR"
 msgstr ""
@@ -810,7 +854,7 @@ msgstr ""
 msgid "Scope típusa"
 msgstr ""
 
-#: admin/class-mtmt-list-table.php:94 admin/class-mtmt-settings-page.php:205
+#: admin/class-mtmt-list-table.php:94 admin/class-mtmt-settings-page.php:261
 msgid "Státusz"
 msgstr ""
 
@@ -828,6 +872,10 @@ msgstr ""
 
 #: elementor/trait-mtmt-widget-common-controls.php:113
 msgid "Szegély szín"
+msgstr ""
+
+#: admin/class-mtmt-settings-page.php:77
+msgid "Szerda"
 msgstr ""
 
 #: admin/class-mtmt-capabilities-page.php:65
@@ -848,6 +896,10 @@ msgstr ""
 
 #: admin/class-mtmt-profiles-page.php:147
 msgid "Szinkron most"
+msgstr ""
+
+#: admin/class-mtmt-settings-page.php:80
+msgid "Szombat"
 msgstr ""
 
 #: elementor/trait-mtmt-widget-common-controls.php:253
@@ -894,11 +946,11 @@ msgstr ""
 msgid "Teljes"
 msgstr ""
 
-#: admin/class-mtmt-settings-page.php:191
+#: admin/class-mtmt-settings-page.php:247
 msgid "Teljes szinkron futtatása (mint a heti cron)"
 msgstr ""
 
-#: admin/class-mtmt-settings-page.php:184
+#: admin/class-mtmt-settings-page.php:240
 msgid "Teljes szinkron most"
 msgstr ""
 
@@ -958,7 +1010,7 @@ msgstr ""
 msgid "Törzsszöveg (alcím, szerzők, meta)"
 msgstr ""
 
-#: admin/class-mtmt-settings-page.php:189
+#: admin/class-mtmt-settings-page.php:245
 msgid "Ugyanazt futtatja le, mint a heti automatikus (cron) futás — MINDEN engedélyezett profilt, ÉS ha volt új/frissült tétel, kimegy az email-értesítés is a fenti címzetteknek. (A profilonkénti \"Szinkron most\" gomb a Profilok oldalon ezzel szemben szándékosan NEM küld emailt, mert azt ott úgyis a képernyőn látod.) Ezzel nem kell konzolból WP-CLI-t futtatni (\"wp cron event run mtmt_weekly_sync\") egy email-teszthez vagy egy soron kívüli teljes szinkronhoz."
 msgstr ""
 
@@ -966,15 +1018,19 @@ msgstr ""
 msgid "Utolsó futás"
 msgstr ""
 
+#: admin/class-mtmt-settings-page.php:81
+msgid "Vasárnap"
+msgstr ""
+
 #: admin/class-mtmt-publications-page.php:313
 msgid "Vissza a listához"
 msgstr ""
 
-#: admin/class-mtmt-settings-page.php:203
+#: admin/class-mtmt-settings-page.php:259
 msgid "Visszaesett"
 msgstr ""
 
-#: admin/class-mtmt-settings-page.php:126
+#: admin/class-mtmt-settings-page.php:139
 msgid "Visszaállítás alapértelmezettre"
 msgstr ""
 
@@ -998,7 +1054,7 @@ msgstr ""
 msgid "Widget címe"
 msgstr ""
 
-#: admin/class-mtmt-settings-page.php:108
+#: admin/class-mtmt-settings-page.php:121
 msgid "Widget — placeholder-kép"
 msgstr ""
 
@@ -1012,11 +1068,11 @@ msgid_plural "and %d more"
 msgstr[0] ""
 msgstr[1] ""
 
-#: admin/class-mtmt-settings-page.php:361
+#: admin/class-mtmt-settings-page.php:455
 msgid "email-értesítés kiküldve."
 msgstr ""
 
-#: admin/class-mtmt-settings-page.php:229
+#: admin/class-mtmt-settings-page.php:285
 msgid "hiba"
 msgstr ""
 
@@ -1024,7 +1080,7 @@ msgstr ""
 msgid "igen"
 msgstr ""
 
-#: admin/class-mtmt-settings-page.php:363
+#: admin/class-mtmt-settings-page.php:457
 msgid "lett volna email, de nincs megadva címzett."
 msgstr ""
 
@@ -1052,6 +1108,10 @@ msgstr ""
 msgid "Év-fül \"összes év\" felirata"
 msgstr ""
 
+#: admin/class-mtmt-settings-page.php:213
+msgid "Óra"
+msgstr ""
+
 #: elementor/class-mtmt-widget-all-publications.php:162 elementor/class-mtmt-widget-topic-publications.php:187
 msgid "Összes"
 msgstr ""
@@ -1060,7 +1120,7 @@ msgstr ""
 msgid "Összesen %d találat felelne meg ennek a szűrésnek (a profil még NINCS elmentve, semmi sem került be a szinkronba)."
 msgstr ""
 
-#: admin/class-mtmt-settings-page.php:201
+#: admin/class-mtmt-settings-page.php:257
 msgid "Új"
 msgstr ""
 
@@ -1080,6 +1140,10 @@ msgstr ""
 msgid "Üresen hagyva nem jelenik meg alcím-sor."
 msgstr ""
 
+#: admin/class-mtmt-settings-page.php:237
+msgid "Ütemezés mentése"
+msgstr ""
+
 #: elementor/trait-mtmt-widget-common-controls.php:53
 msgid "Üzenet, ha nincs kiválasztva terület/profil (csak szerkesztőknek látszik)"
 msgstr ""
@@ -1092,11 +1156,11 @@ msgstr ""
 msgid "— nincs kiválasztva —"
 msgstr ""
 
-#: admin/class-mtmt-settings-page.php:99
+#: admin/class-mtmt-settings-page.php:112
 msgid "„Kiemelt cikk\" funkció engedélyezése"
 msgstr ""
 
-#: admin/class-mtmt-settings-page.php:90
+#: admin/class-mtmt-settings-page.php:103
 msgid "„Szakmai terület\" funkció engedélyezése"
 msgstr ""
 

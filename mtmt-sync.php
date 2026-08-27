@@ -3,7 +3,7 @@
  * Plugin Name: MTMT Sync
  * Contributor: Szurofka Márton, MFÜI
  * Description: MTMT-alapú publikációs lista jóváhagyással és Elementor megjelenítéssel.
- * Version: 0.10.1
+ * Version: 0.11.0
  * Requires at least: 6.4
  * Requires PHP: 8.1
  * Text Domain: mtmt-sync
@@ -14,7 +14,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'MTMT_VERSION', '0.10.1' );
+define( 'MTMT_VERSION', '0.11.0' );
 define( 'MTMT_DB_VERSION', '3' );
 define( 'MTMT_CAPS_VERSION', '1' );
 define( 'MTMT_PLUGIN_FILE', __FILE__ );
@@ -86,7 +86,10 @@ register_activation_hook( __FILE__, array( 'Mtmt_Capabilities', 'activate' ) );
 register_activation_hook( __FILE__, array( 'Mtmt_Cron', 'activate' ) );
 register_deactivation_hook( __FILE__, array( 'Mtmt_Cron', 'deactivate' ) );
 
-add_filter( 'cron_schedules', array( 'Mtmt_Cron', 'add_schedule' ) ); // phpcs:ignore WordPress.WP.CronInterval.ChangeDetected
+// NINCS 'weekly' cron_schedules filter — a Mtmt_Cron mostantól önmagát
+// újraütemező egyszeri eseményekkel dolgozik (docs/decisions.md #98), nem
+// a WP beépített fix-intervallumos ismétlődő ütemezésével, hogy a
+// nyári/téli időszámítás-váltás ne csúsztassa el a beállított órát.
 add_action( Mtmt_Cron::HOOK, array( 'Mtmt_Cron', 'run' ) );
 
 // "Adatok törlése / alaphelyzet" a Pluginok listaoldalon (CLAUDE.md §11 —

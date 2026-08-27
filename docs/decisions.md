@@ -1112,3 +1112,48 @@ set_areas_for_publication()`/`delete()`, és EGYSZER egy teljes
     NEM ennek a fixnek a hatásköre** — ez a javítás csak azt biztosítja,
     hogy a cron-ütemezés MINDIG helyreálljon, származzon bármilyen okból a
     hiánya.
+98. **A heti automatikus szinkron ideje (nap + óra) konfigurálhatóvá vált**
+    (megrendelői kérdés: "lehet-e időzíteni a cron futását pl hétfőnként
+    hajnalra"). Korábban a `Mtmt_Cron::activate()` mindig "most" (`time()`)
+    időponttól számítva ütemezte a heti eseményt — vagyis amikor a plugin
+    aktiválva lett (vagy a #97-es önjavítás lefutott), onnantól kezdve
+    hetente MINDIG ugyanarra a (véletlenszerű) napra/órára esett.
+    - **Új admin-felület**: Beállítások oldal, "Heti automatikus szinkron
+      ütemezése" szekció — nap (hétfő-vasárnap) + óra (00-23) választó,
+      alapértelmezés hétfő 03:00. Mutatja a ténylegesen beütemezett
+      következő futás időpontját is (`wp_next_scheduled()` alapján).
+    - **KRITIKUS tervezési döntés**: a korábbi, WP beépített fix
+      604800 másodperces "weekly" ismétlődő ütemezés (`wp_schedule_event(...,
+      'weekly', ...)`) helyett a `Mtmt_Cron` mostantól **önmagát
+      újraütemező egyszeri eseményekkel** dolgozik (`wp_schedule_single_event()`
+      minden lefutás UTÁN, a KÖVETKEZŐ előfordulást frissen kiszámolva).
+      Indoklás: egy fix másodperc-intervallum nyári/téli időszámítás-
+      váltásnál (DST) tartósan (kb. fél évig, a következő váltásig) 1 órát
+      csúszna a fali-óra időhöz képest — pl. "hétfő 3:00" helyett hónapokig
+      "hétfő 4:00" (vagy 2:00) futna le. Az önmagát újraütemező minta ezt
+      elvi szinten kizárja, mert minden előfordulás a VALÓS naptári nap/óra
+      alapján, frissen számol, nem egy régi időbélyeghez adott fix
+      másodpercekkel.
+    - `Mtmt_Cron::next_run_timestamp( ?DateTime $now = null )` — a
+      `$now` paraméter opcionális, kizárólag tesztelhetőségi célból
+      (determinisztikus nap/óra-aritmetika teszteléséhez, a tényleges
+      "most" időponttól függetlenül); éles hívóknak nem kell megadni,
+      ilyenkor `wp_timezone()` (a site saját, Beállítások → Általános
+      alatt konfigurált időzónája) szerinti aktuális időt használja.
+    - `Mtmt_Cron::save_schedule( $day, $hour )` — csak akkor hívja a
+      `reschedule()`-t (töröl + azonnal újraütemez az ÚJ értékkel), ha a
+      nap/óra TÉNYLEGESEN változott a korábbi beállításhoz képest —
+      különben minden Beállítások-mentés feleslegesen "kitolná" a
+      legközelebbi futást.
+    - A `cron_schedules` filter (`Mtmt_Cron::add_schedule()`, egyedi
+      "weekly" intervallum regisztrálása) megszűnt — a saját eseményünk
+      már nem használja a WP beépített recurrence-mechanizmusát, ezért ez
+      a kód dead code lett volna.
+    Regresszió: `test-cron-selfheal.php` teljesen újraírva az új
+    architektúrához (10 → 26 assertion) — nap/óra-aritmetika 6 különböző
+    forgatókönyvre (ma-még-nem-múlt-el-az-óra / ma-már-elmúlt / más napon
+    állva / hét közepén / hét végén), alapérték + érvénytelen bemenet
+    clamp-elése, `activate()`/`deactivate()`/`reschedule()` idempotencia és
+    hívás-számlálás, `save_schedule()` változás-detektálása. Teljes suite
+    (233 assertion) zöld, repo-szintű `php -l` lint tiszta, i18n
+    újraépítve (289 string, mind lefordítva).

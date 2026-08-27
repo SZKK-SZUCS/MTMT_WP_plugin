@@ -70,6 +70,19 @@ final class Mtmt_Settings_Page {
 			$profile_labels[ (int) $profile['id'] ] = $profile['label'];
 		}
 		$nonce_action = self::NONCE_ACTION;
+
+		$day_labels = array(
+			1 => __( 'Hétfő', 'mtmt-sync' ),
+			2 => __( 'Kedd', 'mtmt-sync' ),
+			3 => __( 'Szerda', 'mtmt-sync' ),
+			4 => __( 'Csütörtök', 'mtmt-sync' ),
+			5 => __( 'Péntek', 'mtmt-sync' ),
+			6 => __( 'Szombat', 'mtmt-sync' ),
+			7 => __( 'Vasárnap', 'mtmt-sync' ),
+		);
+		$current_day  = Mtmt_Cron::get_day();
+		$current_hour = Mtmt_Cron::get_hour();
+		$next_run_ts  = wp_next_scheduled( Mtmt_Cron::HOOK );
 		?>
 		<div class="wrap">
 			<h1><?php esc_html_e( 'MTMT Publikációk — Beállítások', 'mtmt-sync' ); ?></h1>
@@ -181,6 +194,49 @@ final class Mtmt_Settings_Page {
 				<?php submit_button( __( 'Mentés', 'mtmt-sync' ) ); ?>
 			</form>
 
+			<h2><?php esc_html_e( 'Heti automatikus szinkron ütemezése', 'mtmt-sync' ); ?></h2>
+			<form method="post">
+				<?php wp_nonce_field( $nonce_action ); ?>
+				<input type="hidden" name="mtmt_action" value="save_schedule">
+				<table class="form-table">
+					<tr>
+						<th><label for="mtmt-cron-day"><?php esc_html_e( 'Nap', 'mtmt-sync' ); ?></label></th>
+						<td>
+							<select id="mtmt-cron-day" name="cron_day">
+								<?php foreach ( $day_labels as $value => $label ) : ?>
+									<option value="<?php echo esc_attr( (string) $value ); ?>" <?php selected( $current_day, $value ); ?>><?php echo esc_html( $label ); ?></option>
+								<?php endforeach; ?>
+							</select>
+						</td>
+					</tr>
+					<tr>
+						<th><label for="mtmt-cron-hour"><?php esc_html_e( 'Óra', 'mtmt-sync' ); ?></label></th>
+						<td>
+							<select id="mtmt-cron-hour" name="cron_hour">
+								<?php for ( $h = 0; $h <= 23; $h++ ) : ?>
+									<option value="<?php echo esc_attr( (string) $h ); ?>" <?php selected( $current_hour, $h ); ?>><?php echo esc_html( sprintf( '%02d:00', $h ) ); ?></option>
+								<?php endfor; ?>
+							</select>
+						</td>
+					</tr>
+				</table>
+				<p class="description">
+					<?php if ( $next_run_ts ) : ?>
+						<?php
+						printf(
+							/* translators: %s: következő automatikus futás dátuma/időpontja */
+							esc_html__( 'Következő automatikus futás: %s (a site saját időzónájában, Beállítások → Általános).', 'mtmt-sync' ),
+							esc_html( wp_date( 'Y-m-d H:i', $next_run_ts ) )
+						);
+						?>
+					<?php else : ?>
+						<?php esc_html_e( 'Jelenleg nincs beütemezve automatikus futás — mentsd el az ütemezést, hogy létrejöjjön.', 'mtmt-sync' ); ?>
+					<?php endif; ?>
+					<?php esc_html_e( 'Ez csak akkor fut le ténylegesen a megadott időpontban, ha van, ami kiváltja a WP-cron feldolgozását (látogató-vezérelt oldalbetöltés, vagy egy külső "pinger", ami rendszeresen meglátogatja a wp-cron.php végpontot) — lásd a README cron-dokumentációját.', 'mtmt-sync' ); ?>
+				</p>
+				<?php submit_button( __( 'Ütemezés mentése', 'mtmt-sync' ) ); ?>
+			</form>
+
 			<h2><?php esc_html_e( 'Teljes szinkron most', 'mtmt-sync' ); ?></h2>
 			<form method="post">
 				<?php wp_nonce_field( $nonce_action ); ?>
@@ -286,11 +342,49 @@ final class Mtmt_Settings_Page {
 			);
 		}
 
+		if ( 'save_schedule' === $action ) {
+			return $this->handle_save_schedule();
+		}
+
 		if ( 'run_cron_sync' === $action ) {
 			return $this->handle_run_cron_sync();
 		}
 
 		return null;
+	}
+
+	/**
+	 * A heti automatikus szinkron nap/óra ütemezésének mentése
+	 * (megrendelői kérés: "lehet-e időzíteni a cron futását pl hétfőnként
+	 * hajnalra", docs/decisions.md #98). `Mtmt_Cron::save_schedule()` csak
+	 * akkor ütemez újra, ha ténylegesen változott az érték.
+	 *
+	 * @return array{type:string,message:string}
+	 */
+	private function handle_save_schedule(): array {
+		$day  = isset( $_POST['cron_day'] ) ? absint( $_POST['cron_day'] ) : 1;
+		$hour = isset( $_POST['cron_hour'] ) ? absint( $_POST['cron_hour'] ) : 3;
+
+		$changed  = Mtmt_Cron::save_schedule( $day, $hour );
+		$next_run = wp_next_scheduled( Mtmt_Cron::HOOK );
+
+		if ( ! $changed ) {
+			return array(
+				'type'    => 'success',
+				'message' => __( 'Mentve (nem változott az ütemezés).', 'mtmt-sync' ),
+			);
+		}
+
+		return array(
+			'type'    => 'success',
+			'message' => $next_run
+				? sprintf(
+					/* translators: %s: kovetkezo automatikus futas datuma/idopontja */
+					__( 'Mentve, az ütemezés frissítve. Következő automatikus futás: %s.', 'mtmt-sync' ),
+					wp_date( 'Y-m-d H:i', $next_run )
+				)
+				: __( 'Mentve, de az újraütemezés valamiért nem sikerült — ellenőrizd a WP-cron beállításait.', 'mtmt-sync' ),
+		);
 	}
 
 	/**

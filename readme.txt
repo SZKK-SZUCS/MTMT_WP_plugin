@@ -4,7 +4,7 @@ Tags: mtmt, publications, elementor, publikaciok, tudomanyos
 Requires at least: 6.4
 Tested up to: 6.7
 Requires PHP: 8.1
-Stable tag: 0.10.1
+Stable tag: 0.11.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -103,6 +103,15 @@ egyikkel sem, csak a látogató-vezérelt alapbeállítással) működik, tiszt�
 üzemeltetési döntés, telepítésenként eltérhet.
 
 == Changelog ==
+
+= 0.11.0 =
+* Új: a heti automatikus szinkron ideje (nap + óra) mostantól
+  konfigurálható a Beállítások oldalon (alapértelmezés: hétfő 03:00) —
+  korábban mindig aktiváláskor/önjavításkor "most" induló időponttól
+  számítva futott, tehát véletlenszerű napra/órára eshetett.
+* A háttérben önmagát újraütemező egyszeri eseményekre váltottunk a
+  korábbi fix-intervallumos ismétlődés helyett, hogy a nyári/téli
+  időszámítás-váltás ne csúsztassa el a beállított órát.
 
 = 0.10.1 =
 * Kritikus javítás: a heti `mtmt_weekly_sync` cron-esemény bizonyos
@@ -250,6 +259,12 @@ egyikkel sem, csak a látogató-vezérelt alapbeállítással) működik, tiszt�
 * Kezdeti bootstrap: plugin-header, aktivátor (tábla-migráció dbDelta-val).
 
 == Upgrade Notice ==
+
+= 0.11.0 =
+Új: a heti automatikus szinkron ideje (nap + óra) mostantól konfigurálható
+a Beállítások oldalon. A plugin továbbra is 0.x verziószámon fejlődik —
+1.0.0-t csak akkor kap, ha a megrendelő explicit jóváhagyja, hogy a
+rendszer kész (lásd CLAUDE.md §10.2).
 
 = 0.10.1 =
 Kritikus javítás: bizonyos telepítéseken a heti automata szinkron sosem

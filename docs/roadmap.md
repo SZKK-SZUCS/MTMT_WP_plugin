@@ -646,6 +646,43 @@ zöld, lint tiszta.
    ha igen, ÉS a pinger-konténer hálózati elérése is rendben van, a heti
    automatizmus végre ténylegesen működik.
 
+**Frissítve**: a megrendelővel közös élő hibakereséssel mindkettő
+megerősítve — a pinger-konténer HTTP 200-at kap mindkét domainre, a
+wp-cron.php feldolgozás is működik. A heti esemény ezután a normál
+"heti" ütemezés szerint fut tovább (a következő tényleges automata
+lefutásig ~1 hét telik el, mivel egy manuális teszt-lefuttatás "elhasználja"
+az adott heti előfordulást).
+
+## ✅ Konfigurálható cron-ütemezés (nap + óra)
+
+**KÉSZ, még nincs élesben validálva.** Megrendelői kérdés: "lehet-e
+időzíteni a cron futását pl hétfőnként hajnalra". Korábban a heti esemény
+mindig "most" (aktiváláskor/önjavításkor) induló időponttól számítva
+futott, tehát véletlenszerű napra/órára eshetett. Részletek: docs/decisions.md #98.
+
+- Új "Heti automatikus szinkron ütemezése" szekció a Beállítások oldalon
+  — nap (hétfő-vasárnap) + óra (00-23) választó, alapértelmezés hétfő
+  03:00. Mutatja a ténylegesen beütemezett következő futás időpontját is.
+- A háttérben a korábbi fix-intervallumos WP "weekly" ismétlődés helyett
+  önmagát újraütemező egyszeri eseményekre váltottunk, hogy a nyári/téli
+  időszámítás-váltás ne csúsztassa el a beállított órát.
+- A nap/óra módosítása csak akkor ütemez újra ténylegesen, ha az érték
+  valóban változott — egy sima Beállítások-mentés más mezőkkel nem tolja
+  ki feleslegesen a legközelebbi futást.
+
+16 új assertion (`test-cron-selfheal.php`, 10→26), teljes suite (233
+assertion) zöld, lint tiszta, i18n újraépítve (289 string).
+
+**Éles ellenőrzéshez** (JKK site, wp-admin):
+1. MTMT → Beállítások → "Heti automatikus szinkron ütemezése" — állíts be
+   egy nap/óra kombinációt, mentsd — jelenjen meg a "Következő automatikus
+   futás" dátum/időpont, ami valóban a beállított napra/órára esik.
+2. Változtasd meg csak egy másik mezőt (pl. a címzett-listát) egy MÁSIK
+   szekcióban — a cron-ütemezés időpontja NE változzon.
+3. Állítsd a napot/órát a közeljövőre (pl. 10 perccel későbbre), várd
+   meg — fusson le a szinkron pontosan akkor, egy "cron" sorral a
+   futás-naplóban.
+
 ## Backlog — még nincs fázishoz kötve
 
 Jelenleg üres.
