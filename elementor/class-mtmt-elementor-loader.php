@@ -63,6 +63,7 @@ final class Mtmt_Elementor_Loader {
 	 * @param \Elementor\Widgets_Manager $widgets_manager
 	 */
 	public function register_widgets( $widgets_manager ): void {
+		require_once MTMT_PLUGIN_DIR . 'elementor/trait-mtmt-widget-common-controls.php';
 		require_once MTMT_PLUGIN_DIR . 'elementor/class-mtmt-widget-all-publications.php';
 		$widgets_manager->register( new Mtmt_Widget_All_Publications() );
 

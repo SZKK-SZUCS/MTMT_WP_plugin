@@ -467,3 +467,33 @@ lásd ott. Az alábbiak az eziutáni implementációs döntések.
     "cache-miss" lesz. A TTL-t emiatt fel lehetett emelni 5 percről 1 órára
     (csak biztonsági háló, ha egy írási útvonal mégis kimaradna a bump()-ból),
     ami ritkább DB-írást is jelent a gyakori (változatlan) lekérdezéseknél.
+
+60. **Élő visszajelzés után: widget-szintű szöveg- és stílus-testreszabás.**
+    Két kérés: (a) a korábban kőbe vésett (`__()`-be ágyazott) feliratok
+    (fejléc-cím, kereső helyőrző, üres-lista üzenet, lapozó "előző/következő")
+    legyenek szerkeszthetők widget-példányonként; (b) legyen Elementor
+    Stílus-fül (színek/tipográfia/kártya-megjelenés). Megoldás: egy közös
+    `Mtmt_Widget_Common_Controls` TRAIT (nem külön osztály — mindkét widget
+    `\Elementor\Widget_Base`-t terjeszt ki, a trait csak a control-regisztrációt
+    DRY-osítja), amit mindkét widget használ:
+    - `register_mtmt_text_controls(array $defaults)` — csak azokhoz a
+      kulcsokhoz ad TEXT controlt, amik szerepelnek a hívó widget saját
+      `$defaults` tömbjében, így az "A" és "B" widget természetesen kapja meg
+      a saját releváns mezőkészletét (pl. a terület-szűrő felirata csak
+      "A"-nál értelmes, a "nincs terület/profil kiválasztva" üzenet csak "B"-nél).
+    - `register_mtmt_style_controls()` — a színek NEM közvetlen CSS-tulajdonságot
+      írnak felül, hanem a widget.css-ben már meglévő CSS-változókat
+      (`--mtmt-accent`, `--mtmt-border`, `--mtmt-muted`, `--mtmt-bg-soft`) a
+      `{{WRAPPER}} .mtmt-widget` szinten — mivel a teljes stíluslap ezekre a
+      változókra épül, ez egyetlen ponton ad valódi, széleskörű testreszabást
+      négy Color controllal, nem kellett minden CSS-szabályt egyenként
+      exponálni. Typography group-controlok a címre/kártya-címre/törzsszövegre,
+      plusz kártya-háttérszín/lekerekítés/belső margó.
+    - A "Tartalom fülön szerkeszthető, de a swappelt AJAX-fragmentben (kártya-lista,
+      lapozó) is megjelenő" szövegek (`empty_state_text`, `pagination_prev_label`,
+      `pagination_next_label`) `data-*` attribútumokon keresztül a JS-be, onnan
+      minden AJAX-kérés POST body-jában a szerverre jutnak — a header/kereső
+      helyőrző/év-fül-felirat/terület-szűrő-felirat NEM része az AJAX-cserének
+      (a `.mtmt-widget-controls`/`.mtmt-year-tabs` blokk sosem cserélődik,
+      csak a `.mtmt-widget-list`/`.mtmt-widget-pagination`), ezért azokhoz elég
+      a kezdeti szerver-oldali render().

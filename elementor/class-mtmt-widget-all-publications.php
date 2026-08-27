@@ -24,6 +24,8 @@ defined( 'ABSPATH' ) || exit;
  */
 final class Mtmt_Widget_All_Publications extends \Elementor\Widget_Base {
 
+	use Mtmt_Widget_Common_Controls;
+
 	/**
 	 * @return string
 	 */
@@ -134,6 +136,21 @@ final class Mtmt_Widget_All_Publications extends \Elementor\Widget_Base {
 		);
 
 		$this->end_controls_section();
+
+		$this->register_mtmt_text_controls(
+			array(
+				'header_eyebrow'        => __( 'PUBLIKÁCIÓK', 'mtmt-sync' ),
+				'header_title'          => __( 'Lektorált publikációk', 'mtmt-sync' ),
+				'search_placeholder'    => __( 'Keresés cím, szerző vagy forrás szerint…', 'mtmt-sync' ),
+				'area_filter_all_label' => __( 'Minden szakmai terület', 'mtmt-sync' ),
+				'year_tab_all_label'    => __( 'Összes', 'mtmt-sync' ),
+				'empty_state_text'      => __( 'Nincs a szűrésnek megfelelő publikáció.', 'mtmt-sync' ),
+				'pagination_prev_label' => __( 'Előző', 'mtmt-sync' ),
+				'pagination_next_label' => __( 'Következő', 'mtmt-sync' ),
+			)
+		);
+
+		$this->register_mtmt_style_controls();
 	}
 
 	/**
@@ -160,6 +177,17 @@ final class Mtmt_Widget_All_Publications extends \Elementor\Widget_Base {
 		$citation_style      = ( 'compact' === $settings['citation_style'] ) ? 'compact' : 'full';
 		$show_doi_link       = 'yes' === $settings['show_doi_link'];
 		$show_sjr_badge      = 'yes' === $settings['show_sjr_badge'];
+
+		// Korábban kőbe vésett feliratok — most a widget Tartalom fülén,
+		// a "Szövegek" szekcióban szerkeszthetők (docs/decisions.md #60).
+		$header_eyebrow        = (string) $settings['header_eyebrow'];
+		$header_title          = (string) $settings['header_title'];
+		$search_placeholder    = (string) $settings['search_placeholder'];
+		$area_filter_all_label = (string) $settings['area_filter_all_label'];
+		$year_tab_all_label    = (string) $settings['year_tab_all_label'];
+		$empty_state_text      = (string) $settings['empty_state_text'];
+		$prev_label            = (string) $settings['pagination_prev_label'];
+		$next_label            = (string) $settings['pagination_next_label'];
 
 		$display_options = array(
 			'show_topic_area' => $topic_areas_enabled,
@@ -190,21 +218,24 @@ final class Mtmt_Widget_All_Publications extends \Elementor\Widget_Base {
 			data-show-doi-link="<?php echo $show_doi_link ? '1' : '0'; ?>"
 			data-show-sjr-badge="<?php echo $show_sjr_badge ? '1' : '0'; ?>"
 			data-show-topic-area="<?php echo $topic_areas_enabled ? '1' : '0'; ?>"
-			data-year="<?php echo esc_attr( (string) $initial_year ); ?>">
+			data-year="<?php echo esc_attr( (string) $initial_year ); ?>"
+			data-empty-text="<?php echo esc_attr( $empty_state_text ); ?>"
+			data-prev-label="<?php echo esc_attr( $prev_label ); ?>"
+			data-next-label="<?php echo esc_attr( $next_label ); ?>">
 
 			<div class="mtmt-widget-header">
-				<p class="mtmt-eyebrow"><?php esc_html_e( 'PUBLIKÁCIÓK', 'mtmt-sync' ); ?></p>
-				<h2 class="mtmt-widget-title"><?php esc_html_e( 'Lektorált publikációk', 'mtmt-sync' ); ?></h2>
+				<p class="mtmt-eyebrow"><?php echo esc_html( $header_eyebrow ); ?></p>
+				<h2 class="mtmt-widget-title"><?php echo esc_html( $header_title ); ?></h2>
 			</div>
 
 			<?php if ( $show_search || ( $show_topic_filter && ! empty( $areas ) ) ) : ?>
 			<div class="mtmt-widget-controls">
 				<?php if ( $show_search ) : ?>
-					<input type="search" class="mtmt-search-input" placeholder="<?php esc_attr_e( 'Keresés cím, szerző vagy forrás szerint…', 'mtmt-sync' ); ?>">
+					<input type="search" class="mtmt-search-input" placeholder="<?php echo esc_attr( $search_placeholder ); ?>">
 				<?php endif; ?>
 				<?php if ( $show_topic_filter && ! empty( $areas ) ) : ?>
 					<select class="mtmt-area-filter">
-						<option value="0"><?php esc_html_e( 'Minden szakmai terület', 'mtmt-sync' ); ?></option>
+						<option value="0"><?php echo esc_html( $area_filter_all_label ); ?></option>
 						<?php foreach ( $areas as $area ) : ?>
 							<option value="<?php echo esc_attr( (string) $area['id'] ); ?>"><?php echo esc_html( $area['label'] ); ?></option>
 						<?php endforeach; ?>
@@ -215,7 +246,7 @@ final class Mtmt_Widget_All_Publications extends \Elementor\Widget_Base {
 
 			<?php if ( ! empty( $years ) ) : ?>
 			<div class="mtmt-year-tabs" role="tablist">
-				<button type="button" class="mtmt-year-tab<?php echo ( 0 === $initial_year ) ? ' is-active' : ''; ?>" data-year="0"><?php esc_html_e( 'Összes', 'mtmt-sync' ); ?></button>
+				<button type="button" class="mtmt-year-tab<?php echo ( 0 === $initial_year ) ? ' is-active' : ''; ?>" data-year="0"><?php echo esc_html( $year_tab_all_label ); ?></button>
 				<?php foreach ( $years as $year ) : ?>
 					<button type="button" class="mtmt-year-tab<?php echo ( $year === $initial_year ) ? ' is-active' : ''; ?>" data-year="<?php echo esc_attr( (string) $year ); ?>"><?php echo esc_html( (string) $year ); ?></button>
 				<?php endforeach; ?>
@@ -224,7 +255,7 @@ final class Mtmt_Widget_All_Publications extends \Elementor\Widget_Base {
 
 			<div class="mtmt-widget-list">
 				<?php if ( empty( $initial['items'] ) ) : ?>
-					<p class="mtmt-widget-empty"><?php esc_html_e( 'Nincs a szűrésnek megfelelő publikáció.', 'mtmt-sync' ); ?></p>
+					<p class="mtmt-widget-empty"><?php echo esc_html( $empty_state_text ); ?></p>
 				<?php else : ?>
 					<?php foreach ( $initial['items'] as $item ) : ?>
 						<?php echo Mtmt_Card_Renderer::render( $item, $display_options ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- a renderer maga escape-el. ?>
@@ -233,7 +264,7 @@ final class Mtmt_Widget_All_Publications extends \Elementor\Widget_Base {
 			</div>
 
 			<div class="mtmt-widget-pagination">
-				<?php echo Mtmt_Widget_Ajax::render_pagination( 1, $total_pages ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- saját, escape-elt HTML-t épít. ?>
+				<?php echo Mtmt_Widget_Ajax::render_pagination( 1, $total_pages, $prev_label, $next_label ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- saját, escape-elt HTML-t épít. ?>
 			</div>
 		</div>
 		<?php

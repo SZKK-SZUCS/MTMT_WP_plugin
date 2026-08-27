@@ -259,6 +259,15 @@ widget-design.md szerint működik.
 8. Beállítások → Widget — placeholder-kép szekcióban tölts fel egy egyedi
    alapképet, mentsd — az ÚJONNAN generált placeholder-képek ezt használják
    (a korábban generáltak nem frissülnek vissza menet közben, ez így várt).
+9. Mindkét widget Tartalom fülén nyisd meg a "Szövegek" szekciót — írj át pl.
+   a widget címét vagy a kereső helyőrző szövegét, mentsd — a frontenden a
+   megváltoztatott szöveg jelenjen meg (a fejléc/kereső/év-fül azonnal, az
+   üres-lista üzenet és a lapozó "előző/következő" felirata AJAX-lapozás/
+   -keresés UTÁN is maradjon a testre szabott szöveg, ne ugorjon vissza az
+   eredeti magyar szövegre).
+10. Mindkét widget Stílus fülén próbálj ki egy szín- és egy tipográfia-controlt
+    (pl. "Kiemelő szín", "Kártya-cím" tipográfia) — látszódjon a változás a
+    frontenden (kiemelő szín pl. az aktív év-fülön/hover-en, kártya-cím betűtípus/méret).
 
 ## Fázis 6 — GitHub + PUC
 

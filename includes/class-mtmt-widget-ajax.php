@@ -67,11 +67,28 @@ final class Mtmt_Widget_Ajax {
 			'citation_style'  => ( isset( $_POST['citation_style'] ) && 'compact' === $_POST['citation_style'] ) ? 'compact' : 'full',
 		);
 
+		// A widget-példány Tartalom fülén szerkeszthető feliratok (Mtmt_Widget_Common_Controls) —
+		// a JS a data-empty-text/data-prev-label/data-next-label attribútumokból küldi vissza
+		// minden AJAX-kérésnél, hogy a fragment-csere is a testre szabott szöveget mutassa.
+		$empty_state_text = isset( $_POST['empty_state_text'] ) ? sanitize_text_field( wp_unslash( $_POST['empty_state_text'] ) ) : '';
+		$prev_label       = isset( $_POST['pagination_prev_label'] ) ? sanitize_text_field( wp_unslash( $_POST['pagination_prev_label'] ) ) : '';
+		$next_label       = isset( $_POST['pagination_next_label'] ) ? sanitize_text_field( wp_unslash( $_POST['pagination_next_label'] ) ) : '';
+
+		if ( '' === $empty_state_text ) {
+			$empty_state_text = __( 'Nincs a szűrésnek megfelelő publikáció.', 'mtmt-sync' );
+		}
+		if ( '' === $prev_label ) {
+			$prev_label = __( 'Előző', 'mtmt-sync' );
+		}
+		if ( '' === $next_label ) {
+			$next_label = __( 'Következő', 'mtmt-sync' );
+		}
+
 		$result = $this->widget_data->query( $args );
 
 		$html = '';
 		if ( empty( $result['items'] ) ) {
-			$html = '<p class="mtmt-widget-empty">' . esc_html__( 'Nincs a szűrésnek megfelelő publikáció.', 'mtmt-sync' ) . '</p>';
+			$html = '<p class="mtmt-widget-empty">' . esc_html( $empty_state_text ) . '</p>';
 		} else {
 			foreach ( $result['items'] as $item ) {
 				$html .= Mtmt_Card_Renderer::render( $item, $display_options );
@@ -87,7 +104,7 @@ final class Mtmt_Widget_Ajax {
 				'total'       => (int) $result['total'],
 				'total_pages' => $total_pages,
 				'paged'       => $args['paged'],
-				'pagination'  => self::render_pagination( $args['paged'], $total_pages ),
+				'pagination'  => self::render_pagination( $args['paged'], $total_pages, $prev_label, $next_label ),
 			)
 		);
 	}
@@ -97,18 +114,27 @@ final class Mtmt_Widget_Ajax {
 	 * Public: az Elementor-widgetek is ezt hívják a kezdeti (nem-AJAX) szerver-oldali
 	 * render()-nél, hogy ne legyen két hely, ahol a lapozó-HTML épül.
 	 *
-	 * @param int $current
-	 * @param int $total_pages
+	 * @param int    $current
+	 * @param int    $total_pages
+	 * @param string $prev_label Widget-szinten szerkeszthető felirat (Mtmt_Widget_Common_Controls).
+	 * @param string $next_label Widget-szinten szerkeszthető felirat (Mtmt_Widget_Common_Controls).
 	 * @return string
 	 */
-	public static function render_pagination( int $current, int $total_pages ): string {
+	public static function render_pagination( int $current, int $total_pages, string $prev_label = '', string $next_label = '' ): string {
 		if ( $total_pages <= 1 ) {
 			return '';
 		}
 
+		if ( '' === $prev_label ) {
+			$prev_label = __( 'Előző', 'mtmt-sync' );
+		}
+		if ( '' === $next_label ) {
+			$next_label = __( 'Következő', 'mtmt-sync' );
+		}
+
 		$out = '<nav class="mtmt-pagination">';
 		if ( $current > 1 ) {
-			$out .= '<button type="button" class="mtmt-page-btn" data-page="' . esc_attr( (string) ( $current - 1 ) ) . '">&larr; ' . esc_html__( 'Előző', 'mtmt-sync' ) . '</button>';
+			$out .= '<button type="button" class="mtmt-page-btn" data-page="' . esc_attr( (string) ( $current - 1 ) ) . '">&larr; ' . esc_html( $prev_label ) . '</button>';
 		}
 		$out .= '<span class="mtmt-pagination-status">' . sprintf(
 			/* translators: 1: jelenlegi oldal, 2: összes oldal */
@@ -117,7 +143,7 @@ final class Mtmt_Widget_Ajax {
 			$total_pages
 		) . '</span>';
 		if ( $current < $total_pages ) {
-			$out .= '<button type="button" class="mtmt-page-btn" data-page="' . esc_attr( (string) ( $current + 1 ) ) . '">' . esc_html__( 'Következő', 'mtmt-sync' ) . ' &rarr;</button>';
+			$out .= '<button type="button" class="mtmt-page-btn" data-page="' . esc_attr( (string) ( $current + 1 ) ) . '">' . esc_html( $next_label ) . ' &rarr;</button>';
 		}
 		$out .= '</nav>';
 
