@@ -457,11 +457,47 @@ megrendelő megerősítette, hogy a javítás után a szinkron sikeres.
    (a korábbi "372 új, üres tábla" tünet elhárult).
 
 **Még nyitott:**
-- Egyéb azonosítós SVG-ikonok (`assets/img/icons/{wos,scopus,sztaki,pubmed}.svg`)
-  — a megrendelő folyamatban van a beszerzésükkel.
+- Egyéb azonosítós SVG-ikonok betöltve (`assets/img/icons/{wos,scopus,sztaki,pubmed}.svg`)
+  — élesben még nincs ellenőrizve, lásd lent az új szakaszt.
 - **A megrendelő központi cron-pinger job-ját át kell nézni** — jelezte, hogy
   szerinte "nem jó" (a README-ben dokumentált A) opció mintája alapján
   állította össze); a pontos kódot külön küldi el egyeztetésre.
+
+## ✅ Egyéb azonosítós ikonok — megjelenítési mód + stílus-vezérlők
+
+**KÉSZ, még nincs élesben validálva.** A megrendelő betöltötte a 4 SVG-ikont
+(WoS/Scopus/SZTAKI/PubMed), majd kérte: "legyen beállítható: Csak ikon; Csak
+szöveg; Mindkettő, ezen felül ikon szín, szöveg szín, pill dizájn". A
+betöltött fájlok átvizsgálásakor egy komoly, a funkciót érdemben blokkoló
+hiba derült ki és lett javítva — részletek: docs/decisions.md #91.
+
+- Fájlnevek kisbetűsre javítva (`WoS.svg` -> `wos.svg` stb. — Windows-on
+  némán működött volna, élesben a case-sensitive fájlrendszer miatt nem).
+- Színezhetőségi hiba javítva: a betöltött fájlok beágyazott `<style>`/
+  class-alapú fill-mintája (Illustrator-export) felülírta volna az öröklött
+  `currentColor`-t — a widget ikon-szín beállítása enélkül látszólag
+  hatástalan maradt volna.
+- Widget Tartalom fül: "Egyéb azonosítók megjelenítése" (Ikon és szöveg /
+  Csak ikon / Csak szöveg), mindkét widgeten.
+- Widget Stílus fül, új "Egyéb azonosítók" szekció: ikon szín, szöveg szín,
+  pill háttérszín, pill szegély szín, pill lekerekítés.
+
+10 új assertion (`test-ext-id-icons.php`, 6→16), teljes suite (192
+assertion) zöld, lint tiszta.
+
+**Éles ellenőrzéshez** (Local site, Elementor szerkesztő):
+1. Egy publikáción, ahol van WoS/Scopus/SZTAKI/PubMed azonosító, nézd meg a
+   kártyát — az ikonok most már ténylegesen betöltve jelenjenek meg (nem
+   feliratos pill), a szín kövesse a szöveg színét.
+2. Widget Tartalom fülön váltogasd az "Egyéb azonosítók megjelenítése"
+   beállítást Csak ikon / Csak szöveg / Mindkettő között — a kártyák
+   frissüljenek megfelelően (kereséssel/lapozással AJAX-frissítés után is).
+3. Widget Stílus fülön, "Egyéb azonosítók" szekcióban állíts be egy eltérő
+   ikon- és szövegszínt, illetve pill háttér/szegély/lekerekítés értéket —
+   látszódjon a különbség a badge-eken.
+4. Csak ikon módban egy olyan forrásnál, aminek NINCS betöltött ikon-fájlja
+   (pl. ha csak a 4 fentit töltötted be, egy ötödik, ismeretlen forrásnál),
+   a felirat jelenjen meg helyette, ne maradjon üres/névtelen gomb.
 
 ## Backlog — még nincs fázishoz kötve
 

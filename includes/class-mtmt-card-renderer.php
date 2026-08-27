@@ -27,16 +27,19 @@ final class Mtmt_Card_Renderer {
 	 *     @type bool   $show_sjr_badge  SJR-negyed badge megjelenjen-e.
 	 *     @type string $citation_style  'compact' vagy 'full' — compact esetben a forrás-sor és az
 	 *                                   egyéb-azonosító logó-gombok elmaradnak (CLAUDE.md §9.1 "hivatkozás-stílus").
+	 *     @type string $ext_id_badge_mode 'icon' | 'text' | 'both' (alapértelmezett) — az egyéb azonosítós
+	 *                                   gombok "Csak ikon"/"Csak szöveg"/"Ikon és szöveg" megjelenítése.
 	 * }
 	 * @return string Kész HTML.
 	 */
 	public static function render( array $publication, array $display_options = array() ): string {
 		$display_options = array_merge(
 			array(
-				'show_topic_area' => false,
-				'show_doi_link'   => true,
-				'show_sjr_badge'  => true,
-				'citation_style'  => 'full',
+				'show_topic_area'   => false,
+				'show_doi_link'     => true,
+				'show_sjr_badge'    => true,
+				'citation_style'    => 'full',
+				'ext_id_badge_mode' => 'both',
 			),
 			$display_options
 		);
@@ -82,7 +85,7 @@ final class Mtmt_Card_Renderer {
 		$out .= '</p>';
 
 		if ( $full ) {
-			$ext_ids_html = Mtmt_External_Id_Icons::render_buttons( $publication['external_ids'] ?? null );
+			$ext_ids_html = Mtmt_External_Id_Icons::render_buttons( $publication['external_ids'] ?? null, (string) $display_options['ext_id_badge_mode'] );
 			if ( '' !== $ext_ids_html ) {
 				$out .= $ext_ids_html; // Mtmt_External_Id_Icons már maga escape-eli a tartalmát.
 			}

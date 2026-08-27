@@ -49,11 +49,18 @@ final class Mtmt_External_Id_Icons {
 		),
 	);
 
+	/** Elfogadott `$mode` értékek — bármi más 'both'-ra esik vissza. */
+	private const MODES = array( 'icon', 'text', 'both' );
+
 	/**
 	 * @param string|null $external_ids_json Mtmt_Publication_Repository sorának `external_ids` mezője.
+	 * @param string      $mode              'icon' | 'text' | 'both' (alapértelmezett) — widget-szintű
+	 *                                       beállítás (Mtmt_Widget_Common_Controls). 'icon' módban, ha egy
+	 *                                       forráshoz nincs betöltött ikon-fájl, a felirat jelenik meg
+	 *                                       helyette (egy üres/névtelen gomb rosszabb lenne, mint egy felirat).
 	 * @return string Kész, escape-elt HTML (üres string, ha nincs egyéb azonosító).
 	 */
-	public static function render_buttons( ?string $external_ids_json ): string {
+	public static function render_buttons( ?string $external_ids_json, string $mode = 'both' ): string {
 		if ( ! $external_ids_json ) {
 			return '';
 		}
@@ -61,6 +68,10 @@ final class Mtmt_External_Id_Icons {
 		$ids = json_decode( $external_ids_json, true );
 		if ( ! is_array( $ids ) || empty( $ids ) ) {
 			return '';
+		}
+
+		if ( ! in_array( $mode, self::MODES, true ) ) {
+			$mode = 'both';
 		}
 
 		$buttons = array();
@@ -76,13 +87,31 @@ final class Mtmt_External_Id_Icons {
 			$label = $known['label'] ?? $source_name;
 			$icon  = $known ? self::get_icon_svg( $known['slug'] ) : null;
 
-			$buttons[] = sprintf(
-				'<a class="mtmt-ext-id-badge%3$s" href="%1$s" target="_blank" rel="noopener noreferrer" title="%2$s">%4$s%2$s</a>',
-				esc_url( $url ),
-				esc_html( $label ),
-				$icon ? ' mtmt-ext-id-badge-icon' : '',
-				$icon ? '<span class="mtmt-ext-id-icon">' . $icon . '</span>' : ''
-			);
+			$show_icon = null !== $icon && 'text' !== $mode;
+			$show_text = 'icon' !== $mode || null === $icon;
+			$icon_only = $show_icon && ! $show_text;
+
+			$classes = 'mtmt-ext-id-badge';
+			if ( $show_icon ) {
+				$classes .= ' mtmt-ext-id-badge-icon';
+			}
+			if ( $icon_only ) {
+				$classes .= ' mtmt-ext-id-badge-icon-only';
+			}
+
+			$inner = '';
+			if ( $show_icon ) {
+				$inner .= '<span class="mtmt-ext-id-icon">' . $icon . '</span>';
+			}
+			if ( $show_text ) {
+				$inner .= esc_html( $label );
+			}
+
+			// Ikon-only gombnál nincs látható szöveg -> aria-label pótolja
+			// (a title-attribútum önmagában nem minden screen readerben elég).
+			$aria = $icon_only ? ' aria-label="' . esc_attr( $label ) . '"' : '';
+
+			$buttons[] = '<a class="' . esc_attr( $classes ) . '" href="' . esc_url( $url ) . '" target="_blank" rel="noopener noreferrer" title="' . esc_attr( $label ) . '"' . $aria . '>' . $inner . '</a>';
 		}
 
 		if ( empty( $buttons ) ) {
@@ -128,7 +157,24 @@ final class Mtmt_External_Id_Icons {
 		// Az XML-prológ/DOCTYPE nem érvényes egy HTML-dokumentumba ágyazva.
 		$svg = preg_replace( '/<\?xml[^>]*\?>/i', '', $svg );
 		$svg = preg_replace( '/<!DOCTYPE[^>]*>/i', '', $svg );
+
+		// KRITIKUS (élesben betöltött ikonoknál talált hiba): néhány export
+		// (pl. Illustrator "Export as SVG") a színt NEM explicit fill="..."
+		// attribútumként adja a path-ra, hanem egy beágyazott <style> blokkban,
+		// class-szelektorral (pl. ".cls-2 { fill: #010101; }"). Egy ilyen, az
+		// elemre KÖZVETLENÜL illeszkedő szabály MINDIG felülírja az öröklött
+		// `fill: currentColor`-t (az öröklés a CSS-cascade leggyengébb tagja,
+		// bármelyik közvetlenül illeszkedő szabály megelőzi, függetlenül a
+		// specificitástól) — enélkül a javítás nélkül a widget ikon-szín
+		// beállítása látszólag hatástalan maradna ezekre a fájlokra, az ikon
+		// mindig az eredeti exportált színben (itt: közel fekete) jelenne meg.
+		$svg = preg_replace( '/<style\b[^>]*>.*?<\/style>/is', '', $svg );
 		$svg = preg_replace( '/\bfill="[^"]*"/i', '', $svg );
+		// Az így "üresen maradt" class/id/data-name attribútumok nem törnek el
+		// semmit (nincs mire hivatkozniuk), de több inline-olt ikon esetén
+		// (pl. egy publikációnak WoS ÉS Scopus azonosítója is van) elkerüljük
+		// az ismétlődő id-kat egy oldalon belül.
+		$svg = preg_replace( '/\s(?:class|id|data-name)="[^"]*"/i', '', $svg );
 		$svg = trim( $svg );
 
 		$cache[ $slug ] = $svg;

@@ -44,6 +44,7 @@
 		body.set( 'citation_style', widget.getAttribute( 'data-citation-style' ) || 'full' );
 		body.set( 'show_doi_link', widget.getAttribute( 'data-show-doi-link' ) === '1' ? '1' : '0' );
 		body.set( 'show_sjr_badge', widget.getAttribute( 'data-show-sjr-badge' ) === '1' ? '1' : '0' );
+		body.set( 'ext_id_badge_mode', widget.getAttribute( 'data-ext-id-badge-mode' ) || 'both' );
 		body.set( 'show_topic_area', widget.getAttribute( 'data-show-topic-area' ) === '1' ? '1' : '0' );
 		body.set( 'empty_state_text', widget.getAttribute( 'data-empty-text' ) || '' );
 		body.set( 'pagination_prev_label', widget.getAttribute( 'data-prev-label' ) || '' );

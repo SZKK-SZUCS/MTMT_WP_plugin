@@ -249,11 +249,12 @@
 .mtmt-ext-id-badge {
 	display: inline-block;
 	padding: 0.2em 0.65em;
-	border: 1px solid var(--mtmt-border);
-	border-radius: 6px;
+	border: 1px solid var(--mtmt-ext-id-border-color, var(--mtmt-border));
+	border-radius: var(--mtmt-ext-id-radius, 6px);
+	background: var(--mtmt-ext-id-bg-color, transparent);
 	font-size: 0.75em;
 	font-weight: 600;
-	color: var(--mtmt-muted);
+	color: var(--mtmt-ext-id-text-color, var(--mtmt-muted));
 	text-decoration: none;
 }
 
@@ -280,7 +281,22 @@
 .mtmt-ext-id-icon svg {
 	width: 1em;
 	height: 1em;
-	fill: currentColor;
+	fill: var(--mtmt-ext-id-icon-color, currentColor);
+}
+
+/* "Csak ikon" mód: nincs mellette felirat, ezért négyzetesebb, kicsit
+   nagyobb belső hely + ikon jár neki, hogy ne tűnjön aránytévesztettnek a
+   szöveges pillek mellett. A span-wrappert és a benne lévő svg-t is bővíteni
+   kell együtt, különben az svg kilógna a span fix méretű dobozából. */
+.mtmt-ext-id-badge-icon-only {
+	padding: 0.35em;
+	line-height: 0;
+}
+
+.mtmt-ext-id-badge-icon-only .mtmt-ext-id-icon,
+.mtmt-ext-id-badge-icon-only .mtmt-ext-id-icon svg {
+	width: 1.15em;
+	height: 1.15em;
 }
 
 .mtmt-pagination {

@@ -164,6 +164,21 @@ final class Mtmt_Widget_Topic_Publications extends \Elementor\Widget_Base {
 			)
 		);
 
+		$this->add_control(
+			'ext_id_badge_mode',
+			array(
+				'label'       => __( 'Egyéb azonosítók megjelenítése', 'mtmt-sync' ),
+				'type'        => \Elementor\Controls_Manager::SELECT,
+				'default'     => 'both',
+				'options'     => array(
+					'both' => __( 'Ikon és szöveg', 'mtmt-sync' ),
+					'icon' => __( 'Csak ikon', 'mtmt-sync' ),
+					'text' => __( 'Csak szöveg', 'mtmt-sync' ),
+				),
+				'description' => __( 'Ha egy forráshoz nincs betöltve ikon-fájl, "Csak ikon" módban is a felirat jelenik meg helyette.', 'mtmt-sync' ),
+			)
+		);
+
 		$this->end_controls_section();
 
 		$this->register_mtmt_text_controls(
@@ -244,6 +259,7 @@ final class Mtmt_Widget_Topic_Publications extends \Elementor\Widget_Base {
 		$citation_style      = ( 'compact' === $settings['citation_style'] ) ? 'compact' : 'full';
 		$show_doi_link       = 'yes' === $settings['show_doi_link'];
 		$show_sjr_badge      = 'yes' === $settings['show_sjr_badge'];
+		$ext_id_badge_mode   = in_array( $settings['ext_id_badge_mode'] ?? '', array( 'icon', 'text' ), true ) ? $settings['ext_id_badge_mode'] : 'both';
 
 		$search_placeholder = (string) $settings['search_placeholder'];
 		$year_tab_all_label = (string) $settings['year_tab_all_label'];
@@ -252,10 +268,11 @@ final class Mtmt_Widget_Topic_Publications extends \Elementor\Widget_Base {
 		$next_label         = (string) $settings['pagination_next_label'];
 
 		$display_options = array(
-			'show_topic_area' => $topic_areas_enabled,
-			'show_doi_link'   => $show_doi_link,
-			'show_sjr_badge'  => $show_sjr_badge,
-			'citation_style'  => $citation_style,
+			'show_topic_area'   => $topic_areas_enabled,
+			'show_doi_link'     => $show_doi_link,
+			'show_sjr_badge'    => $show_sjr_badge,
+			'citation_style'    => $citation_style,
+			'ext_id_badge_mode' => $ext_id_badge_mode,
 		);
 
 		$scope = array(
@@ -290,6 +307,7 @@ final class Mtmt_Widget_Topic_Publications extends \Elementor\Widget_Base {
 			data-citation-style="<?php echo esc_attr( $citation_style ); ?>"
 			data-show-doi-link="<?php echo $show_doi_link ? '1' : '0'; ?>"
 			data-show-sjr-badge="<?php echo $show_sjr_badge ? '1' : '0'; ?>"
+			data-ext-id-badge-mode="<?php echo esc_attr( $ext_id_badge_mode ); ?>"
 			data-show-topic-area="<?php echo $topic_areas_enabled ? '1' : '0'; ?>"
 			data-year="<?php echo esc_attr( (string) $initial_year ); ?>"
 			data-empty-text="<?php echo esc_attr( $empty_state_text ); ?>"

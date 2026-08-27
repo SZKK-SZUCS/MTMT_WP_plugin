@@ -61,10 +61,11 @@ final class Mtmt_Widget_Ajax {
 		);
 
 		$display_options = array(
-			'show_topic_area' => ! empty( $_POST['show_topic_area'] ),
-			'show_doi_link'   => ! empty( $_POST['show_doi_link'] ),
-			'show_sjr_badge'  => ! empty( $_POST['show_sjr_badge'] ),
-			'citation_style'  => ( isset( $_POST['citation_style'] ) && 'compact' === $_POST['citation_style'] ) ? 'compact' : 'full',
+			'show_topic_area'   => ! empty( $_POST['show_topic_area'] ),
+			'show_doi_link'     => ! empty( $_POST['show_doi_link'] ),
+			'show_sjr_badge'    => ! empty( $_POST['show_sjr_badge'] ),
+			'citation_style'    => ( isset( $_POST['citation_style'] ) && 'compact' === $_POST['citation_style'] ) ? 'compact' : 'full',
+			'ext_id_badge_mode' => ( isset( $_POST['ext_id_badge_mode'] ) && in_array( $_POST['ext_id_badge_mode'], array( 'icon', 'text' ), true ) ) ? $_POST['ext_id_badge_mode'] : 'both',
 		);
 
 		// A widget-példány Tartalom fülén szerkeszthető feliratok (Mtmt_Widget_Common_Controls) —

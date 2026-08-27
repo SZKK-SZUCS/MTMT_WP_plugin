@@ -193,5 +193,58 @@ trait Mtmt_Widget_Common_Controls {
 		);
 
 		$this->end_controls_section();
+
+		$this->start_controls_section(
+			'mtmt_style_ext_ids_section',
+			array(
+				'label' => __( 'Egyéb azonosítók (WoS/Scopus/…)', 'mtmt-sync' ),
+				'tab'   => \Elementor\Controls_Manager::TAB_STYLE,
+			)
+		);
+
+		$this->add_control(
+			'ext_id_icon_color',
+			array(
+				'label'     => __( 'Ikon szín', 'mtmt-sync' ),
+				'type'      => \Elementor\Controls_Manager::COLOR,
+				'selectors' => array( '{{WRAPPER}} .mtmt-widget' => '--mtmt-ext-id-icon-color: {{VALUE}};' ),
+			)
+		);
+		$this->add_control(
+			'ext_id_text_color',
+			array(
+				'label'     => __( 'Szöveg szín', 'mtmt-sync' ),
+				'type'      => \Elementor\Controls_Manager::COLOR,
+				'selectors' => array( '{{WRAPPER}} .mtmt-widget' => '--mtmt-ext-id-text-color: {{VALUE}};' ),
+			)
+		);
+		$this->add_control(
+			'ext_id_bg_color',
+			array(
+				'label'     => __( 'Pill háttérszín', 'mtmt-sync' ),
+				'type'      => \Elementor\Controls_Manager::COLOR,
+				'selectors' => array( '{{WRAPPER}} .mtmt-widget' => '--mtmt-ext-id-bg-color: {{VALUE}};' ),
+			)
+		);
+		$this->add_control(
+			'ext_id_border_color',
+			array(
+				'label'     => __( 'Pill szegély szín', 'mtmt-sync' ),
+				'type'      => \Elementor\Controls_Manager::COLOR,
+				'selectors' => array( '{{WRAPPER}} .mtmt-widget' => '--mtmt-ext-id-border-color: {{VALUE}};' ),
+			)
+		);
+		$this->add_responsive_control(
+			'ext_id_border_radius',
+			array(
+				'label'      => __( 'Pill lekerekítés', 'mtmt-sync' ),
+				'type'       => \Elementor\Controls_Manager::SLIDER,
+				'size_units' => array( 'px' ),
+				'range'      => array( 'px' => array( 'min' => 0, 'max' => 40 ) ),
+				'selectors'  => array( '{{WRAPPER}} .mtmt-widget' => '--mtmt-ext-id-radius: {{SIZE}}{{UNIT}};' ),
+			)
+		);
+
+		$this->end_controls_section();
 	}
 }

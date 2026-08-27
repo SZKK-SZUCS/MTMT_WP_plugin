@@ -19,8 +19,9 @@ tovább — semmi nem törik el, nincs kötelező elem ezen a listán.
 
 **Formátum-elvárás:**
 - **SVG**, lehetőleg `viewBox`-szal (nem fix `width`/`height`-tal), hogy tetszőleges méretben élesen skálázódjon.
-- **Egyszínű** ("monokróm") — a kód automatikusan eltávolítja az esetleges explicit `fill="..."` attribútumokat betöltéskor, hogy a CSS mindig felül tudja írni a színt (`fill: currentColor`) — tehát akkor is működik, ha az eredeti export egy fix fekete/szürke fill-lel jön, nem kell külön "clean" exportot csinálni.
+- **Egyszínű** ("monokróm") — a kód automatikusan eltávolítja az esetleges explicit `fill="..."` attribútumokat ÉS a beágyazott `<style>`/class-alapú fill-szabályokat (pl. Illustrator "Export as SVG" tipikus `.cls-1 { fill: #010101; }` mintája) betöltéskor, hogy a CSS mindig felül tudja írni a színt (`fill: currentColor`, ill. a widget "Ikon szín" beállítása) — tehát akkor is működik, ha az eredeti export egy fix fekete/szürke fill-lel jön, nem kell külön "clean" exportot csinálni.
 - Nem kell base64/adatURI, sima nyers SVG-fájl elég.
+- **A fájlnév PONTOSAN kisbetűs legyen** (`wos.svg`, nem `WoS.svg`) — Windows-fejlesztői gépen a case-insensitive fájlrendszer miatt egy hibásan nagybetűs fájlnév is működni LÁTSZIK, de az éles (Linux) szerveren a `file_exists()` case-sensitive, és a fájl csendben nem töltődik be (visszaesik a feliratos pill-re, hiba nélkül — ezért nem esik le azonnal, csak élesben derül ki).
 
 **Ha új forrás bukkanna fel** (amit az MTMT ezután ad vissza, és most nincs a
 fenti listában): a kód akkor is működik — a nyers `source.name`-et feliratos

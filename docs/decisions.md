@@ -828,3 +828,50 @@ set_areas_for_publication()`/`delete()`, és EGYSZER egy teljes
     Regresszió: 3 új assertion (`test-activator.php`) — mind az 5 tábla
     sikeres létrehozása esetén az opció beállítódik, bármelyik tábla
     hiánya esetén NEM.
+91. **Betöltött egyéb-azonosítós SVG-ikonok: hiba a színezhetőségben,
+    javítva + widget-vezérlők a megjelenítési módhoz/színekhez** (megrendelői
+    kérés: a betöltött WoS/Scopus/SZTAKI/PubMed ikonok után "legyen
+    beállítható: Csak ikon; Csak szöveg; Mindkettő, ezen felül ikon szín,
+    szöveg szín, pill dizájn").
+    - **Fájlnév-hiba**: a beszerzett fájlok `WoS.svg`/`Scopus.svg`/
+      `Sztaki.svg`/`PubMed.svg` néven érkeztek, a kód viszont kisbetűs
+      slug-ot vár (`wos.svg` stb., `docs/external-id-icons.md`). Windows-on
+      ez a case-insensitive fájlrendszer miatt csendben "működni látszott"
+      volna, élesben (Linux) viszont a `file_exists()` case-sensitive, és a
+      fájl némán nem töltődött volna be. Átnevezve kisbetűsre.
+    - **Színezhetőségi hiba**: mind a 4 fájl (jellegzetes Illustrator "Export
+      as SVG" minta) a színt NEM `fill="..."` attribútumként adja a path-ra,
+      hanem egy beágyazott `<style>` blokkban, class-szelektorral (pl.
+      `.cls-2 { fill: #010101; }`). Egy ilyen, az elemre KÖZVETLENÜL
+      illeszkedő CSS-szabály MINDIG felülírja az öröklött `fill:
+      currentColor`-t (az öröklés a cascade leggyengébb tagja, bármelyik
+      közvetlen találat megelőzi, specificitástól függetlenül) — a korábbi
+      `get_icon_svg()` csak explicit `fill="..."` attribútumot távolított
+      el, ezt a mintát nem kezelte, tehát az ikon-szín widget-beállítás
+      LÁTHATATLAN maradt volna ezekre a fájlokra (mindig az eredeti,
+      közel fekete export-szín jelent volna meg). Javítás: a teljes
+      beágyazott `<style>` blokk (és a rajta lógó `class`/`id`/`data-name`
+      attribútumok) eltávolítása betöltéskor, így a szín kizárólag a külső
+      CSS-től (`currentColor`, ill. az új "Ikon szín" widget-beállítás)
+      függ.
+    - **Megjelenítési mód** (`Mtmt_External_Id_Icons::render_buttons()` új
+      `$mode` paramétere, `icon`/`text`/`both`, alapértelmezett `both` =
+      korábbi viselkedés): `icon` módban, ha egy forráshoz NINCS betöltött
+      ikon-fájl, a felirat jelenik meg helyette (egy néma/üres gomb rosszabb
+      lenne, mint egy felirat) — ikon-only badge-nél `aria-label` pótolja a
+      hiányzó látható szöveget (akadálymentesség). Widget Tartalom fülön
+      SELECT control (`ext_id_badge_mode`), ugyanazon a mintán, mint a
+      meglévő `citation_style`/`show_doi_link`/`show_sjr_badge` — mindkét
+      widgetben duplikálva (nem trait, mert widget-specifikus Tartalom-mező,
+      ugyanúgy mint a szomszédai), AJAX-fragment-újratöltésnél is átadva
+      (`data-ext-id-badge-mode` attribútum -> JS -> `$_POST` -> whitelist).
+    - **Stílus-vezérlők** (`Mtmt_Widget_Common_Controls::register_mtmt_style_controls()`,
+      új "Egyéb azonosítók" Style-szekció): ikon szín, szöveg szín, pill
+      háttérszín, pill szegély szín, pill lekerekítés — mind CSS-változón
+      (`--mtmt-ext-id-*`) keresztül, ugyanaz a minta, mint a meglévő
+      `--mtmt-accent`/`--mtmt-border` stb.
+    Regresszió: `test-ext-id-icons.php` 6 -> 16 assertion (a WoS-fixture
+    átírva a valós class/style-alapú mintára, hogy a fix ténylegesen
+    lefedve legyen; új esetek: `text`/`icon`/érvénytelen mód, `<style>`/
+    `class=`/`fill=` teljes hiánya a kimenetből). Teljes teszt-szuit
+    (192 assertion) zöld, repo-szintű `php -l` lint tiszta.
