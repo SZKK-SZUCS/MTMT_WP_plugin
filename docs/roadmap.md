@@ -269,9 +269,9 @@ widget-design.md szerint működik.
     (pl. "Kiemelő szín", "Kártya-cím" tipográfia) — látszódjon a változás a
     frontenden (kiemelő szín pl. az aktív év-fülön/hover-en, kártya-cím betűtípus/méret).
 
-## 🔜 Fázis 6 — GitHub + PUC
+## ✅ Fázis 6 — GitHub + PUC
 
-**KÓD KÉSZ, ÉLES ELLENŐRZÉS MÉG NEM TÖRTÉNT.** PUC v5.7 bevendorolva
+**KÉSZ, mergelve (PR #5), 0.6.0-ban kiadva.** PUC v5.7 bevendorolva
 (`lib/plugin-update-checker/`, GitHub-ról letöltve, nem git-almodulként —
 `docs/decisions.md` #61), inicializálva `mtmt-sync.php`-ban, `is_admin()`
 mögé kötve (frontendnek nincs köze a frissítés-ellenőrzéshez). Repo publikus
@@ -280,16 +280,18 @@ mögé kötve (frontendnek nincs köze a frissítés-ellenőrzéshez). Repo publ
 
 *Kész, ha:* egy teszt-oldal (pl. a Local site) a Pluginok oldalon frissülést
 lát, amikor egy ÚJABB verziójú GitHub Release kerül ki, mint ami a site-on
-fut — ehhez a teszthez egy KÖVETKEZŐ release szükséges (a jelenlegi release
-kiadásakor a site még ugyanazt a verziót futtatja, amit a PUC lát, tehát nem
-mutatna frissítést — ez nem hiba, csak a teszt sorrendje).
+fut. A 0.6.0 kiadásakor a PUC-kód maga is 0.6.0-t futtat, tehát ekkor még nem
+mutatna frissítést (ez nem hiba, csak a teszt sorrendje) — a tényleges
+"látja-e" próba a KÖVETKEZŐ fázis/javítás lezárásakor, a következő
+verzióbump+release-nél adódik magától, a rendes munkamenet részeként.
 
 **Éles ellenőrzéshez** (Local site):
 1. Aktiváld/frissítsd a plugint a Local site-on erre a verzióra.
 2. wp-admin → Pluginok — NE legyen PHP hiba/fatal a plugin-listánál (a PUC
    betöltése ne törje el az oldalt Elementor/egyéb pluginok mellett sem).
-3. Egy KÖVETKEZŐ verzióbump + GitHub Release után: Pluginok oldalon jelenjen
-   meg az "Új verzió érhető el" sáv, "View version X.Y.Z details" linkkel.
+3. A KÖVETKEZŐ verzióbump + GitHub Release után (a következő fázis/javítás
+   lezárásakor): Pluginok oldalon jelenjen meg az "Új verzió érhető el" sáv,
+   "View version X.Y.Z details" linkkel.
 
 ## Fázis 7 (opcionális) — nice-to-have-ek
 
