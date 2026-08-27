@@ -6,8 +6,20 @@
  *
  * A widget-osztályok `\Elementor\Widget_Base`-t terjesztenek ki — ezeket a
  * fájlokat NEM szabad betölteni, ha az Elementor nincs aktiválva (fatal hibát
- * adna). Ezért mindent az `elementor/loaded` action mögé kötünk: ha az
- * Elementor nincs jelen, ez az action sosem fut le, tehát a `require`-ek sem.
+ * adna). A védelem viszont NEM az `elementor/loaded` action, hanem az, hogy a
+ * `require`-ek kizárólag a `elementor/widgets/register` callback BELSEJÉBEN
+ * futnak — ez az action Elementor nélkül sosem tüzel, tehát a require-ek sem.
+ *
+ * FONTOS (élesben derült ki, docs/decisions.md): az `elementor/widgets/register`
+ * és `elementor/elements/categories_registered` akciókat NEM szabad egy
+ * `elementor/loaded`-re akasztott `boot()` mögé rejteni — az Elementor a
+ * Widgets_Manager/Elements_Manager saját inicializálása során, MÉG az
+ * `elementor/loaded` ténylegesen kitüzelése ELŐTT elsüti ezeket. Ha a mi
+ * `add_action('elementor/widgets/register', ...)` hívásunk csak az
+ * `elementor/loaded` callbackjén belül fut le, már elkéstünk — az Elementor
+ * addigra végzett a widget-regisztrációs körrel, a mi widgetünk sosem kerül be.
+ * Ez pont az official Elementor-dokumentáció mintája: az `elementor/widgets/register`-t
+ * mindig FELTÉTEL NÉLKÜL, közvetlenül a plugin-betöltéskor kell felakasztani.
  *
  * @package Mtmt_Sync
  */
@@ -15,22 +27,17 @@
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Csak akkor csinál bármit, ha az Elementor ténylegesen be van töltve.
+ * Csak akkor csinál bármit, ha az Elementor ténylegesen be van töltve — de ezt
+ * magától a hook-rendszertől "kapja": Elementor nélkül a lenti akciók sosem
+ * tüzelnek, tehát a callback-ek sosem futnak le.
  */
 final class Mtmt_Elementor_Loader {
 
 	/**
-	 * Regisztrálja az `elementor/loaded` horgot — magát a widget-regisztrációt
-	 * csak EZUTÁN, ha az Elementor tényleg fut.
+	 * Feltétel nélkül, közvetlenül a plugin-betöltéskor hívandó — lásd az
+	 * osztály-PHPDoc-ban a hook-sorrendi indoklást.
 	 */
 	public function init(): void {
-		add_action( 'elementor/loaded', array( $this, 'boot' ) );
-	}
-
-	/**
-	 * Csak Elementor jelenlétében fut.
-	 */
-	public function boot(): void {
 		add_action( 'elementor/elements/categories_registered', array( $this, 'register_category' ) );
 		add_action( 'elementor/widgets/register', array( $this, 'register_widgets' ) );
 		add_action( 'elementor/frontend/after_enqueue_styles', array( $this, 'enqueue_assets' ) );

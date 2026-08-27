@@ -435,3 +435,18 @@ lásd ott. Az alábbiak az eziutáni implementációs döntések.
     "minden év" opciót nem említ explicit, de hasznos kiegészítésnek tűnt (pl.
     keresésnél ne kelljen évenként külön kattintani). Élő visszajelzés után
     törölhető, ha a megrendelő nem akarja.
+
+58. **JAVÍTVA élő teszt után: a widgetek nem jelentek meg az Elementor
+    widget-panelen.** Az eredeti `Mtmt_Elementor_Loader` az `elementor/widgets/
+    register` és `elementor/elements/categories_registered` felakasztását egy
+    `elementor/loaded`-re kötött `boot()` mögé rejtette. Ez hook-sorrendi hiba:
+    az Elementor a Widgets_Manager/Elements_Manager saját inicializálása
+    során, MÉG az `elementor/loaded` tényleges kitüzelése ELŐTT elsüti ezeket
+    az akciókat — mire a mi `boot()`-unk lefutott volna, az Elementor már
+    végzett a widget-regisztrációs körrel, a mi `add_action()`-jeink elkéstek,
+    soha nem futottak le. A javítás: `elementor/widgets/register` (és a másik
+    két akció) feltétel nélkül, közvetlenül a plugin-betöltéskor felakasztva —
+    ez az Elementor saját fejlesztői dokumentációjának mintája is. A védelem
+    (ne töltődjön be `\Elementor\Widget_Base`-t kiterjesztő fájl Elementor
+    nélkül) továbbra is megvan: a `require_once`-ok a callback BELSEJÉBEN
+    maradtak, ami Elementor nélkül sosem fut le, mert maga az akció sosem tüzel.

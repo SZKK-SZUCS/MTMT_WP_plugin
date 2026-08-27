@@ -124,9 +124,9 @@ function mtmt_handle_admin_actions(): void {
 }
 add_action( 'admin_init', 'mtmt_handle_admin_actions' );
 
-// Elementor-widgetek (Fázis 5) — a loader maga is ellenőrzi az Elementor
-// jelenlétét (`elementor/loaded` mögé kötve), itt bátran példányosítható,
-// Elementor nélkül egyszerűen sosem fut le a boot() (CLAUDE.md §2).
+// Elementor-widgetek (Fázis 5) — feltétel nélkül hívható, Elementor nélkül a
+// loader belsejében felakasztott `elementor/*` action-ök egyszerűen sosem
+// tüzelnek (lásd class-mtmt-elementor-loader.php PHPDoc, CLAUDE.md §2).
 ( new Mtmt_Elementor_Loader() )->init();
 
 /**
