@@ -221,7 +221,7 @@ trait Mtmt_Widget_Common_Controls {
 				),
 				'default'    => array(
 					'unit' => 'px',
-					'size' => 16,
+					'size' => 20,
 				),
 				'selectors'  => array( '{{WRAPPER}} .mtmt-widget' => '--mtmt-ext-id-icon-size: {{SIZE}}{{UNIT}};' ),
 			)

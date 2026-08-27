@@ -489,8 +489,15 @@ a később pótolt ResearchGate-hez #92.
   kicsik — a korábbi fix `1em` a badge örökölt, kicsi `font-size`-lánca
   miatt alig látszott. Az ikon-méret is CSS-változóra (`--mtmt-ext-id-icon-size`)
   került, widget Stílus fülön reszponzív SLIDER-rel állítható (px/em,
-  alapérték 16px) — MINDKÉT módban (ikon+szöveg / csak ikon) ugyanazt az
-  egy beállítást követi (docs/decisions.md #93).
+  alapérték 20px — a megrendelő kérésére 16px-ről emelve) — MINDKÉT
+  módban (ikon+szöveg / csak ikon) ugyanazt az egy beállítást követi
+  (docs/decisions.md #93-94).
+- **Kártya-kinézet felfrissítés + visszafogott animáció** (megrendelői
+  visszajelzés: "nagyon összecsúsznak az adatok"): a badge-ek helytelen
+  `vertical-align`-je és a szövegblokkok közti túl szoros margók javítva,
+  kártya hover-emelés + kép-zoom + finom belépő fade-in animáció, minden
+  `prefers-reduced-motion: reduce`-dal kikapcsolható. Részletek:
+  docs/decisions.md #94.
 
 12 új assertion (`test-ext-id-icons.php`, 6→18), teljes suite (194
 assertion) zöld, lint tiszta.
@@ -513,6 +520,14 @@ assertion) zöld, lint tiszta.
 4. Csak ikon módban egy olyan forrásnál, aminek NINCS betöltött ikon-fájlja
    (pl. ha csak a 4 fentit töltötted be, egy ötödik, ismeretlen forrásnál),
    a felirat jelenjen meg helyette, ne maradjon üres/névtelen gomb.
+5. Nézd meg egy kártyalistát — a szerzők/meta-sor/badge-ek között legyen
+   érdemi levegő, a SJR-/egyéb-azonosító-badge-ek ne tűnjenek "csúszottnak"
+   a szöveghez képest.
+6. Vidd az egeret egy kártyára — finoman emelkedjen (árnyék nő), az
+   indexkép enyhén nagyítson; kattints egy év-fülre/keress rá valamire —
+   az újonnan betöltött kártyák finoman "beússzanak" (fade-in). Rendszer
+   szinten kapcsold be a "csökkentett mozgás" (reduced motion)
+   beállítást (OS/böngésző szinten) — ugyanezek az animációk maradjanak ki.
 
 ## Backlog — még nincs fázishoz kötve
 

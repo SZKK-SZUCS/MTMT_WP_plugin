@@ -904,3 +904,40 @@ set_areas_for_publication()`/`delete()`, és EGYSZER egy teljes
     unit-teszt (Elementor Style-tab control-regisztráció, a kódbázisban
     eddig sem volt erre harness — a Stílus-fül controlok élő ellenőrzéssel
     validáltak, lásd docs/roadmap.md).
+94. **Ikon-méret alapérték 16px→20px + kártya-kinézet felfrissítés +
+    "visszafogott modern" animáció** (megrendelői kérés: "legyen az alap
+    20 px az ikonoknak... a widgetek kinézetét javítsd fel, most nagyon
+    összecsúsznak az adatok... alapvető visszafogott modern animációt
+    rakj rá"). Az "összecsúszás" fő okai, kód-szinten átvizsgálva:
+    - A `.mtmt-badge`/`.mtmt-ext-id-badge` inline-block elemek nem kaptak
+      `vertical-align`-et, ezért baseline-hoz igazodtak — a körülöttük futó
+      normál szöveghez képest vizuálisan "csúszottnak" tűntek. Javítva:
+      `vertical-align: middle` mindkettőn.
+    - A kártyán belüli szövegblokkok (szerzők, szakmai terület, meta-sor,
+      egyéb-azonosítók) közötti függőleges margó túl szoros volt
+      (`0.3-0.4em`) — megemelve `0.45-0.7em`-re, plusz a meta-sor és a
+      terület-badge-ek sorköze (`line-height`) `2`-re nőtt, hogy tördelt
+      (2 sorba törő) állapotban is legyen levegő a sorok között.
+    - A kártya belső paddingje/gap-je (`1em`/`1.25em` → `1.25em`/`1.5em`)
+      és a lista-elemek közti tér (`1em` → `1.5em`) is nőtt.
+    - Ez NEM egy widget-beállítás, hanem közvetlenül a `widget.css`
+      alapértéke — nincs hozzá Elementor-control, mert ez a kód-szintű
+      alap-rendezettséget javítja, nem egy testreszabható stílusjegy.
+    - **Animáció** (mind `transition: 0.15-0.4s ease`, tehát valóban
+      "visszafogott", nem feltűnő): kártya hover-emelés (`translateY(-3px)`
+      + megnövelt árnyék) + kép finom zoom (`scale(1.06)`) hoveren; kártyák
+      finom fade-in+slide-up belépő animációja (`@keyframes mtmt-card-in`),
+      ami MINDEN AJAX-fragment-cserénél újra lejátszódik (a böngésző új
+      DOM-elemként kezeli a becserélt kártyákat) — az első 8 kártyára
+      enyhe `nth-child` stagger-rel (0.02s lépésekben), hogy ne váljon
+      zajossá nagy listánál; keresőmező/terület-szűrő fókusz-gyűrű
+      (`color-mix()`-szel a widget kiemelő-színéhez igazodva, nem
+      hardcode-olt szín); év-fül/lapozó-gomb/egyéb-azonosító-badge hover-
+      átmenetek.
+    - **Akadálymentesség**: teljes `@media (prefers-reduced-motion: reduce)`
+      blokk a végén — minden transition/animation kikapcsolva, a
+      hover-transform-ok null-ozva, azoknak a látogatóknak, akik rendszer
+      szinten kikapcsolták a mozgást.
+    Nincs hozzá unit-teszt (tisztán CSS-változás, PHP-oldali logika nem
+    érintett) — a teljes PHP teszt-szuit (194 assertion) és a repo-szintű
+    `php -l` lint ettől függetlenül ellenőrizve, változatlanul zöld.

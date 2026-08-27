@@ -17,7 +17,7 @@
 }
 
 .mtmt-widget-header {
-	margin-bottom: 1.25em;
+	margin-bottom: 1.6em;
 }
 
 .mtmt-eyebrow {
@@ -48,6 +48,14 @@
 	font-size: 0.95em;
 	min-width: 220px;
 	flex: 1 1 220px;
+	transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.mtmt-search-input:focus,
+.mtmt-area-filter:focus {
+	outline: none;
+	border-color: var(--mtmt-accent);
+	box-shadow: 0 0 0 3px color-mix(in srgb, var(--mtmt-accent) 18%, transparent);
 }
 
 .mtmt-year-tabs {
@@ -67,6 +75,7 @@
 	font-size: 0.95em;
 	cursor: pointer;
 	color: var(--mtmt-muted);
+	transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
 
 .mtmt-year-tab:hover {
@@ -83,7 +92,8 @@
 .mtmt-widget-list {
 	display: flex;
 	flex-direction: column;
-	gap: 1em;
+	gap: 1.5em;
+	transition: opacity 0.2s ease;
 }
 
 .mtmt-widget-empty {
@@ -94,12 +104,14 @@
 
 .mtmt-pub-card {
 	display: flex;
-	gap: 1.25em;
-	padding: 1em;
+	gap: 1.5em;
+	padding: 1.25em;
 	border: 1px solid var(--mtmt-border);
-	border-radius: 10px;
+	border-radius: 12px;
 	position: relative;
-	transition: box-shadow 0.15s ease, border-color 0.15s ease;
+	background: #fff;
+	transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+	animation: mtmt-card-in 0.4s ease both;
 }
 
 .mtmt-pub-card[data-href] {
@@ -108,8 +120,34 @@
 
 .mtmt-pub-card[data-href]:hover,
 .mtmt-pub-card[data-href]:focus-within {
-	box-shadow: 0 2px 12px rgba(20, 30, 45, 0.08);
+	transform: translateY(-3px);
+	box-shadow: 0 10px 24px rgba(20, 30, 45, 0.1);
 	border-color: var(--mtmt-accent);
+}
+
+/* Visszafogott belépő-stagger az elsö nehány kártyára — a lista minden
+   AJAX-fragment-cserénél újra lejátszódik (a böngésző új DOM-elemekként
+   kezeli a becserélt kártyákat), ami finom visszajelzés arra, hogy a
+   lista frissült. Csak az elsö 8 kártyára, hogy nagy listáknál se váljon
+   lassúvá/zajossá. */
+.mtmt-widget-list .mtmt-pub-card:nth-child(1) { animation-delay: 0.02s; }
+.mtmt-widget-list .mtmt-pub-card:nth-child(2) { animation-delay: 0.05s; }
+.mtmt-widget-list .mtmt-pub-card:nth-child(3) { animation-delay: 0.08s; }
+.mtmt-widget-list .mtmt-pub-card:nth-child(4) { animation-delay: 0.11s; }
+.mtmt-widget-list .mtmt-pub-card:nth-child(5) { animation-delay: 0.14s; }
+.mtmt-widget-list .mtmt-pub-card:nth-child(6) { animation-delay: 0.17s; }
+.mtmt-widget-list .mtmt-pub-card:nth-child(7) { animation-delay: 0.2s; }
+.mtmt-widget-list .mtmt-pub-card:nth-child(8) { animation-delay: 0.23s; }
+
+@keyframes mtmt-card-in {
+	from {
+		opacity: 0;
+		transform: translateY(8px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
 }
 
 .mtmt-pub-card-media {
@@ -117,7 +155,7 @@
 	flex: 0 0 180px;
 	width: 180px;
 	height: 110px;
-	border-radius: 6px;
+	border-radius: 8px;
 	overflow: hidden;
 	background: var(--mtmt-bg-soft);
 }
@@ -128,6 +166,7 @@
 	object-fit: cover;
 	display: block;
 	margin: 0;
+	transition: transform 0.4s ease;
 }
 
 .mtmt-pub-card-css-placeholder {
@@ -138,6 +177,12 @@
 	position: relative;
 	display: flex;
 	align-items: flex-end;
+	transition: transform 0.4s ease;
+}
+
+.mtmt-pub-card[data-href]:hover .mtmt-pub-card-img,
+.mtmt-pub-card[data-href]:hover .mtmt-pub-card-css-placeholder {
+	transform: scale(1.06);
 }
 
 .mtmt-pub-card-css-placeholder span {
@@ -165,7 +210,7 @@
 }
 
 .mtmt-pub-card-title {
-	margin: 0 0 0.3em;
+	margin: 0 0 0.45em;
 	font-size: 1.05em;
 	line-height: 1.35;
 }
@@ -173,25 +218,30 @@
 .mtmt-pub-card-title a {
 	color: inherit;
 	text-decoration: none;
+	transition: color 0.15s ease;
 }
 
 .mtmt-pub-card[data-href]:hover .mtmt-pub-card-title a {
+	color: var(--mtmt-accent);
 	text-decoration: underline;
 }
 
 .mtmt-pub-card-authors {
-	margin: 0 0 0.4em;
+	margin: 0 0 0.55em;
 	color: var(--mtmt-muted);
 	font-size: 0.92em;
+	line-height: 1.5;
 }
 
 .mtmt-pub-card-topic-areas {
-	margin: 0 0 0.4em;
+	margin: 0 0 0.55em;
+	line-height: 2;
 }
 
 .mtmt-pub-card-meta {
-	margin: 0 0 0.4em;
+	margin: 0 0 0.55em;
 	font-size: 0.9em;
+	line-height: 2;
 	color: var(--mtmt-muted);
 }
 
@@ -205,14 +255,15 @@
 
 .mtmt-pub-card-doi {
 	display: inline-block;
-	margin-left: 0.3em;
+	margin-left: 0.4em;
 	font-size: 0.85em;
 	color: var(--mtmt-muted);
 }
 
 .mtmt-badge {
 	display: inline-block;
-	padding: 0.2em 0.6em;
+	vertical-align: middle;
+	padding: 0.25em 0.7em;
 	border-radius: 999px;
 	font-size: 0.75em;
 	font-weight: 600;
@@ -221,10 +272,17 @@
 	color: #33404f;
 }
 
+/* A badge-ek inline-block elemként alapból baseline-hoz igazodnának, ami a
+   körülöttük futó normál szöveghez képest "csúszottnak" tűnik — middle
+   igazítás oldja meg. */
+.mtmt-pub-card-meta .mtmt-badge {
+	margin-left: 0.4em;
+}
+
 .mtmt-badge-topic-area {
 	background: #eef2ff;
 	color: #3b4ba0;
-	margin-right: 0.3em;
+	margin-right: 0.35em;
 }
 
 .mtmt-badge-color-0 { background: #e7f0fb; color: #205081; }
@@ -242,13 +300,15 @@
 .mtmt-ext-ids {
 	display: flex;
 	flex-wrap: wrap;
-	gap: 0.4em;
-	margin-top: 0.5em;
+	align-items: center;
+	gap: 0.5em;
+	margin-top: 0.7em;
 }
 
 .mtmt-ext-id-badge {
 	display: inline-block;
-	padding: 0.2em 0.65em;
+	vertical-align: middle;
+	padding: 0.25em 0.7em;
 	border: 1px solid var(--mtmt-ext-id-border-color, var(--mtmt-border));
 	border-radius: var(--mtmt-ext-id-radius, 6px);
 	background: var(--mtmt-ext-id-bg-color, transparent);
@@ -256,6 +316,7 @@
 	font-weight: 600;
 	color: var(--mtmt-ext-id-text-color, var(--mtmt-muted));
 	text-decoration: none;
+	transition: color 0.15s ease, border-color 0.15s ease, background-color 0.15s ease;
 }
 
 .mtmt-ext-id-badge:hover {
@@ -275,13 +336,13 @@
 /* Az ikon-méret widget-szinten állítható (Stílus fül, "Egyéb azonosítók"
    szekció, "Ikon méret" control) — a korábbi fix 1em az ősök (badge
    0.75em-es font-size-a stb.) miatt gyakorlatilag alig látható méretre
-   zsugorodott. Az alapérték (16px) csak biztonsági tartalék, Elementorban
+   zsugorodott. Az alapérték (20px) csak biztonsági tartalék, Elementorban
    mindig konkrét értéket kap a widget wrapperére. */
 .mtmt-ext-id-icon {
 	display: inline-flex;
 	flex: 0 0 auto;
-	width: var(--mtmt-ext-id-icon-size, 16px);
-	height: var(--mtmt-ext-id-icon-size, 16px);
+	width: var(--mtmt-ext-id-icon-size, 20px);
+	height: var(--mtmt-ext-id-icon-size, 20px);
 }
 
 .mtmt-ext-id-icon svg {
@@ -314,6 +375,7 @@
 	padding: 0.5em 1em;
 	cursor: pointer;
 	font-size: 0.9em;
+	transition: border-color 0.15s ease, color 0.15s ease, background-color 0.15s ease;
 }
 
 .mtmt-page-btn:hover {
@@ -339,5 +401,32 @@
 		width: 100%;
 		flex-basis: auto;
 		height: 150px;
+	}
+}
+
+/* "Visszafogott, modern animáció" (megrendelői kérés) — de aki a rendszer
+   szintjén kikapcsolta a mozgást, annak ne fusson se a hover-emelés/kép-
+   zoom, se a belépő fade-in/stagger. */
+@media (prefers-reduced-motion: reduce) {
+	.mtmt-pub-card,
+	.mtmt-pub-card-img,
+	.mtmt-pub-card-css-placeholder,
+	.mtmt-pub-card-title a,
+	.mtmt-year-tab,
+	.mtmt-ext-id-badge,
+	.mtmt-page-btn,
+	.mtmt-search-input,
+	.mtmt-area-filter,
+	.mtmt-widget-list {
+		transition: none !important;
+		animation: none !important;
+	}
+	.mtmt-pub-card[data-href]:hover,
+	.mtmt-pub-card[data-href]:focus-within {
+		transform: none;
+	}
+	.mtmt-pub-card[data-href]:hover .mtmt-pub-card-img,
+	.mtmt-pub-card[data-href]:hover .mtmt-pub-card-css-placeholder {
+		transform: none;
 	}
 }
