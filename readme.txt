@@ -4,7 +4,7 @@ Tags: mtmt, publications, elementor, publikaciok, tudomanyos
 Requires at least: 6.4
 Tested up to: 6.7
 Requires PHP: 8.1
-Stable tag: 0.12.0
+Stable tag: 0.13.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -103,6 +103,21 @@ egyikkel sem, csak a látogató-vezérelt alapbeállítással) működik, tiszt�
 üzemeltetési döntés, telepítésenként eltérhet.
 
 == Changelog ==
+
+= 0.13.0 =
+* Új widget-beállítás: "Rendezés" (Legújabb elöl / Legrégebbi elöl / Cím
+  szerint A–Z / SJR-negyed szerint) mindkét Elementor widgeten,
+  alapértelmezés "Legújabb elöl". A beállított sorrend keresés, év-váltás
+  és lapozás után is érvényben marad. A besorolás nélküli tételek
+  SJR-rendezésnél mindig a lista végére kerülnek.
+* A moderációs lista mostantól megjegyzi az URL-ben, hol jársz (oldalszám,
+  szűrők, rendezés) — egy rekord szerkesztéséből kilépve ugyanarra az
+  oldalra és ugyanazzal a szűréssel térsz vissza, nem az első oldalra.
+* Az "SJR" oszlop a moderációs listán rendezhető lett; a "Szűrés" gomb
+  megtartja az aktív rendezést.
+* Javítva: a lapozás ritkán megismételhetett vagy kihagyhatott tételeket,
+  ha több publikációnak azonos volt a megjelenési éve — a sorrend
+  mostantól minden esetben egyértelmű.
 
 = 0.12.0 =
 * Admin-felület minden szövege átírva egyszerűbb, köznyelvi
@@ -267,6 +282,13 @@ egyikkel sem, csak a látogató-vezérelt alapbeállítással) működik, tiszt�
 * Kezdeti bootstrap: plugin-header, aktivátor (tábla-migráció dbDelta-val).
 
 == Upgrade Notice ==
+
+= 0.13.0 =
+Widget-rendezés választó (alapból "legújabb elöl"), a moderációs lista
+megjegyzi az oldalszámot/szűrőt szerkesztés közben, és egy lapozási hiba
+javítva. A plugin továbbra is 0.x verziószámon fejlődik — 1.0.0-t csak
+akkor kap, ha a megrendelő explicit jóváhagyja, hogy a rendszer kész
+(lásd CLAUDE.md §10.2).
 
 = 0.12.0 =
 Admin-felület szövegei egyszerűsítve, egy hibás email-link javítva. A
