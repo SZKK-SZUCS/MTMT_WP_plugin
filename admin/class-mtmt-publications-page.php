@@ -116,11 +116,14 @@ final class Mtmt_Publications_Page {
 
 		$this->repository->set_status( $id, $status_map[ $action ], get_current_user_id() );
 
+		// A sor-művelet linkje már hordozza a lista nézet-állapotát (szűrők,
+		// rendezés, oldalszám) — csak a művelet-specifikus kulcsokat vesszük ki,
+		// így a jóváhagyás/elutasítás után is ugyanarra az oldalra térünk vissza.
 		wp_safe_redirect(
 			add_query_arg(
 				'mtmt_notice',
 				'status_updated',
-				remove_query_arg( array( 'action', 'id', '_wpnonce' ) )
+				remove_query_arg( array( 'action', 'id', '_wpnonce', 'mtmt_notice' ) )
 			)
 		);
 		exit;
@@ -161,13 +164,16 @@ final class Mtmt_Publications_Page {
 			$this->repository->bulk_set_status( $ids, $status, get_current_user_id() );
 		}
 
-		wp_safe_redirect(
-			add_query_arg(
-				'mtmt_notice',
-				'bulk_updated',
-				remove_query_arg( array( 'action', 'action2', 'id', '_wpnonce', '_wp_http_referer' ) )
-			)
-		);
+		// A tömeges művelet GET-form-ja nem küldi vissza az oldalszámot; a
+		// `_wp_http_referer` viszont a lista teljes URL-jét tartalmazza (szűrők
+		// + rendezés + oldalszám), ezért oda térünk vissza.
+		$sendback = wp_get_referer();
+		if ( ! $sendback ) {
+			$sendback = remove_query_arg( array( 'action', 'action2', 'id', '_wpnonce', '_wp_http_referer', 'filter_action' ) );
+		}
+		$sendback = remove_query_arg( array( 'action', 'action2', 'id', '_wpnonce', '_wp_http_referer', 'filter_action', 'mtmt_notice' ), $sendback );
+
+		wp_safe_redirect( add_query_arg( 'mtmt_notice', 'bulk_updated', $sendback ) );
 		exit;
 	}
 
@@ -206,11 +212,14 @@ final class Mtmt_Publications_Page {
 
 		wp_safe_redirect(
 			add_query_arg(
-				array(
-					'page'        => self::PAGE_SLUG,
-					'action'      => 'edit',
-					'id'          => $id,
-					'mtmt_notice' => 'saved',
+				array_merge(
+					Mtmt_List_Table::current_view_args(),
+					array(
+						'page'        => self::PAGE_SLUG,
+						'action'      => 'edit',
+						'id'          => $id,
+						'mtmt_notice' => 'saved',
+					)
 				),
 				admin_url( 'admin.php' )
 			)
@@ -260,7 +269,7 @@ final class Mtmt_Publications_Page {
 		$topic_areas_on    = (bool) get_option( 'mtmt_enable_topic_areas' );
 		$all_areas         = $topic_areas_on ? $this->topic_area_repo->get_all() : array();
 		$assigned_area_ids = $topic_areas_on ? $this->topic_area_repo->get_area_ids_for_publication( $id ) : array();
-		$back_url          = remove_query_arg( array( 'action', 'id' ) );
+		$back_url          = remove_query_arg( array( 'action', 'id', 'mtmt_notice' ) );
 		$status_labels     = array(
 			'pending'  => __( 'Függőben', 'mtmt-sync' ),
 			'approved' => __( 'Jóváhagyva', 'mtmt-sync' ),
@@ -285,12 +294,12 @@ final class Mtmt_Publications_Page {
 				?>
 				&nbsp;
 				<?php if ( 'approved' !== $item['status'] ) : ?>
-					<a class="button button-primary" href="<?php echo esc_url( wp_nonce_url( add_query_arg( array( 'page' => self::PAGE_SLUG, 'action' => 'approve', 'id' => $id ), admin_url( 'admin.php' ) ), 'mtmt_row_action_approve_' . $id ) ); ?>"><?php esc_html_e( 'Jóváhagyás', 'mtmt-sync' ); ?></a>
+					<a class="button button-primary" href="<?php echo esc_url( $this->moderation_action_url( 'approve', $id ) ); ?>"><?php esc_html_e( 'Jóváhagyás', 'mtmt-sync' ); ?></a>
 				<?php endif; ?>
 				<?php if ( 'rejected' !== $item['status'] ) : ?>
-					<a class="button" href="<?php echo esc_url( wp_nonce_url( add_query_arg( array( 'page' => self::PAGE_SLUG, 'action' => 'reject', 'id' => $id ), admin_url( 'admin.php' ) ), 'mtmt_row_action_reject_' . $id ) ); ?>"><?php esc_html_e( 'Elutasítás', 'mtmt-sync' ); ?></a>
+					<a class="button" href="<?php echo esc_url( $this->moderation_action_url( 'reject', $id ) ); ?>"><?php esc_html_e( 'Elutasítás', 'mtmt-sync' ); ?></a>
 				<?php else : ?>
-					<a class="button" href="<?php echo esc_url( wp_nonce_url( add_query_arg( array( 'page' => self::PAGE_SLUG, 'action' => 'undo_reject', 'id' => $id ), admin_url( 'admin.php' ) ), 'mtmt_row_action_undo_reject_' . $id ) ); ?>"><?php esc_html_e( 'Elutasítás visszavonása', 'mtmt-sync' ); ?></a>
+					<a class="button" href="<?php echo esc_url( $this->moderation_action_url( 'undo_reject', $id ) ); ?>"><?php esc_html_e( 'Elutasítás visszavonása', 'mtmt-sync' ); ?></a>
 				<?php endif; ?>
 			</p>
 
@@ -298,6 +307,9 @@ final class Mtmt_Publications_Page {
 				<?php wp_nonce_field( self::NONCE_ACTION_ENRICH ); ?>
 				<input type="hidden" name="mtmt_enrich_submit" value="1">
 				<input type="hidden" name="id" value="<?php echo esc_attr( (string) $id ); ?>">
+				<?php foreach ( Mtmt_List_Table::current_view_args() as $view_key => $view_val ) : ?>
+					<input type="hidden" name="<?php echo esc_attr( $view_key ); ?>" value="<?php echo esc_attr( (string) $view_val ); ?>">
+				<?php endforeach; ?>
 
 				<table class="form-table">
 					<tr>
@@ -427,6 +439,32 @@ final class Mtmt_Publications_Page {
 		} )();
 		</script>
 		<?php
+	}
+
+	/**
+	 * Jóváhagyás/elutasítás/visszavonás link a szerkesztő nézetből — a lista
+	 * nézet-állapotát (szűrők, rendezés, oldalszám) is beleszőve, hogy a
+	 * művelet után a helyes oldalra térjünk vissza.
+	 *
+	 * @param string $action 'approve'|'reject'|'undo_reject'
+	 * @param int    $id
+	 * @return string
+	 */
+	private function moderation_action_url( string $action, int $id ): string {
+		return wp_nonce_url(
+			add_query_arg(
+				array_merge(
+					Mtmt_List_Table::current_view_args(),
+					array(
+						'page'   => self::PAGE_SLUG,
+						'action' => $action,
+						'id'     => $id,
+					)
+				),
+				admin_url( 'admin.php' )
+			),
+			'mtmt_row_action_' . $action . '_' . $id
+		);
 	}
 
 	private function render_notice(): void {

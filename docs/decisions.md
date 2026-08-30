@@ -1188,3 +1188,50 @@ activate()` idempotenciája (kétszeri hívás nem duplikál), az önjavító
     figyelmeztető szöveg új megfogalmazásához). Teljes suite (234
     assertion) zöld, repo-szintű `php -l` lint tiszta, i18n újraépítve
     (285 string, mind lefordítva).
+
+## Widget-rendezés + admin-lista nézet-állapot megőrzése (2026-08)
+
+100. **Widget-rendezés (Elementor-beállítás) + admin-lista nézet-állapot az
+     URL-ben + determinisztikus lapozás.** Megrendelői kérés három pontban:
+     (1) a widgetekben legyen állítható a rendezés, alapból "legújabb elöl";
+     (2) az adminban a lista lapozása maradjon meg szerkesztésbe belépés/
+     kilépés után is; (3) az admin-lista is időrendi legyen, állítható
+     szűrőkkel/rendezéssel.
+     - **Widget-rendezés — Elementor-beállítás, NEM látogatói legördülő**
+       (megrendelői döntés: "csak Elementor-beállítás"). Mindkét widget
+       ("A" összesítő, "B" terület) Tartalom fülén új "Rendezés" választó:
+       Legújabb elöl (alap) / Legrégebbi elöl / Cím szerint (A–Z) / SJR-negyed
+       szerint (legjobb elöl). A widget `data-sort-order` attribútumba írja,
+       a `widget-frontend.js` minden AJAX-kérésnél visszaküldi (`sort`), így
+       keresés / év-váltás / lapozás után is a beállított sorrend marad
+       ("minden lapon a szűréseknél is"). A `Mtmt_Widget_Data::sort_to_orderby()`
+       képezi le a token → repository orderby/order párra; ismeretlen token
+       → "legújabb elöl".
+     - **SJR-rendezés**: a `D1 < Q1 < Q2 < Q3 < Q4` betűrend maga a
+       legjobb→leggyengébb sorrend, így `sjr_quartile ASC` a "legjobb elöl";
+       a besorolás nélküli (`NULL`/üres) tételek egy külön
+       `(sjr_quartile IS NULL OR sjr_quartile = '') ASC` kulccsal mindig a
+       lista végére kerülnek, nem az elejére.
+     - **Determinisztikus lapozás** (valódi, korábban is meglévő hiba): a
+       `get_list()` ORDER BY-a eddig csak `published_year DESC` volt,
+       tie-breaker nélkül — azonos évű tételek oldalak közt cserélhették a
+       helyüket (duplikátum/kihagyás a lapozásban). Mostantól minden rendezési
+       ág `, id <irány>` tie-breakerrel zárul (`order_by_sql()`). Ez a
+       widgetet és az admin-listát is érinti.
+     - **Admin-lista nézet-állapot** (`Mtmt_List_Table::current_view_args()`):
+       a szűrő/rendezés/oldalszám query-argok (`status`, `year`, `profile_id`,
+       `area_id`, `orderby`, `order`, `paged`) mostantól átöröklődnek a
+       szerkesztő-linkbe, a szerkesztő űrlap rejtett mezőibe, a moderációs
+       gomb-linkekbe és a mentés utáni redirectbe. A tömeges művelet a
+       `wp_get_referer()`-re redirectel (a GET-form nem küldi vissza az
+       oldalszámot, a `_wp_http_referer` viszont a teljes lista-URL-t
+       tartalmazza). Így a 10. oldalon megnyitott rekord szerkesztéséből
+       kilépve újra a 10. oldalon (és ugyanazzal a szűréssel/rendezéssel)
+       landolunk.
+     - Az admin-lista alapértelmezett rendezése változatlanul
+       `published_year DESC` (időrendi), az "Év" oszlop első kattintása is
+       csökkenőt ad; a "SJR" oszlop mostantól rendezhető; a "Szűrés" gomb
+       megtartja az aktív rendezést (rejtett `orderby`/`order` mezők a
+       szűrő-sorban).
+     Nincs adatbázis-változás, nincs új plugin-beállítás. i18n +5 string
+     (290, mind lefordítva), repo-szintű `php -l` lint tiszta.

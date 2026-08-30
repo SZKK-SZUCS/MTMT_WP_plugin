@@ -55,6 +55,7 @@ final class Mtmt_Widget_Data {
 	 *                                 repository szinten mindkettő egyszerre is AND-elhető, ha valaki mégis megadná).
 	 *     @type bool   $featured_only Csak `is_featured=1` (a "B" widget mindig ezt adja).
 	 *     @type string $search        Cím/szerző/forrás LIKE-keresés.
+	 *     @type string $sort          Rendezés (widget-beállítás): newest|oldest|title|sjr.
 	 *     @type int    $paged
 	 *     @type int    $per_page
 	 * }
@@ -68,6 +69,7 @@ final class Mtmt_Widget_Data {
 				'profile_id'    => 0,
 				'featured_only' => false,
 				'search'        => '',
+				'sort'          => 'newest',
 				'paged'         => 1,
 				'per_page'      => 20,
 			),
@@ -80,6 +82,8 @@ final class Mtmt_Widget_Data {
 			return $cached;
 		}
 
+		list( $orderby, $order ) = self::sort_to_orderby( (string) $args['sort'] );
+
 		$repo_args = array(
 			'status'        => 'approved', // A widget MINDIG csak jóváhagyott tételt mutat, ez nem kapcsolható ki.
 			'year'          => (int) $args['year'],
@@ -87,8 +91,8 @@ final class Mtmt_Widget_Data {
 			'search'        => (string) $args['search'],
 			'paged'         => (int) $args['paged'],
 			'per_page'      => (int) $args['per_page'],
-			'orderby'       => 'published_year',
-			'order'         => 'DESC',
+			'orderby'       => $orderby,
+			'order'         => $order,
 		);
 
 		if ( (int) $args['area_id'] > 0 ) {
@@ -112,6 +116,24 @@ final class Mtmt_Widget_Data {
 		set_transient( $cache_key, $result, self::CACHE_TTL );
 
 		return $result;
+	}
+
+	/**
+	 * Widget-rendezés token -> repository orderby/order pár. Ismeretlen token
+	 * esetén a "legújabb elöl" az alapértelmezés.
+	 *
+	 * @param string $sort newest|oldest|title|sjr
+	 * @return array{0:string,1:string} [orderby, order]
+	 */
+	public static function sort_to_orderby( string $sort ): array {
+		$map = array(
+			'newest' => array( 'published_year', 'DESC' ),
+			'oldest' => array( 'published_year', 'ASC' ),
+			'title'  => array( 'title', 'ASC' ),
+			'sjr'    => array( 'sjr_quartile', 'ASC' ),
+		);
+
+		return $map[ $sort ] ?? $map['newest'];
 	}
 
 	/**

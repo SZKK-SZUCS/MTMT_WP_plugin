@@ -212,6 +212,16 @@ final class Mtmt_Publication_Repository {
 	private const VALID_STATUSES = array( 'pending', 'approved', 'rejected' );
 
 	/**
+	 * Engedélyezett rendezési oszlopok (get_list `orderby`). A tényleges
+	 * ORDER BY kifejezést a lenti `order_by_sql()` építi belőlük — mindegyik
+	 * kap egy `id` szerinti tie-breakert, hogy a lapozás determinisztikus
+	 * legyen (azonos évű/című tételek ne cserélgessék a helyüket oldalak közt).
+	 *
+	 * @var string[]
+	 */
+	private const ALLOWED_ORDERBY = array( 'published_year', 'title', 'sjr_quartile', 'first_seen_at', 'last_synced_at' );
+
+	/**
 	 * Moderációs lista, szűrve/lapozva (CLAUDE.md §8.1).
 	 *
 	 * @param array $args status, year, profile_id, ids (előre kiválogatott
@@ -276,10 +286,10 @@ final class Mtmt_Publication_Repository {
 			$params  = array_merge( $params, $ids );
 		}
 
-		$allowed_orderby = array( 'published_year', 'title', 'first_seen_at', 'last_synced_at' );
-		$orderby         = in_array( $args['orderby'], $allowed_orderby, true ) ? $args['orderby'] : 'published_year';
-		$order           = 'ASC' === strtoupper( (string) $args['order'] ) ? 'ASC' : 'DESC';
-		$where_sql       = implode( ' AND ', $where );
+		$orderby   = in_array( $args['orderby'], self::ALLOWED_ORDERBY, true ) ? $args['orderby'] : 'published_year';
+		$order     = 'ASC' === strtoupper( (string) $args['order'] ) ? 'ASC' : 'DESC';
+		$order_by  = $this->order_by_sql( $orderby, $order );
+		$where_sql = implode( ' AND ', $where );
 
 		$per_page = max( 1, (int) $args['per_page'] );
 		$offset   = ( max( 1, (int) $args['paged'] ) - 1 ) * $per_page;
@@ -289,7 +299,7 @@ final class Mtmt_Publication_Repository {
 			? (int) $this->wpdb->get_var( $this->wpdb->prepare( $count_sql, $params ) )
 			: (int) $this->wpdb->get_var( $count_sql );
 
-		$list_sql    = "SELECT * FROM {$this->table} WHERE {$where_sql} ORDER BY {$orderby} {$order} LIMIT %d OFFSET %d";
+		$list_sql    = "SELECT * FROM {$this->table} WHERE {$where_sql} ORDER BY {$order_by} LIMIT %d OFFSET %d";
 		$list_params = array_merge( $params, array( $per_page, $offset ) );
 		$items       = $this->wpdb->get_results( $this->wpdb->prepare( $list_sql, $list_params ), ARRAY_A );
 
@@ -297,6 +307,32 @@ final class Mtmt_Publication_Repository {
 			'items' => $items ?: array(),
 			'total' => $total,
 		);
+	}
+
+	/**
+	 * ORDER BY kifejezés egy engedélyezett `orderby` + irány párból. Minden
+	 * ág `id`-tie-breakerrel zárul a determinisztikus lapozásért. Az SJR
+	 * szerinti rendezésnél a besorolás nélküli tételek mindig a lista végére
+	 * kerülnek (a D1<Q1<Q2<Q3<Q4 betűrend maga a legjobb→leggyengébb sorrend).
+	 *
+	 * @param string $orderby A self::ALLOWED_ORDERBY egyike (a hívó már validálta).
+	 * @param string $order   'ASC' vagy 'DESC'.
+	 * @return string
+	 */
+	private function order_by_sql( string $orderby, string $order ): string {
+		switch ( $orderby ) {
+			case 'title':
+				return "title {$order}, id {$order}";
+			case 'sjr_quartile':
+				return "(sjr_quartile IS NULL OR sjr_quartile = '') ASC, sjr_quartile {$order}, published_year DESC, id DESC";
+			case 'first_seen_at':
+				return "first_seen_at {$order}, id {$order}";
+			case 'last_synced_at':
+				return "last_synced_at {$order}, id {$order}";
+			case 'published_year':
+			default:
+				return "published_year {$order}, id {$order}";
+		}
 	}
 
 	/**

@@ -7,12 +7,12 @@
 ( function () {
 	'use strict';
 
-	/** @type {WeakMap<Element, {year:number, areaId:number, search:string, paged:number}>} */
+	/** @type {WeakMap<Element, {year:number, areaId:number, search:string, sort:string, paged:number}>} */
 	var state = new WeakMap();
 
 	/**
 	 * @param {Element} widget
-	 * @return {{year:number, areaId:number, search:string, paged:number}}
+	 * @return {{year:number, areaId:number, search:string, sort:string, paged:number}}
 	 */
 	function getState( widget ) {
 		if ( ! state.has( widget ) ) {
@@ -20,6 +20,10 @@
 				year: parseInt( widget.getAttribute( 'data-year' ) || '0', 10 ) || 0,
 				areaId: parseInt( widget.getAttribute( 'data-area-filter' ) || '0', 10 ) || 0,
 				search: '',
+				// Widget-beállítás (nincs hozzá frontend kapcsoló), de minden
+				// AJAX-kérésnél elküldjük, hogy a beállított sorrend keresés/
+				// év-váltás/lapozás után is érvényben maradjon.
+				sort: widget.getAttribute( 'data-sort-order' ) || 'newest',
 				paged: 1,
 			} );
 		}
@@ -39,6 +43,7 @@
 		body.set( 'nonce', nonce || '' );
 		body.set( 'year', String( s.year ) );
 		body.set( 'search', s.search );
+		body.set( 'sort', s.sort );
 		body.set( 'paged', String( s.paged ) );
 		body.set( 'per_page', widget.getAttribute( 'data-per-page' ) || '20' );
 		body.set( 'citation_style', widget.getAttribute( 'data-citation-style' ) || 'full' );

@@ -716,6 +716,49 @@ szövegek érthetőek-e egy nem-technikai kollégának is; próbáld ki az email
 "Jóváhagyás megnyitása" gombját — a moderációs listára kell vinnie,
 "Függőben" szűrővel.
 
+## ✅ Widget-rendezés + admin-lista nézet-állapot
+
+**KÉSZ, még nincs élesben validálva.** Megrendelői kérés három pontban
+(docs/decisions.md #100):
+
+- **Widget-rendezés** — mindkét Elementor widget Tartalom fülén "Rendezés"
+  választó (Legújabb elöl / Legrégebbi elöl / Cím A–Z / SJR-negyed szerint),
+  alapból "Legújabb elöl". Elementor-beállítás, nem látogatói legördülő
+  (megrendelői döntés). A beállított sorrend keresés / év-váltás / lapozás
+  után is érvényben marad (a JS minden AJAX-kérésnél visszaküldi).
+- **Admin-lista lapozása az URL-ben** — a 10. oldalon megnyitott rekord
+  szerkesztéséből kilépve újra a 10. oldalon (és ugyanazzal a szűréssel/
+  rendezéssel) landolunk. A szűrő/rendezés/oldalszám átöröklődik a
+  szerkesztő-linkbe, az űrlap rejtett mezőibe, a moderációs gombokba és a
+  mentés/tömeges művelet utáni redirectbe.
+- **Admin-lista időrendi + rendezhető** — alapból `published_year DESC`
+  (változatlan), a "SJR" oszlop mostantól szintén rendezhető, a "Szűrés"
+  gomb megtartja az aktív rendezést.
+- **Determinisztikus lapozás** (mellékesen javított, korábbi hiba): a
+  `get_list()` ORDER BY-a mostantól minden ágon `id`-tie-breakerrel zárul —
+  azonos évű tételek nem cserélgetik a helyüket oldalak közt.
+
+Nincs DB-változás, nincs új plugin-beállítás. i18n +5 string (290).
+
+**Éles ellenőrzéshez** (Local site + JKK site):
+
+1. Elementor szerkesztő → "A" widget Tartalom fül → "Rendezés" → állítsd
+   "Legrégebbi elöl"-re, mentsd — a frontenden az "Összes" év-fülön a
+   legrégebbi publikációk legyenek elöl; válts "SJR-negyed szerint"-re —
+   a D1/Q1-es tételek kerüljenek előre, a besorolás nélküliek a végére.
+2. Keress rá valamire / válts év-fület / lapozz — a beállított sorrend
+   maradjon érvényben (ne ugorjon vissza "legújabb elöl"-re).
+3. wp-admin → MTMT lista → menj a 3. (vagy tovább) oldalra, nyiss meg egy
+   rekordot "Szerkesztés/Gazdagítás"-sal, majd "Vissza a listához" — ugyanazon
+   az oldalszámon legyél.
+4. Ugyanez szűrővel: szűrj pl. "Függőben"-re + egy évre, lapozz a 2. oldalra,
+   nyiss meg egy rekordot, hagyd jóvá a szerkesztő nézetből — a lista a 2.
+   oldalon, a szűréssel együtt jöjjön vissza.
+5. Jelölj ki pár sort a 2. oldalon, futtass egy tömeges jóváhagyást — a
+   lista a 2. oldalon maradjon.
+6. Kattints az "SJR" oszlopfejlécre — rendezzen SJR szerint; a "Szűrés"
+   gomb megnyomása tartsa meg ezt a rendezést.
+
 ## Backlog — még nincs fázishoz kötve
 
 Jelenleg üres.

@@ -344,4 +344,9 @@ return array(
 	'Pill lekerekítés' => 'Pill corner radius',
 	'Pill szegély szín' => 'Pill border color',
 	'Szöveg szín' => 'Text color',
+	'Rendezés' => 'Sort order',
+	'Legújabb elöl' => 'Newest first',
+	'Legrégebbi elöl' => 'Oldest first',
+	'Cím szerint (A–Z)' => 'By title (A–Z)',
+	'SJR-negyed szerint (legjobb elöl)' => 'By SJR quartile (best first)',
 );

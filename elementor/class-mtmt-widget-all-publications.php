@@ -91,6 +91,21 @@ final class Mtmt_Widget_All_Publications extends \Elementor\Widget_Base {
 		);
 
 		$this->add_control(
+			'sort_order',
+			array(
+				'label'   => __( 'Rendezés', 'mtmt-sync' ),
+				'type'    => \Elementor\Controls_Manager::SELECT,
+				'default' => 'newest',
+				'options' => array(
+					'newest' => __( 'Legújabb elöl', 'mtmt-sync' ),
+					'oldest' => __( 'Legrégebbi elöl', 'mtmt-sync' ),
+					'title'  => __( 'Cím szerint (A–Z)', 'mtmt-sync' ),
+					'sjr'    => __( 'SJR-negyed szerint (legjobb elöl)', 'mtmt-sync' ),
+				),
+			)
+		);
+
+		$this->add_control(
 			'citation_style',
 			array(
 				'label'   => __( 'Hivatkozás-stílus', 'mtmt-sync' ),
@@ -175,6 +190,7 @@ final class Mtmt_Widget_All_Publications extends \Elementor\Widget_Base {
 		$show_search         = 'yes' === $settings['show_search'];
 		$show_topic_filter   = $topic_areas_enabled && 'yes' === $settings['show_topic_filter'];
 		$per_page            = max( 1, min( 50, (int) $settings['per_page'] ) );
+		$sort_order          = in_array( $settings['sort_order'] ?? '', array( 'newest', 'oldest', 'title', 'sjr' ), true ) ? $settings['sort_order'] : 'newest';
 		$citation_style      = ( 'compact' === $settings['citation_style'] ) ? 'compact' : 'full';
 		$show_doi_link       = 'yes' === $settings['show_doi_link'];
 		$show_sjr_badge      = 'yes' === $settings['show_sjr_badge'];
@@ -204,6 +220,7 @@ final class Mtmt_Widget_All_Publications extends \Elementor\Widget_Base {
 		$initial = $widget_data->query(
 			array(
 				'year'     => $initial_year,
+				'sort'     => $sort_order,
 				'per_page' => $per_page,
 			)
 		);
@@ -216,6 +233,7 @@ final class Mtmt_Widget_All_Publications extends \Elementor\Widget_Base {
 			data-nonce="<?php echo esc_attr( wp_create_nonce( Mtmt_Widget_Ajax::NONCE_ACTION ) ); ?>"
 			data-widget-type="all"
 			data-per-page="<?php echo esc_attr( (string) $per_page ); ?>"
+			data-sort-order="<?php echo esc_attr( $sort_order ); ?>"
 			data-citation-style="<?php echo esc_attr( $citation_style ); ?>"
 			data-show-doi-link="<?php echo $show_doi_link ? '1' : '0'; ?>"
 			data-show-sjr-badge="<?php echo $show_sjr_badge ? '1' : '0'; ?>"

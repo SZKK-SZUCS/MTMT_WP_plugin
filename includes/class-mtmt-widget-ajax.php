@@ -55,6 +55,10 @@ final class Mtmt_Widget_Ajax {
 			'profile_id'    => isset( $_POST['profile_id'] ) ? absint( $_POST['profile_id'] ) : 0,
 			'featured_only' => ! empty( $_POST['featured_only'] ),
 			'search'        => isset( $_POST['search'] ) ? sanitize_text_field( wp_unslash( $_POST['search'] ) ) : '',
+			// A rendezés widget-beállítás (nem látogatói kapcsoló); a JS minden
+			// kérésnél visszaküldi a data-sort-order attribútumból, hogy
+			// keresés/év-váltás/lapozás után is a beállított sorrend maradjon.
+			'sort'          => isset( $_POST['sort'] ) ? sanitize_key( wp_unslash( $_POST['sort'] ) ) : 'newest',
 			'paged'         => isset( $_POST['paged'] ) ? max( 1, absint( $_POST['paged'] ) ) : 1,
 			// Felülről korlátozva -> egy kliens ne tudjon indokolatlanul nagy lekérdezést kikényszeríteni.
 			'per_page'      => isset( $_POST['per_page'] ) ? min( 50, max( 1, absint( $_POST['per_page'] ) ) ) : 20,

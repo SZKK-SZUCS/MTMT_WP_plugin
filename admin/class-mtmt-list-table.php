@@ -97,8 +97,34 @@ final class Mtmt_List_Table extends WP_List_Table {
 	public function get_sortable_columns(): array {
 		return array(
 			'title' => array( 'title', false ),
-			'year'  => array( 'published_year', false ),
+			'year'  => array( 'published_year', true ),
+			'sjr'   => array( 'sjr_quartile', false ),
 		);
+	}
+
+	/**
+	 * A lista jelenlegi nézet-állapota (szűrők, rendezés, oldalszám)
+	 * query-argokként — hogy a szerkesztésből / sor-műveletből visszatérve
+	 * ugyanoda (ugyanarra az oldalra, ugyanazzal a szűréssel) kerüljünk.
+	 *
+	 * @return array<string,string|int>
+	 */
+	public static function current_view_args(): array {
+		$args = array();
+
+		foreach ( array( 'status', 'orderby', 'order' ) as $key ) {
+			if ( isset( $_REQUEST[ $key ] ) && '' !== $_REQUEST[ $key ] ) {
+				$args[ $key ] = sanitize_key( wp_unslash( $_REQUEST[ $key ] ) );
+			}
+		}
+
+		foreach ( array( 'year', 'profile_id', 'area_id', 'paged' ) as $key ) {
+			if ( isset( $_REQUEST[ $key ] ) && absint( $_REQUEST[ $key ] ) > 0 ) {
+				$args[ $key ] = absint( $_REQUEST[ $key ] );
+			}
+		}
+
+		return $args;
 	}
 
 	/**
@@ -154,6 +180,17 @@ final class Mtmt_List_Table extends WP_List_Table {
 		}
 
 		$result = $this->repository->get_list( $list_args );
+
+		// Ha az URL-ből örökölt oldalszám a szűrés miatt már túllóg (pl. a
+		// szerkesztésből visszatérve egy tétel épp kikerült a szűrésből, és
+		// eggyel kevesebb oldal maradt), essünk vissza az utolsó valós oldalra
+		// üres lista helyett.
+		$total_pages = (int) ceil( $result['total'] / $per_page );
+		if ( $total_pages > 0 && $paged > $total_pages ) {
+			$paged              = $total_pages;
+			$list_args['paged'] = $paged;
+			$result             = $this->repository->get_list( $list_args );
+		}
 
 		$this->items = $result['items'];
 
@@ -320,8 +357,16 @@ final class Mtmt_List_Table extends WP_List_Table {
 		$current_profile = isset( $_REQUEST['profile_id'] ) ? absint( $_REQUEST['profile_id'] ) : 0;
 		$current_area    = isset( $_REQUEST['area_id'] ) ? absint( $_REQUEST['area_id'] ) : 0;
 		$topic_areas_on  = (bool) get_option( 'mtmt_enable_topic_areas' );
+		$current_orderby = isset( $_REQUEST['orderby'] ) ? sanitize_key( wp_unslash( $_REQUEST['orderby'] ) ) : '';
+		$current_order   = isset( $_REQUEST['order'] ) ? sanitize_key( wp_unslash( $_REQUEST['order'] ) ) : '';
 		?>
 		<div class="alignleft actions">
+			<?php if ( '' !== $current_orderby ) : ?>
+				<input type="hidden" name="orderby" value="<?php echo esc_attr( $current_orderby ); ?>" />
+			<?php endif; ?>
+			<?php if ( '' !== $current_order ) : ?>
+				<input type="hidden" name="order" value="<?php echo esc_attr( $current_order ); ?>" />
+			<?php endif; ?>
 			<select name="status">
 				<option value=""><?php esc_html_e( 'Minden státusz', 'mtmt-sync' ); ?></option>
 				<option value="pending" <?php selected( $current_status, 'pending' ); ?>><?php esc_html_e( 'Függőben', 'mtmt-sync' ); ?></option>
@@ -360,10 +405,13 @@ final class Mtmt_List_Table extends WP_List_Table {
 	 */
 	private function action_url( string $action, int $id ): string {
 		return add_query_arg(
-			array(
-				'page'   => $this->page_slug,
-				'action' => $action,
-				'id'     => $id,
+			array_merge(
+				self::current_view_args(),
+				array(
+					'page'   => $this->page_slug,
+					'action' => $action,
+					'id'     => $id,
+				)
 			),
 			admin_url( 'admin.php' )
 		);

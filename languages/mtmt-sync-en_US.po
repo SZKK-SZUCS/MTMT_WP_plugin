@@ -7,7 +7,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"PO-Revision-Date: 2026-08-27T22:48:53+00:00\n"
+"PO-Revision-Date: 2026-08-30T10:53:10+00:00\n"
 "Language: en_US\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: bin/i18n/build.php\n"
@@ -28,19 +28,19 @@ msgstr "%1$s: %2$d new, %3$d updated (%4$d reverted to pending), %5$d missing"
 msgid "%1$s: HIBA — %2$s"
 msgstr "%1$s: ERROR — %2$s"
 
-#: admin/class-mtmt-list-table.php:210 admin/class-mtmt-profiles-page.php:170 admin/class-mtmt-publications-page.php:275
+#: admin/class-mtmt-list-table.php:247 admin/class-mtmt-profiles-page.php:170 admin/class-mtmt-publications-page.php:284
 msgid "(cím nélkül)"
 msgstr "(untitled)"
 
-#: elementor/class-mtmt-widget-topic-publications.php:206 elementor/class-mtmt-widget-topic-publications.php:214
+#: elementor/class-mtmt-widget-topic-publications.php:221 elementor/class-mtmt-widget-topic-publications.php:229
 msgid "(nincs elérhető profil)"
 msgstr "(no profile available)"
 
-#: elementor/class-mtmt-widget-topic-publications.php:198
+#: elementor/class-mtmt-widget-topic-publications.php:213
 msgid "(nincs elérhető terület — hozz létre egyet a Területek oldalon)"
 msgstr "(no topic area available — create one on the Topic Areas page)"
 
-#: elementor/class-mtmt-widget-topic-publications.php:190
+#: elementor/class-mtmt-widget-topic-publications.php:205
 msgid "(nincs elérhető terület)"
 msgstr "(no topic area available)"
 
@@ -48,7 +48,7 @@ msgstr "(no topic area available)"
 msgid "A haladó cond JSON érvénytelen. Formátum: [{\"field\":\"...\",\"op\":\"...\",\"value\":\"...\"}]"
 msgstr "The advanced cond JSON is invalid. Format: [{\"field\":\"...\",\"op\":\"...\",\"value\":\"...\"}]"
 
-#: admin/class-mtmt-publications-page.php:387
+#: admin/class-mtmt-publications-page.php:399
 msgid "A kiemelt cikkek jelennek meg a szakmai terület aloldalak widgetjén."
 msgstr "Featured articles appear on the topic area subpage widgets."
 
@@ -56,15 +56,15 @@ msgstr "Featured articles appear on the topic area subpage widgets."
 msgid "A profil neve kötelező."
 msgstr "The profile name is required."
 
-#: admin/class-mtmt-publications-page.php:316
+#: admin/class-mtmt-publications-page.php:328
 msgid "A publikáció mellett megjelenő kép a weboldalon. Ha nem választasz, a rendszer egy alapértelmezett képet készít a cím alapján."
 msgstr "The image shown next to the publication on the website. If you don't choose one, the system generates a default image based on the title."
 
-#: admin/class-mtmt-publications-page.php:252
+#: admin/class-mtmt-publications-page.php:261
 msgid "A publikáció nem található."
 msgstr "The publication was not found."
 
-#: admin/class-mtmt-publications-page.php:338
+#: admin/class-mtmt-publications-page.php:350
 msgid "A publikációhoz tartozó pályázati azonosító(k), pl. \"K 123456\". Az \"Ellenőrizve\" pipa jelzi, hogy valaki már leellenőrizte."
 msgstr "The grant/project identifier(s) for the publication, e.g. \"K 123456\". The \"Verified\" checkbox indicates someone has already checked it."
 
@@ -160,7 +160,7 @@ msgstr "Only records with a DOI identifier"
 msgid "Csak akkor jelenik meg ténylegesen, ha a \"Szakmai terület\" funkció be van kapcsolva a plugin Beállítások oldalán."
 msgstr "Only actually shows up if the \"Topic Area\" feature is enabled on the plugin's Settings page."
 
-#: elementor/class-mtmt-widget-all-publications.php:133 elementor/class-mtmt-widget-topic-publications.php:162
+#: elementor/class-mtmt-widget-all-publications.php:148 elementor/class-mtmt-widget-topic-publications.php:177
 msgid "Csak ikon"
 msgstr "Icon only"
 
@@ -168,7 +168,7 @@ msgstr "Icon only"
 msgid "Csak neked segít azonosítani a profilt, a weboldalon nem jelenik meg."
 msgstr "Only helps you identify the profile, it does not appear on the website."
 
-#: elementor/class-mtmt-widget-all-publications.php:134 elementor/class-mtmt-widget-topic-publications.php:163
+#: elementor/class-mtmt-widget-all-publications.php:149 elementor/class-mtmt-widget-topic-publications.php:178
 msgid "Csak szöveg"
 msgstr "Text only"
 
@@ -180,6 +180,10 @@ msgstr "Thursday"
 msgid "Cím / szerzők"
 msgstr "Title / authors"
 
+#: elementor/class-mtmt-widget-all-publications.php:102 elementor/class-mtmt-widget-topic-publications.php:132
+msgid "Cím szerint (A–Z)"
+msgstr "By title (A–Z)"
+
 #: elementor/trait-mtmt-widget-common-controls.php:111
 msgid "Cím szín (widget-cím, kártya-cím, aktív év-fül)"
 msgstr "Heading color (widget title, card title, active year tab)"
@@ -188,11 +192,11 @@ msgstr "Heading color (widget title, card title, active year tab)"
 msgid "Címzettek (soronként vagy vesszővel elválasztva):"
 msgstr "Recipients (one per line, or comma-separated):"
 
-#: elementor/class-mtmt-widget-all-publications.php:112
+#: elementor/class-mtmt-widget-all-publications.php:127
 msgid "DOI hiányában ez dönti el, hogy a teljes kártya az MTMT oldalára linkeljen-e."
 msgstr "In the absence of a DOI, this decides whether the whole card links to the MTMT page."
 
-#: elementor/class-mtmt-widget-all-publications.php:109 elementor/class-mtmt-widget-topic-publications.php:139
+#: elementor/class-mtmt-widget-all-publications.php:124 elementor/class-mtmt-widget-topic-publications.php:154
 msgid "DOI megjelenítése"
 msgstr "Show DOI"
 
@@ -200,27 +204,27 @@ msgstr "Show DOI"
 msgid "Egyéb azonosítók (WoS/Scopus/…)"
 msgstr "Other identifiers (WoS/Scopus/…)"
 
-#: elementor/class-mtmt-widget-all-publications.php:128 elementor/class-mtmt-widget-topic-publications.php:157
+#: elementor/class-mtmt-widget-all-publications.php:143 elementor/class-mtmt-widget-topic-publications.php:172
 msgid "Egyéb azonosítók megjelenítése"
 msgstr "Other identifiers display"
 
-#: admin/class-mtmt-publications-page.php:334 admin/class-mtmt-publications-page.php:336
+#: admin/class-mtmt-publications-page.php:346 admin/class-mtmt-publications-page.php:348
 msgid "Ellenőrizve"
 msgstr "Verified"
 
-#: admin/class-mtmt-publications-page.php:314
+#: admin/class-mtmt-publications-page.php:326
 msgid "Eltávolítás"
 msgstr "Remove"
 
-#: admin/class-mtmt-list-table.php:277 admin/class-mtmt-list-table.php:329 admin/class-mtmt-publications-page.php:267
+#: admin/class-mtmt-list-table.php:314 admin/class-mtmt-list-table.php:374 admin/class-mtmt-publications-page.php:276
 msgid "Elutasítva"
 msgstr "Rejected"
 
-#: admin/class-mtmt-list-table.php:110 admin/class-mtmt-list-table.php:222 admin/class-mtmt-publications-page.php:291
+#: admin/class-mtmt-list-table.php:136 admin/class-mtmt-list-table.php:259 admin/class-mtmt-publications-page.php:300
 msgid "Elutasítás"
 msgstr "Reject"
 
-#: admin/class-mtmt-list-table.php:225 admin/class-mtmt-publications-page.php:293
+#: admin/class-mtmt-list-table.php:262 admin/class-mtmt-publications-page.php:302
 msgid "Elutasítás visszavonása"
 msgstr "Undo rejection"
 
@@ -236,7 +240,7 @@ msgstr "Preview result"
 msgid "Előnézeti kép"
 msgstr "Preview image"
 
-#: elementor/class-mtmt-widget-all-publications.php:151 elementor/class-mtmt-widget-topic-publications.php:176 includes/class-mtmt-widget-ajax.php:82 includes/class-mtmt-widget-ajax.php:137
+#: elementor/class-mtmt-widget-all-publications.php:166 elementor/class-mtmt-widget-topic-publications.php:191 includes/class-mtmt-widget-ajax.php:86 includes/class-mtmt-widget-ajax.php:141
 msgid "Előző"
 msgstr "Previous"
 
@@ -296,7 +300,7 @@ msgstr "Features"
 msgid "Futás-napló (utolsó 20)"
 msgstr "Run log (last 20)"
 
-#: admin/class-mtmt-list-table.php:275 admin/class-mtmt-list-table.php:327 admin/class-mtmt-publications-page.php:265
+#: admin/class-mtmt-list-table.php:312 admin/class-mtmt-list-table.php:372 admin/class-mtmt-publications-page.php:274
 msgid "Függőben"
 msgstr "Pending"
 
@@ -304,7 +308,7 @@ msgstr "Pending"
 msgid "HIBA a futás közben"
 msgstr "ERROR during the run"
 
-#: elementor/class-mtmt-widget-all-publications.php:136 elementor/class-mtmt-widget-topic-publications.php:165
+#: elementor/class-mtmt-widget-all-publications.php:151 elementor/class-mtmt-widget-topic-publications.php:180
 msgid "Ha egy forráshoz nincs betöltve ikon-fájl, \"Csak ikon\" módban is a felirat jelenik meg helyette."
 msgstr "If a source has no icon file loaded, the label is shown instead even in \"Icon only\" mode."
 
@@ -332,7 +336,7 @@ msgstr "Error during sync: %s"
 msgid "Hiba az előnézet lekérésekor: %s"
 msgstr "Error fetching the preview: %s"
 
-#: elementor/class-mtmt-widget-all-publications.php:96 elementor/class-mtmt-widget-topic-publications.php:126
+#: elementor/class-mtmt-widget-all-publications.php:111 elementor/class-mtmt-widget-topic-publications.php:141
 msgid "Hivatkozás-stílus"
 msgstr "Citation style"
 
@@ -364,15 +368,15 @@ msgstr "Icon size"
 msgid "Ikon szín"
 msgstr "Icon color"
 
-#: elementor/class-mtmt-widget-all-publications.php:132 elementor/class-mtmt-widget-topic-publications.php:161
+#: elementor/class-mtmt-widget-all-publications.php:147 elementor/class-mtmt-widget-topic-publications.php:176
 msgid "Ikon és szöveg"
 msgstr "Icon and text"
 
-#: admin/class-mtmt-publications-page.php:304
+#: admin/class-mtmt-publications-page.php:316
 msgid "Indexkép"
 msgstr "Thumbnail"
 
-#: admin/class-mtmt-publications-page.php:409
+#: admin/class-mtmt-publications-page.php:421
 msgid "Indexkép kiválasztása"
 msgstr "Select thumbnail"
 
@@ -408,7 +412,7 @@ msgstr "Here you can set which roles can moderate and classify. Saving takes eff
 msgid "Jelenleg nincs beütemezve automatikus futás — mentsd el, hogy létrejöjjön."
 msgstr "No automatic run is currently scheduled — save to create one."
 
-#: admin/class-mtmt-publications-page.php:282
+#: admin/class-mtmt-publications-page.php:291
 msgid "Jelenlegi státusz: %s"
 msgstr "Current status: %s"
 
@@ -416,11 +420,11 @@ msgstr "Current status: %s"
 msgid "Jogosultságok"
 msgstr "Permissions"
 
-#: admin/class-mtmt-list-table.php:276 admin/class-mtmt-list-table.php:328 admin/class-mtmt-publications-page.php:266
+#: admin/class-mtmt-list-table.php:313 admin/class-mtmt-list-table.php:373 admin/class-mtmt-publications-page.php:275
 msgid "Jóváhagyva"
 msgstr "Approved"
 
-#: admin/class-mtmt-list-table.php:109 admin/class-mtmt-list-table.php:219 admin/class-mtmt-publications-page.php:288
+#: admin/class-mtmt-list-table.php:135 admin/class-mtmt-list-table.php:256 admin/class-mtmt-publications-page.php:297
 msgid "Jóváhagyás"
 msgstr "Approve"
 
@@ -432,7 +436,7 @@ msgstr "Open for approval"
 msgid "Kedd"
 msgstr "Tuesday"
 
-#: elementor/class-mtmt-widget-all-publications.php:147 elementor/class-mtmt-widget-topic-publications.php:173
+#: elementor/class-mtmt-widget-all-publications.php:162 elementor/class-mtmt-widget-topic-publications.php:188
 msgid "Keresés cím, szerző vagy forrás szerint…"
 msgstr "Search by title, author, or source…"
 
@@ -448,15 +452,15 @@ msgstr "Search field placeholder text"
 msgid "Kereső mező megjelenítése"
 msgstr "Show search field"
 
-#: admin/class-mtmt-list-table.php:283 admin/class-mtmt-publications-page.php:384
+#: admin/class-mtmt-list-table.php:320 admin/class-mtmt-publications-page.php:396
 msgid "Kiemelt cikk"
 msgstr "Featured article"
 
-#: admin/class-mtmt-list-table.php:114
+#: admin/class-mtmt-list-table.php:140
 msgid "Kiemelés"
 msgstr "Feature"
 
-#: admin/class-mtmt-list-table.php:115
+#: admin/class-mtmt-list-table.php:141
 msgid "Kiemelés visszavonása"
 msgstr "Unfeature"
 
@@ -464,7 +468,7 @@ msgstr "Unfeature"
 msgid "Kiemelő szín"
 msgstr "Accent color"
 
-#: elementor/class-mtmt-widget-all-publications.php:101 elementor/class-mtmt-widget-topic-publications.php:131
+#: elementor/class-mtmt-widget-all-publications.php:116 elementor/class-mtmt-widget-topic-publications.php:146
 msgid "Kompakt"
 msgstr "Compact"
 
@@ -496,11 +500,11 @@ msgstr "Card row shadow"
 msgid "Kép"
 msgstr "Image"
 
-#: admin/class-mtmt-publications-page.php:313 admin/class-mtmt-settings-page.php:120 admin/class-mtmt-settings-page.php:144
+#: admin/class-mtmt-publications-page.php:325 admin/class-mtmt-settings-page.php:120 admin/class-mtmt-settings-page.php:144
 msgid "Kép kiválasztása"
 msgstr "Select image"
 
-#: elementor/class-mtmt-widget-all-publications.php:152 elementor/class-mtmt-widget-topic-publications.php:177 includes/class-mtmt-widget-ajax.php:85 includes/class-mtmt-widget-ajax.php:140
+#: elementor/class-mtmt-widget-all-publications.php:167 elementor/class-mtmt-widget-topic-publications.php:192 includes/class-mtmt-widget-ajax.php:89 includes/class-mtmt-widget-ajax.php:144
 msgid "Következő"
 msgstr "Next"
 
@@ -512,7 +516,7 @@ msgstr "Next automatic run: %s."
 msgid "Lapozás"
 msgstr "Pagination"
 
-#: includes/class-mtmt-widget-ajax.php:146
+#: includes/class-mtmt-widget-ajax.php:150
 msgid "Lapozó"
 msgstr "Pagination"
 
@@ -524,6 +528,14 @@ msgstr "Pagination \"previous\" label"
 msgid "Lapozó \"következő\" felirata"
 msgstr "Pagination \"next\" label"
 
+#: elementor/class-mtmt-widget-all-publications.php:101 elementor/class-mtmt-widget-topic-publications.php:131
+msgid "Legrégebbi elöl"
+msgstr "Oldest first"
+
+#: elementor/class-mtmt-widget-all-publications.php:100 elementor/class-mtmt-widget-topic-publications.php:130
+msgid "Legújabb elöl"
+msgstr "Newest first"
+
 #: elementor/trait-mtmt-widget-common-controls.php:255 elementor/trait-mtmt-widget-common-controls.php:276 elementor/trait-mtmt-widget-common-controls.php:360
 msgid "Lekerekítés"
 msgstr "Corner radius"
@@ -532,7 +544,7 @@ msgstr "Corner radius"
 msgid "Lekerekítés (100% = kör)"
 msgstr "Corner radius (100% = circle)"
 
-#: elementor/class-mtmt-widget-all-publications.php:145
+#: elementor/class-mtmt-widget-all-publications.php:160
 msgid "Lektorált publikációk"
 msgstr "Peer-reviewed publications"
 
@@ -556,7 +568,7 @@ msgstr "MTMT"
 msgid "MTMT API hiba: HTTP %d"
 msgstr "MTMT API error: HTTP %d"
 
-#: admin/class-mtmt-publications-page.php:43 admin/class-mtmt-publications-page.php:237
+#: admin/class-mtmt-publications-page.php:43 admin/class-mtmt-publications-page.php:246
 msgid "MTMT Publikációk"
 msgstr "MTMT Publications"
 
@@ -596,7 +608,7 @@ msgstr "MTMT — Profiles"
 msgid "MTMT — Szakmai területek"
 msgstr "MTMT — Topic Areas"
 
-#: admin/class-mtmt-publications-page.php:324
+#: admin/class-mtmt-publications-page.php:336
 msgid "MTMT-ből importált (nem szerkeszthető, csak felülírható):"
 msgstr "Imported from MTMT (not editable, only overridable):"
 
@@ -608,7 +620,7 @@ msgstr "MTMT status"
 msgid "Magasság"
 msgstr "Height"
 
-#: admin/class-mtmt-publications-page.php:386
+#: admin/class-mtmt-publications-page.php:398
 msgid "Megjelölés kiemelt cikkként"
 msgstr "Mark as featured article"
 
@@ -616,7 +628,7 @@ msgstr "Mark as featured article"
 msgid "Melyik oldalon jelenjen meg ennek a területnek a publikációs listája."
 msgstr "Which page should show this topic area's publication list."
 
-#: admin/class-mtmt-publications-page.php:377
+#: admin/class-mtmt-publications-page.php:389
 msgid "Melyik szakmai terület aloldalán jelenjen meg. Több is választható."
 msgstr "Which topic area subpage it should appear on. Multiple can be selected."
 
@@ -628,7 +640,7 @@ msgstr "Saved (the schedule did not change)."
 msgid "Mentve, de az ütemezés beállítása nem sikerült."
 msgstr "Saved, but setting the schedule failed."
 
-#: admin/class-mtmt-publications-page.php:440 admin/class-mtmt-settings-page.php:303 admin/class-mtmt-settings-page.php:313 admin/class-mtmt-settings-page.php:322
+#: admin/class-mtmt-publications-page.php:478 admin/class-mtmt-settings-page.php:303 admin/class-mtmt-settings-page.php:313 admin/class-mtmt-settings-page.php:322
 msgid "Mentve."
 msgstr "Saved."
 
@@ -640,11 +652,11 @@ msgstr "Saved. The permissions took effect immediately."
 msgid "Mentve. Következő automatikus futás: %s."
 msgstr "Saved. Next automatic run: %s."
 
-#: admin/class-mtmt-capabilities-page.php:100 admin/class-mtmt-publications-page.php:393 admin/class-mtmt-settings-page.php:100 admin/class-mtmt-settings-page.php:129 admin/class-mtmt-settings-page.php:176
+#: admin/class-mtmt-capabilities-page.php:100 admin/class-mtmt-publications-page.php:405 admin/class-mtmt-settings-page.php:100 admin/class-mtmt-settings-page.php:129 admin/class-mtmt-settings-page.php:176
 msgid "Mentés"
 msgstr "Save"
 
-#: admin/class-mtmt-publications-page.php:326
+#: admin/class-mtmt-publications-page.php:338
 msgid "Milyen támogatás/pályázat állt a publikáció mögött — ha kitöltöd, megjelenik a weboldalon."
 msgstr "What funding/grant was behind the publication — if filled in, it appears on the website."
 
@@ -652,15 +664,15 @@ msgstr "What funding/grant was behind the publication — if filled in, it appea
 msgid "Minden adat törölve."
 msgstr "All data deleted."
 
-#: admin/class-mtmt-list-table.php:338
+#: admin/class-mtmt-list-table.php:383
 msgid "Minden profil"
 msgstr "All profiles"
 
-#: admin/class-mtmt-list-table.php:326
+#: admin/class-mtmt-list-table.php:371
 msgid "Minden státusz"
 msgstr "All statuses"
 
-#: admin/class-mtmt-list-table.php:345 elementor/class-mtmt-widget-all-publications.php:148
+#: admin/class-mtmt-list-table.php:390 elementor/class-mtmt-widget-all-publications.php:163
 msgid "Minden szakmai terület"
 msgstr "All topic areas"
 
@@ -668,7 +680,7 @@ msgstr "All topic areas"
 msgid "Minden szakmai terület egy weboldalhoz van párosítva. A moderációs űrlapon minden publikációhoz kiválasztható, melyik terület(ek)hez tartozik."
 msgstr "Every topic area is paired with a website page. On the moderation form, each publication can be assigned to which topic area(s) it belongs to."
 
-#: admin/class-mtmt-list-table.php:332
+#: admin/class-mtmt-list-table.php:377
 msgid "Minden év"
 msgstr "All years"
 
@@ -692,7 +704,7 @@ msgstr "No sync has run yet."
 msgid "Még nincs egy profil sem."
 msgstr "There are no profiles yet."
 
-#: admin/class-mtmt-publications-page.php:365
+#: admin/class-mtmt-publications-page.php:377
 msgid "Még nincs egy szakmai terület sem beállítva. %s"
 msgstr "No topic area has been set up yet. %s"
 
@@ -712,7 +724,7 @@ msgstr "Action"
 msgid "Nap"
 msgstr "Day"
 
-#: elementor/class-mtmt-widget-all-publications.php:150 includes/class-mtmt-widget-ajax.php:79
+#: elementor/class-mtmt-widget-all-publications.php:165 includes/class-mtmt-widget-ajax.php:83
 msgid "Nincs a szűrésnek megfelelő publikáció."
 msgstr "No publication matches this filter."
 
@@ -728,11 +740,11 @@ msgstr "You don't have permission to perform this action."
 msgid "Nincs jogosultságod ehhez az oldalhoz."
 msgstr "You don't have permission to access this page."
 
-#: elementor/class-mtmt-widget-topic-publications.php:175
+#: elementor/class-mtmt-widget-topic-publications.php:190
 msgid "Nincs kiemelt publikáció ebben a körben."
 msgstr "There's no featured publication in this scope."
 
-#: admin/class-mtmt-list-table.php:125
+#: admin/class-mtmt-list-table.php:151
 msgid "Nincs publikáció."
 msgstr "No publications."
 
@@ -740,7 +752,7 @@ msgstr "No publications."
 msgid "Nincs találat ezzel a szűréssel."
 msgstr "No results with this filter."
 
-#: admin/class-mtmt-publications-page.php:359
+#: admin/class-mtmt-publications-page.php:371
 msgid "Nincs terület kijelölve."
 msgstr "No topic area assigned."
 
@@ -760,7 +772,7 @@ msgstr "OK"
 msgid "Oldalszám-gombok lekerekítése"
 msgstr "Page number button corner radius"
 
-#: elementor/class-mtmt-widget-all-publications.php:144
+#: elementor/class-mtmt-widget-all-publications.php:159
 msgid "PUBLIKÁCIÓK"
 msgstr "PUBLICATIONS"
 
@@ -808,7 +820,7 @@ msgstr "Profile deleted."
 msgid "Profilok"
 msgstr "Profiles"
 
-#: admin/class-mtmt-publications-page.php:330
+#: admin/class-mtmt-publications-page.php:342
 msgid "Projektazonosító(k)"
 msgstr "Project identifier(s)"
 
@@ -816,7 +828,7 @@ msgstr "Project identifier(s)"
 msgid "Publikáció"
 msgstr "Publication"
 
-#: admin/class-mtmt-publications-page.php:271
+#: admin/class-mtmt-publications-page.php:280
 msgid "Publikáció gazdagítása"
 msgstr "Enrich publication"
 
@@ -832,13 +844,21 @@ msgstr "You can categorize publications by topic area (e.g. Autonomous Vehicles,
 msgid "Péntek"
 msgstr "Friday"
 
+#: elementor/class-mtmt-widget-all-publications.php:96 elementor/class-mtmt-widget-topic-publications.php:126
+msgid "Rendezés"
+msgstr "Sort order"
+
 #: admin/class-mtmt-list-table.php:80
 msgid "SJR"
 msgstr "SJR"
 
-#: elementor/class-mtmt-widget-all-publications.php:119 elementor/class-mtmt-widget-topic-publications.php:148
+#: elementor/class-mtmt-widget-all-publications.php:134 elementor/class-mtmt-widget-topic-publications.php:163
 msgid "SJR-negyed badge megjelenítése"
 msgstr "Show SJR quartile badge"
+
+#: elementor/class-mtmt-widget-all-publications.php:103 elementor/class-mtmt-widget-topic-publications.php:133
+msgid "SJR-negyed szerint (legjobb elöl)"
+msgstr "By SJR quartile (best first)"
 
 #: admin/class-mtmt-profiles-page.php:201
 msgid "Scope típusa"
@@ -848,7 +868,7 @@ msgstr "Scope type"
 msgid "Státusz"
 msgstr "Status"
 
-#: admin/class-mtmt-list-table.php:86 admin/class-mtmt-publications-page.php:343 elementor/class-mtmt-widget-topic-publications.php:67 elementor/class-mtmt-widget-topic-publications.php:76
+#: admin/class-mtmt-list-table.php:86 admin/class-mtmt-publications-page.php:355 elementor/class-mtmt-widget-topic-publications.php:67 elementor/class-mtmt-widget-topic-publications.php:76
 msgid "Szakmai terület"
 msgstr "Topic area"
 
@@ -872,7 +892,7 @@ msgstr "Wednesday"
 msgid "Szerepkör"
 msgstr "Role"
 
-#: admin/class-mtmt-list-table.php:215
+#: admin/class-mtmt-list-table.php:252
 msgid "Szerkesztés/Gazdagítás"
 msgstr "Edit/Enrich"
 
@@ -924,7 +944,7 @@ msgstr "Scope"
 msgid "Szűkítés módja"
 msgstr "Scope mode"
 
-#: admin/class-mtmt-list-table.php:351 admin/class-mtmt-profiles-page.php:74 admin/class-mtmt-profiles-page.php:219
+#: admin/class-mtmt-list-table.php:396 admin/class-mtmt-profiles-page.php:74 admin/class-mtmt-profiles-page.php:219
 msgid "Szűrés"
 msgstr "Filter"
 
@@ -932,7 +952,7 @@ msgstr "Filter"
 msgid "Tartalom"
 msgstr "Content"
 
-#: elementor/class-mtmt-widget-all-publications.php:100 elementor/class-mtmt-widget-topic-publications.php:130
+#: elementor/class-mtmt-widget-all-publications.php:115 elementor/class-mtmt-widget-topic-publications.php:145
 msgid "Teljes"
 msgstr "Full"
 
@@ -964,7 +984,7 @@ msgstr "Area filter's \"all areas\" label"
 msgid "Területek"
 msgstr "Topic Areas"
 
-#: admin/class-mtmt-publications-page.php:366
+#: admin/class-mtmt-publications-page.php:378
 msgid "Területek kezelése"
 msgstr "Manage topic areas"
 
@@ -972,7 +992,7 @@ msgstr "Manage topic areas"
 msgid "Tipográfia"
 msgstr "Typography"
 
-#: admin/class-mtmt-publications-page.php:320
+#: admin/class-mtmt-publications-page.php:332
 msgid "Támogatás felülbírálása"
 msgstr "Funding override"
 
@@ -988,7 +1008,7 @@ msgstr "Type"
 msgid "Több profilt is létrehozhatsz, pl. kutatócsoportonként. A behúzott publikációk mindig jóváhagyásra várnak, addig nem jelennek meg a weboldalon."
 msgstr "You can create multiple profiles, e.g. per research group. Publications that are pulled in always wait for approval, and don't appear on the website until then."
 
-#: admin/class-mtmt-publications-page.php:439
+#: admin/class-mtmt-publications-page.php:477
 msgid "Tömeges művelet végrehajtva."
 msgstr "Bulk action performed."
 
@@ -1008,7 +1028,7 @@ msgstr "Last run"
 msgid "Vasárnap"
 msgstr "Sunday"
 
-#: admin/class-mtmt-publications-page.php:272
+#: admin/class-mtmt-publications-page.php:281
 msgid "Vissza a listához"
 msgstr "Back to the list"
 
@@ -1020,7 +1040,7 @@ msgstr "Reverted"
 msgid "Visszaállítás alapértelmezettre"
 msgstr "Reset to default"
 
-#: elementor/class-mtmt-widget-topic-publications.php:178
+#: elementor/class-mtmt-widget-topic-publications.php:193
 msgid "Válassz egy szakmai területet vagy lekérdezési profilt a widget beállításaiban."
 msgstr "Choose a topic area or a query profile in the widget settings."
 
@@ -1074,7 +1094,7 @@ msgstr "an email would have been sent, but no recipient is configured."
 msgid "nem"
 msgstr "no"
 
-#: admin/class-mtmt-profiles-page.php:451 admin/class-mtmt-publications-page.php:438
+#: admin/class-mtmt-profiles-page.php:451 admin/class-mtmt-publications-page.php:476
 msgid "Állapot frissítve."
 msgstr "Status updated."
 
@@ -1098,7 +1118,7 @@ msgstr "Year tab's \"all years\" label"
 msgid "Óra"
 msgstr "Hour"
 
-#: elementor/class-mtmt-widget-all-publications.php:149 elementor/class-mtmt-widget-topic-publications.php:174
+#: elementor/class-mtmt-widget-all-publications.php:164 elementor/class-mtmt-widget-topic-publications.php:189
 msgid "Összes"
 msgstr "All"
 
