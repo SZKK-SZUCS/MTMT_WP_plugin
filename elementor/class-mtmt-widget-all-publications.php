@@ -243,7 +243,8 @@ final class Mtmt_Widget_All_Publications extends \Elementor\Widget_Base {
 			data-empty-text="<?php echo esc_attr( $empty_state_text ); ?>"
 			data-prev-label="<?php echo esc_attr( $prev_label ); ?>"
 			data-next-label="<?php echo esc_attr( $next_label ); ?>"
-			data-year-all-label="<?php echo esc_attr( $year_tab_all_label ); ?>">
+			data-year-all-label="<?php echo esc_attr( $year_tab_all_label ); ?>"
+			data-area-all-label="<?php echo esc_attr( $area_filter_all_label ); ?>">
 
 			<div class="mtmt-widget-header">
 				<p class="mtmt-eyebrow"><?php echo esc_html( $header_eyebrow ); ?></p>
@@ -260,10 +261,7 @@ final class Mtmt_Widget_All_Publications extends \Elementor\Widget_Base {
 				<?php endif; ?>
 				<?php if ( $show_topic_filter && ! empty( $areas ) ) : ?>
 					<select class="mtmt-area-filter">
-						<option value="0"><?php echo esc_html( $area_filter_all_label ); ?></option>
-						<?php foreach ( $areas as $area ) : ?>
-							<option value="<?php echo esc_attr( (string) $area['id'] ); ?>"><?php echo esc_html( $area['label'] ); ?></option>
-						<?php endforeach; ?>
+						<?php echo Mtmt_Widget_Ajax::render_area_options( $areas, 0, $area_filter_all_label ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- saját, escape-elt HTML-t épít. ?>
 					</select>
 				<?php endif; ?>
 			</div>

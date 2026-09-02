@@ -1257,3 +1257,20 @@ activate()` idempotenciája (kétszeri hívás nem duplikál), az önjavító
      - Az AJAX oldal-számláló túllógás-védelme (mint az admin-listánál):
        ha a szűrés után az oldalszám nagyobb a tényleges oldalszámnál, az
        utolsó valós oldalra esik vissza.
+
+     **0.13.2 utókövetés — a terület-szűrő lenyíló is a kereséshez igazodik.**
+     Ugyanez a 0.13.1-es logika a másik szűrőre: keresés után az "A" widget
+     szakmai terület lenyílójában csak azok a területek maradjanak, amikhez
+     van a keresésnek megfelelő jóváhagyott tétel.
+     - `Mtmt_Topic_Area_Repository::get_area_ids_with_matches( $search )`:
+       `DISTINCT topic_area_id` a pivot + publications JOIN-ból, `approved` +
+       cím/szerző/forrás LIKE szűréssel.
+     - `Mtmt_Widget_Data::get_filterable_topic_areas( $search )`: üres
+       keresésnél az összes terület, egyébként csak a találatot adók.
+     - Az AJAX-válasz visszaadja az újraszámolt `<option>`-listát
+       (`area_options`, új `Mtmt_Widget_Ajax::render_area_options()` — a
+       widget kezdeti renderje is ezt hívja) és az `active_area_id`-t. Ha a
+       kiválasztott terület a keresés miatt kiesett, "minden terület"-re esik
+       vissza. A JS az `area_filter=1`-et csak akkor küldi, ha van
+       `.mtmt-area-filter` (a "B" widgetnek nincs). Ha csak a "minden
+       terület" opció marad, a JS elrejti a lenyílót.

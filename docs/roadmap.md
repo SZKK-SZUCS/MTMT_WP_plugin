@@ -740,6 +740,10 @@ szövegek érthetőek-e egy nem-technikai kollégának is; próbáld ki az email
 - **0.13.1: üres év-fülek elrejtése** — keresés vagy (frontend) terület-szűrés
   után csak azok az év-fülek látszanak, amikre van találat; ha a kiválasztott
   évre már nincs, a widget "Összes"-re vált. (docs/decisions.md #100 utókövetés.)
+- **0.13.2: a terület-szűrő lenyíló is a kereséshez igazodik** — keresés után
+  csak azok a szakmai területek maradnak az "A" widget lenyílójában, amikhez
+  van a keresésnek megfelelő tétel; ha a kiválasztott kiesett, "minden
+  terület"-re vált. (docs/decisions.md #100 utókövetés.)
 
 Nincs DB-változás, nincs új plugin-beállítás. i18n +5 string (290).
 
@@ -754,6 +758,11 @@ Nincs DB-változás, nincs új plugin-beállítás. i18n +5 string (290).
 2b. Keress rá egy olyan szóra, ami csak 1-2 évben ad találatot — az év-fülek
    szűküljenek le azokra az évekre; töröld a keresést — jöjjön vissza az
    összes év. Ugyanez a frontend terület-szűrővel ("A" widget).
+2c. Keress rá valamire, majd nyisd le a szakmai terület szűrőt — csak azok a
+   területek legyenek benne, amikhez van a keresésnek megfelelő tétel; töröld
+   a keresést — jöjjön vissza az összes terület. Ha előbb területet választasz,
+   utána olyanra keresel, aminél annak a területnek nincs találata — a szűrő
+   álljon vissza "minden terület"-re és a lista mutassa az összes találatot.
 3. wp-admin → MTMT lista → menj a 3. (vagy tovább) oldalra, nyiss meg egy
    rekordot "Szerkesztés/Gazdagítás"-sal, majd "Vissza a listához" — ugyanazon
    az oldalszámon legyél.

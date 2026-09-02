@@ -188,4 +188,31 @@ final class Mtmt_Widget_Data {
 
 		return $years;
 	}
+
+	/**
+	 * A widget terület-szűrő lenyílójában megjelenítendő területek: üres
+	 * keresésnél mind, egyébként csak azok, amikhez van a keresésnek megfelelő
+	 * jóváhagyott találat (így keresés után nem kínálunk üres területet).
+	 *
+	 * @param string $search
+	 * @return array[] Terület-sorok (id, label, ...).
+	 */
+	public function get_filterable_topic_areas( string $search = '' ): array {
+		$all = $this->topic_area_repo->get_all();
+
+		if ( '' === trim( $search ) ) {
+			return $all;
+		}
+
+		$match_ids = $this->topic_area_repo->get_area_ids_with_matches( $search );
+
+		return array_values(
+			array_filter(
+				$all,
+				static function ( $area ) use ( $match_ids ) {
+					return in_array( (int) $area['id'], $match_ids, true );
+				}
+			)
+		);
+	}
 }

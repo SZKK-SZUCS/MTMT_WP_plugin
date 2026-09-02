@@ -93,6 +93,33 @@ final class Mtmt_Widget_Ajax {
 			$year_all_label = __( 'Összes', 'mtmt-sync' );
 		}
 
+		// Terület-szűrő lenyíló ("A" widget): keresés után csak azok a területek
+		// maradjanak a listában, amikhez van a keresésnek megfelelő találat.
+		// A JS az `area_filter=1`-et csak akkor küldi, ha van .mtmt-area-filter.
+		$area_options = null;
+		if ( ! empty( $_POST['area_filter'] ) && get_option( 'mtmt_enable_topic_areas' ) ) {
+			$area_all_label = isset( $_POST['area_filter_all_label'] ) ? sanitize_text_field( wp_unslash( $_POST['area_filter_all_label'] ) ) : '';
+			if ( '' === $area_all_label ) {
+				$area_all_label = __( 'Minden szakmai terület', 'mtmt-sync' );
+			}
+
+			$filterable_areas = $this->widget_data->get_filterable_topic_areas( $args['search'] );
+			$filterable_ids   = array_map(
+				static function ( $area ) {
+					return (int) $area['id'];
+				},
+				$filterable_areas
+			);
+
+			// Ha a kiválasztott terület a keresés miatt kiesett, "minden terület"-re
+			// esünk vissza, hogy a lista ne tűnjön indokolatlanul üresnek.
+			if ( 0 !== $args['area_id'] && '' !== trim( $args['search'] ) && ! in_array( $args['area_id'], $filterable_ids, true ) ) {
+				$args['area_id'] = 0;
+			}
+
+			$area_options = self::render_area_options( $filterable_areas, (int) $args['area_id'], $area_all_label );
+		}
+
 		// Csak azok az év-fülek jelenjenek meg, amelyeknek az aktuális
 		// kereséssel / terület-szűréssel is van találatuk.
 		$available_years = $this->widget_data->get_available_years(
@@ -129,15 +156,41 @@ final class Mtmt_Widget_Ajax {
 
 		wp_send_json_success(
 			array(
-				'html'        => $html,
-				'total'       => (int) $result['total'],
-				'total_pages' => $total_pages,
-				'paged'       => $args['paged'],
-				'pagination'  => self::render_pagination( $args['paged'], $total_pages, $prev_label, $next_label ),
-				'year_tabs'   => self::render_year_tabs( $available_years, (int) $args['year'], $year_all_label ),
-				'active_year' => (int) $args['year'],
+				'html'           => $html,
+				'total'          => (int) $result['total'],
+				'total_pages'    => $total_pages,
+				'paged'          => $args['paged'],
+				'pagination'     => self::render_pagination( $args['paged'], $total_pages, $prev_label, $next_label ),
+				'year_tabs'      => self::render_year_tabs( $available_years, (int) $args['year'], $year_all_label ),
+				'active_year'    => (int) $args['year'],
+				'area_options'   => $area_options, // null, ha a widgetnek nincs terület-szűrője.
+				'active_area_id' => (int) $args['area_id'],
 			)
 		);
+	}
+
+	/**
+	 * A terület-szűrő lenyíló belső HTML-je ("minden terület" opció + területek).
+	 * A widget kezdeti (nem-AJAX) renderje is ezt hívja.
+	 *
+	 * @param array[] $areas       Terület-sorok (id, label, ...).
+	 * @param int     $selected_id 0 = "minden terület".
+	 * @param string  $all_label   A "minden terület" opció felirata (widget-beállítás).
+	 * @return string
+	 */
+	public static function render_area_options( array $areas, int $selected_id, string $all_label = '' ): string {
+		if ( '' === $all_label ) {
+			$all_label = __( 'Minden szakmai terület', 'mtmt-sync' );
+		}
+
+		$out = '<option value="0"' . selected( $selected_id, 0, false ) . '>' . esc_html( $all_label ) . '</option>';
+
+		foreach ( $areas as $area ) {
+			$id   = (int) $area['id'];
+			$out .= '<option value="' . esc_attr( (string) $id ) . '"' . selected( $selected_id, $id, false ) . '>' . esc_html( (string) $area['label'] ) . '</option>';
+		}
+
+		return $out;
 	}
 
 	/**

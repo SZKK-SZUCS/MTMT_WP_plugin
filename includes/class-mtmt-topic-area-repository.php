@@ -135,6 +135,41 @@ final class Mtmt_Topic_Area_Repository {
 	}
 
 	/**
+	 * Terület-id-k, amelyekhez tartozik legalább egy `approved` publikáció, ami
+	 * megfelel a keresésnek (cím/szerző/forrás LIKE). A widget terület-szűrő
+	 * lenyílójához: keresés után csak a találatot adó területek maradjanak.
+	 * Üres keresésnél az összes olyan terület, amihez van jóváhagyott tétel.
+	 *
+	 * @param string $search
+	 * @return int[]
+	 */
+	public function get_area_ids_with_matches( string $search = '' ): array {
+		$pubs_table = $this->wpdb->prefix . 'mtmt_publications';
+
+		$where  = array( "p.status = 'approved'" );
+		$params = array();
+
+		if ( '' !== trim( $search ) ) {
+			$like     = '%' . $this->wpdb->esc_like( trim( $search ) ) . '%';
+			$where[]  = '(p.title LIKE %s OR p.authors_text LIKE %s OR p.source_title LIKE %s)';
+			$params[] = $like;
+			$params[] = $like;
+			$params[] = $like;
+		}
+
+		$sql = "SELECT DISTINCT pt.topic_area_id
+			FROM {$this->pivot_table} pt
+			INNER JOIN {$pubs_table} p ON p.id = pt.pub_id
+			WHERE " . implode( ' AND ', $where );
+
+		$rows = $params
+			? $this->wpdb->get_col( $this->wpdb->prepare( $sql, $params ) )
+			: $this->wpdb->get_col( $sql );
+
+		return array_map( 'intval', $rows );
+	}
+
+	/**
 	 * Több publikációhoz egyszerre lekéri a hozzájuk rendelt terület-label-eket
 	 * (a moderációs lista oszlopához — egy lekérdezés N helyett).
 	 *

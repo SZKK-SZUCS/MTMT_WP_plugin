@@ -62,6 +62,12 @@
 			body.set( 'featured_only', '1' );
 		} else {
 			body.set( 'area_id', String( s.areaId ) );
+			// Van terület-szűrő lenyíló -> a szerver keresés után szűkítse a
+			// listáját a találatot adó területekre.
+			if ( widget.querySelector( '.mtmt-area-filter' ) ) {
+				body.set( 'area_filter', '1' );
+				body.set( 'area_filter_all_label', widget.getAttribute( 'data-area-all-label' ) || '' );
+			}
 		}
 
 		widget.classList.add( 'is-loading' );
@@ -95,6 +101,20 @@
 				}
 				if ( typeof json.data.active_year !== 'undefined' ) {
 					s.year = parseInt( json.data.active_year, 10 ) || 0;
+				}
+				// A terület-szűrő lenyíló is a kereséssel újraszámolódik: csak a
+				// találatot adó területek maradnak benne. A szerver a helyes
+				// <option>-t jelöli kiválasztottnak (ha a kiválasztott terület
+				// kiesett, "minden terület"-re esik vissza).
+				var areaFilter = widget.querySelector( '.mtmt-area-filter' );
+				if ( areaFilter && typeof json.data.area_options === 'string' ) {
+					areaFilter.innerHTML = json.data.area_options;
+					// Ha csak a "minden terület" opció maradt (a keresésnek egyik
+					// terület sem felel meg), a szűrőnek nincs értelme -> elrejtjük.
+					areaFilter.hidden = areaFilter.options.length <= 1;
+					if ( typeof json.data.active_area_id !== 'undefined' ) {
+						s.areaId = parseInt( json.data.active_area_id, 10 ) || 0;
+					}
 				}
 			} )
 			['catch']( function () {

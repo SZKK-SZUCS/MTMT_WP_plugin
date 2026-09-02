@@ -7,7 +7,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-09-02T07:13:51+00:00\n"
+"POT-Creation-Date: 2026-09-02T07:31:45+00:00\n"
 "X-Generator: bin/i18n/build.php\n"
 "X-Domain: mtmt-sync\n"
 #: includes/class-mtmt-sync.php:150
@@ -238,7 +238,7 @@ msgstr ""
 msgid "Előnézeti kép"
 msgstr ""
 
-#: elementor/class-mtmt-widget-all-publications.php:166 elementor/class-mtmt-widget-topic-publications.php:191 includes/class-mtmt-widget-ajax.php:87 includes/class-mtmt-widget-ajax.php:195
+#: elementor/class-mtmt-widget-all-publications.php:166 elementor/class-mtmt-widget-topic-publications.php:191 includes/class-mtmt-widget-ajax.php:87 includes/class-mtmt-widget-ajax.php:248
 msgid "Előző"
 msgstr ""
 
@@ -502,7 +502,7 @@ msgstr ""
 msgid "Kép kiválasztása"
 msgstr ""
 
-#: elementor/class-mtmt-widget-all-publications.php:167 elementor/class-mtmt-widget-topic-publications.php:192 includes/class-mtmt-widget-ajax.php:90 includes/class-mtmt-widget-ajax.php:198
+#: elementor/class-mtmt-widget-all-publications.php:167 elementor/class-mtmt-widget-topic-publications.php:192 includes/class-mtmt-widget-ajax.php:90 includes/class-mtmt-widget-ajax.php:251
 msgid "Következő"
 msgstr ""
 
@@ -514,7 +514,7 @@ msgstr ""
 msgid "Lapozás"
 msgstr ""
 
-#: includes/class-mtmt-widget-ajax.php:204
+#: includes/class-mtmt-widget-ajax.php:257
 msgid "Lapozó"
 msgstr ""
 
@@ -670,7 +670,7 @@ msgstr ""
 msgid "Minden státusz"
 msgstr ""
 
-#: admin/class-mtmt-list-table.php:390 elementor/class-mtmt-widget-all-publications.php:163
+#: admin/class-mtmt-list-table.php:390 elementor/class-mtmt-widget-all-publications.php:163 includes/class-mtmt-widget-ajax.php:103 includes/class-mtmt-widget-ajax.php:183
 msgid "Minden szakmai terület"
 msgstr ""
 
@@ -1116,7 +1116,7 @@ msgstr ""
 msgid "Óra"
 msgstr ""
 
-#: elementor/class-mtmt-widget-all-publications.php:164 elementor/class-mtmt-widget-topic-publications.php:189 includes/class-mtmt-widget-ajax.php:93 includes/class-mtmt-widget-ajax.php:158
+#: elementor/class-mtmt-widget-all-publications.php:164 elementor/class-mtmt-widget-topic-publications.php:189 includes/class-mtmt-widget-ajax.php:93 includes/class-mtmt-widget-ajax.php:211
 msgid "Összes"
 msgstr ""
 
