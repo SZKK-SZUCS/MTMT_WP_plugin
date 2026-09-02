@@ -4,7 +4,7 @@ Tags: mtmt, publications, elementor, publikaciok, tudomanyos
 Requires at least: 6.4
 Tested up to: 6.7
 Requires PHP: 8.1
-Stable tag: 0.13.1
+Stable tag: 0.13.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -103,6 +103,12 @@ egyikkel sem, csak a látogató-vezérelt alapbeállítással) működik, tiszt�
 üzemeltetési döntés, telepítésenként eltérhet.
 
 == Changelog ==
+
+= 0.13.2 =
+* Widget szakmai terület szűrő: keresés után már csak azok a területek
+  jelennek meg a lenyílóban, amikhez van a keresésnek megfelelő tétel. Ha
+  előbb területet választasz, majd olyanra keresel, aminél annak a
+  területnek nincs találata, a szűrő visszaáll "minden terület"-re.
 
 = 0.13.1 =
 * Widget év-fülek: keresés vagy (frontend) szakmai terület-szűrés után
@@ -288,6 +294,10 @@ egyikkel sem, csak a látogató-vezérelt alapbeállítással) működik, tiszt�
 * Kezdeti bootstrap: plugin-header, aktivátor (tábla-migráció dbDelta-val).
 
 == Upgrade Notice ==
+
+= 0.13.2 =
+Widget-finomítás: keresés után a szakmai terület szűrő is csak a találatot
+adó területeket kínálja. Csak a widget működését érinti, adatot nem.
 
 = 0.13.1 =
 Widget-finomítás: keresés/terület-szűrés után eltűnnek az üres év-fülek.
