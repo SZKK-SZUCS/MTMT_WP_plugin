@@ -4,7 +4,7 @@ Tags: mtmt, publications, elementor, publikaciok, tudomanyos
 Requires at least: 6.4
 Tested up to: 6.7
 Requires PHP: 8.1
-Stable tag: 0.13.0
+Stable tag: 0.13.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -103,6 +103,12 @@ egyikkel sem, csak a látogató-vezérelt alapbeállítással) működik, tiszt�
 üzemeltetési döntés, telepítésenként eltérhet.
 
 == Changelog ==
+
+= 0.13.1 =
+* Widget év-fülek: keresés vagy (frontend) szakmai terület-szűrés után
+  már csak azok az évek jelennek meg, amikre ténylegesen van találat. Ha
+  éppen egy olyan év-fülön állsz, amire a szűréssel nincs eredmény, a
+  widget automatikusan az "Összes" nézetre vált.
 
 = 0.13.0 =
 * Új widget-beállítás: "Rendezés" (Legújabb elöl / Legrégebbi elöl / Cím
@@ -282,6 +288,10 @@ egyikkel sem, csak a látogató-vezérelt alapbeállítással) működik, tiszt�
 * Kezdeti bootstrap: plugin-header, aktivátor (tábla-migráció dbDelta-val).
 
 == Upgrade Notice ==
+
+= 0.13.1 =
+Widget-finomítás: keresés/terület-szűrés után eltűnnek az üres év-fülek.
+Csak a widget működését érinti, adatot nem.
 
 = 0.13.0 =
 Widget-rendezés választó (alapból "legújabb elöl"), a moderációs lista
