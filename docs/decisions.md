@@ -1235,3 +1235,25 @@ activate()` idempotenciája (kétszeri hívás nem duplikál), az önjavító
        szűrő-sorban).
      Nincs adatbázis-változás, nincs új plugin-beállítás. i18n +5 string
      (290, mind lefordítva), repo-szintű `php -l` lint tiszta.
+
+     **0.13.1 utókövetés — üres év-fülek elrejtése keresés/terület-szűrés
+     után.** A 0.13.0-ból kimaradt: az év-fülek a kezdeti scope (profil/
+     terület/kiemelt) szerint épültek, de a látogatói keresést és a frontend
+     terület-szűrőt nem vették figyelembe — így megjelentek olyan évek is,
+     amikre az adott kereséssel 0 találat volt.
+     - `get_distinct_years_filtered()` + `Mtmt_Widget_Data::get_available_years()`
+       kap egy `search` paramétert (ugyanaz a cím/szerző/forrás LIKE, mint a
+       `get_list()`-ben). Keresés esetén nincs transient-cache (keresőszavanként
+       külön transient fölösleges lenne, a `DISTINCT` amúgy is olcsó).
+     - Az AJAX-válasz mostantól visszaadja az újraszámolt év-fül-HTML-t
+       (`year_tabs`, új `Mtmt_Widget_Ajax::render_year_tabs()` — a widgetek
+       kezdeti renderje is ezt hívja) és az `active_year`-t. Ha a kiválasztott
+       évre a szűréssel már nincs találat, a szerver "Összes"-re esik vissza,
+       hogy a lista ne tűnjön indokolatlanul üresnek.
+     - `widget-frontend.js`: minden AJAX-válasznál lecseréli a `.mtmt-year-tabs`
+       tartalmát és szinkronizálja a kliens `s.year` állapotot az
+       `active_year`-rel. 0 találatnál a fül-sor üres lesz -> `:empty` CSS
+       elrejti.
+     - Az AJAX oldal-számláló túllógás-védelme (mint az admin-listánál):
+       ha a szűrés után az oldalszám nagyobb a tényleges oldalszámnál, az
+       utolsó valós oldalra esik vissza.

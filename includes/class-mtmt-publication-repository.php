@@ -359,6 +359,8 @@ final class Mtmt_Publication_Repository {
 	 *     @type string $status        Alapértelmezetten 'approved' (a widgetek mindig ezt kérik).
 	 *     @type int    $profile_id
 	 *     @type bool   $featured_only
+	 *     @type string $search        Cím/szerző/forrás LIKE-keresés — a keresés
+	 *                                 utáni év-fülekhez (üres évek kihagyása).
 	 *     @type int[]|null $ids
 	 * }
 	 * @return int[]
@@ -369,6 +371,7 @@ final class Mtmt_Publication_Repository {
 				'status'        => 'approved',
 				'profile_id'    => 0,
 				'featured_only' => false,
+				'search'        => '',
 				'ids'           => null,
 			),
 			$args
@@ -387,6 +390,13 @@ final class Mtmt_Publication_Repository {
 		}
 		if ( ! empty( $args['featured_only'] ) ) {
 			$where[] = 'is_featured = 1';
+		}
+		if ( '' !== trim( (string) $args['search'] ) ) {
+			$like     = '%' . $this->wpdb->esc_like( trim( (string) $args['search'] ) ) . '%';
+			$where[]  = '(title LIKE %s OR authors_text LIKE %s OR source_title LIKE %s)';
+			$params[] = $like;
+			$params[] = $like;
+			$params[] = $like;
 		}
 		if ( is_array( $args['ids'] ) ) {
 			$ids = array_map( 'absint', $args['ids'] );

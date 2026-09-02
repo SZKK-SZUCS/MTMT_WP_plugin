@@ -137,14 +137,16 @@ final class Mtmt_Widget_Data {
 	}
 
 	/**
-	 * Elérhető évek az év-fülekhez, UGYANAZZAL a scope-pal (profil/terület/kiemelt),
-	 * mint amivel a widget ténylegesen lekérdez — így nem kínálunk fel olyan
-	 * év-fület, aminek 0 találata lenne az adott widget-példány szűrésével.
+	 * Elérhető évek az év-fülekhez, UGYANAZZAL a scope-pal (profil/terület/kiemelt)
+	 * ÉS az aktuális kereséssel, mint amivel a widget ténylegesen lekérdez — így
+	 * nem kínálunk fel olyan év-fület, aminek 0 találata lenne (pl. keresés vagy
+	 * terület-szűrés után).
 	 *
 	 * @param array $scope {
-	 *     @type int  $area_id
-	 *     @type int  $profile_id
-	 *     @type bool $featured_only
+	 *     @type int    $area_id
+	 *     @type int    $profile_id
+	 *     @type bool   $featured_only
+	 *     @type string $search
 	 * }
 	 * @return int[]
 	 */
@@ -154,6 +156,7 @@ final class Mtmt_Widget_Data {
 				'area_id'       => 0,
 				'profile_id'    => 0,
 				'featured_only' => false,
+				'search'        => '',
 			),
 			$scope
 		);
@@ -162,9 +165,16 @@ final class Mtmt_Widget_Data {
 			'status'        => 'approved',
 			'profile_id'    => (int) $scope['profile_id'],
 			'featured_only' => (bool) $scope['featured_only'],
+			'search'        => (string) $scope['search'],
 		);
 		if ( (int) $scope['area_id'] > 0 ) {
 			$repo_args['ids'] = $this->topic_area_repo->get_publication_ids_for_area( (int) $scope['area_id'] );
+		}
+
+		// Keresés esetén nem cache-elünk — minden keresőszóra külön transient
+		// fölösleges szemetet szórna, a DISTINCT-lekérdezés meg amúgy is olcsó.
+		if ( '' !== trim( (string) $repo_args['search'] ) ) {
+			return $this->repository->get_distinct_years_filtered( $repo_args );
 		}
 
 		$cache_key = 'mtmt_widget_years_' . md5( Mtmt_Widget_Cache::version() . '|' . wp_json_encode( $repo_args ) );

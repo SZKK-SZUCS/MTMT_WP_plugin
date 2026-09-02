@@ -90,6 +90,12 @@
 	border-bottom: 1px solid var(--mtmt-border);
 }
 
+/* Keresés/terület-szűrés után 0 találatnál az AJAX üresre cseréli a fül-sort —
+   ilyenkor a szegély/térköz se maradjon ott árván. */
+.mtmt-year-tabs:empty {
+	display: none;
+}
+
 .mtmt-year-tab {
 	background: transparent;
 	border: none;

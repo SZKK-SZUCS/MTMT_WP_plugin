@@ -737,6 +737,9 @@ szövegek érthetőek-e egy nem-technikai kollégának is; próbáld ki az email
 - **Determinisztikus lapozás** (mellékesen javított, korábbi hiba): a
   `get_list()` ORDER BY-a mostantól minden ágon `id`-tie-breakerrel zárul —
   azonos évű tételek nem cserélgetik a helyüket oldalak közt.
+- **0.13.1: üres év-fülek elrejtése** — keresés vagy (frontend) terület-szűrés
+  után csak azok az év-fülek látszanak, amikre van találat; ha a kiválasztott
+  évre már nincs, a widget "Összes"-re vált. (docs/decisions.md #100 utókövetés.)
 
 Nincs DB-változás, nincs új plugin-beállítás. i18n +5 string (290).
 
@@ -748,6 +751,9 @@ Nincs DB-változás, nincs új plugin-beállítás. i18n +5 string (290).
    a D1/Q1-es tételek kerüljenek előre, a besorolás nélküliek a végére.
 2. Keress rá valamire / válts év-fület / lapozz — a beállított sorrend
    maradjon érvényben (ne ugorjon vissza "legújabb elöl"-re).
+2b. Keress rá egy olyan szóra, ami csak 1-2 évben ad találatot — az év-fülek
+   szűküljenek le azokra az évekre; töröld a keresést — jöjjön vissza az
+   összes év. Ugyanez a frontend terület-szűrővel ("A" widget).
 3. wp-admin → MTMT lista → menj a 3. (vagy tovább) oldalra, nyiss meg egy
    rekordot "Szerkesztés/Gazdagítás"-sal, majd "Vissza a listához" — ugyanazon
    az oldalszámon legyél.

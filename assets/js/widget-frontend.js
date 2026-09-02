@@ -54,6 +54,7 @@
 		body.set( 'empty_state_text', widget.getAttribute( 'data-empty-text' ) || '' );
 		body.set( 'pagination_prev_label', widget.getAttribute( 'data-prev-label' ) || '' );
 		body.set( 'pagination_next_label', widget.getAttribute( 'data-next-label' ) || '' );
+		body.set( 'year_tab_all_label', widget.getAttribute( 'data-year-all-label' ) || '' );
 
 		if ( 'topic' === widget.getAttribute( 'data-widget-type' ) ) {
 			body.set( 'area_id', widget.getAttribute( 'data-area-id' ) || '0' );
@@ -78,11 +79,22 @@
 				}
 				var list = widget.querySelector( '.mtmt-widget-list' );
 				var pagination = widget.querySelector( '.mtmt-widget-pagination' );
+				var yearTabs = widget.querySelector( '.mtmt-year-tabs' );
 				if ( list ) {
 					list.innerHTML = json.data.html;
 				}
 				if ( pagination ) {
 					pagination.innerHTML = json.data.pagination;
+				}
+				// Az év-fülek a kereséssel/terület-szűréssel újraszámolódnak a
+				// szerveren — csak a találatot adó évek maradnak. A szerver az
+				// aktív évet is visszaadhatja módosítva (ha a kiválasztott évre
+				// már nincs találat, "Összes"-re esik vissza).
+				if ( yearTabs && typeof json.data.year_tabs === 'string' ) {
+					yearTabs.innerHTML = json.data.year_tabs;
+				}
+				if ( typeof json.data.active_year !== 'undefined' ) {
+					s.year = parseInt( json.data.active_year, 10 ) || 0;
 				}
 			} )
 			['catch']( function () {

@@ -242,7 +242,8 @@ final class Mtmt_Widget_All_Publications extends \Elementor\Widget_Base {
 			data-year="<?php echo esc_attr( (string) $initial_year ); ?>"
 			data-empty-text="<?php echo esc_attr( $empty_state_text ); ?>"
 			data-prev-label="<?php echo esc_attr( $prev_label ); ?>"
-			data-next-label="<?php echo esc_attr( $next_label ); ?>">
+			data-next-label="<?php echo esc_attr( $next_label ); ?>"
+			data-year-all-label="<?php echo esc_attr( $year_tab_all_label ); ?>">
 
 			<div class="mtmt-widget-header">
 				<p class="mtmt-eyebrow"><?php echo esc_html( $header_eyebrow ); ?></p>
@@ -270,10 +271,7 @@ final class Mtmt_Widget_All_Publications extends \Elementor\Widget_Base {
 
 			<?php if ( ! empty( $years ) ) : ?>
 			<div class="mtmt-year-tabs" role="tablist">
-				<button type="button" class="mtmt-year-tab<?php echo ( 0 === $initial_year ) ? ' is-active' : ''; ?>" data-year="0"><?php echo esc_html( $year_tab_all_label ); ?></button>
-				<?php foreach ( $years as $year ) : ?>
-					<button type="button" class="mtmt-year-tab<?php echo ( $year === $initial_year ) ? ' is-active' : ''; ?>" data-year="<?php echo esc_attr( (string) $year ); ?>"><?php echo esc_html( (string) $year ); ?></button>
-				<?php endforeach; ?>
+				<?php echo Mtmt_Widget_Ajax::render_year_tabs( $years, (int) $initial_year, $year_tab_all_label ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- saját, escape-elt HTML-t épít. ?>
 			</div>
 			<?php endif; ?>
 
