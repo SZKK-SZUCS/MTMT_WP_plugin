@@ -6,6 +6,11 @@
 
 ## 0. TL;DR a Claude Code-nak
 
+> **Megjegyzés (2026-09):** ez az eredeti kickoff-terv, változatlanul
+> hagyva referenciának (ld. §12). Az aktuális állapotért lásd
+> `docs/roadmap.md` — a projekt jelenleg v0.13.2-nél, Fázis 2 után tart,
+> a lenti "első lépés" már megtörtént.
+
 Építs egy **WordPress plugint**, ami az **MTMT publikus REST API-jából** hetente lekérdez publikációkat megadott szűrőprofilok alapján, wp-adminban **jóváhagyható/elutasítható és kézzel gazdagítható** (indexkép, kutatócsoport, projektazonosító-ellenőrzés), majd egy **Elementor widget** naptári évekre bontva, kereshetően/szűrhetően megjeleníti a jóváhagyott tételeket. A plugin **GitHubon él**, és a **Plugin Update Checker (PUC) v5**-tel frissül az éles oldalakon.
 
 **FONTOS első lépés, mielőtt kódot írsz:** csinálj egy éles minta-lekérést egy konkrét `mtid`-re (lásd 5.6), és a tényleges JSON-válaszból térképezd fel a mezőneveket. Az MTMT mezőnevei verziófüggők — ne találj ki kulcsneveket, a valós válaszra építs. Ahol a spec „ellenőrizd élesben" jelölést tesz, ott tényleg kérdezz vissza vagy tesztelj, ne tippelj.
