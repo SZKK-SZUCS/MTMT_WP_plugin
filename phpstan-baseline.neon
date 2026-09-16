@@ -1,0 +1,66 @@
+parameters:
+	ignoreErrors:
+		-
+			message: "#^Property Mtmt_Profiles_Page\\:\\:\\$repopulate \\(array\\{label\\: string, scope_type\\: string, scope_value\\: string, doi_only\\: bool\\}\\|null\\) does not accept array\\{label\\: '', scope_type\\: string, value\\: string, doi_only\\: bool\\}\\.$#"
+			count: 1
+			path: admin/class-mtmt-profiles-page.php
+
+		-
+			message: "#^Property Mtmt_Profiles_Page\\:\\:\\$repopulate \\(array\\{label\\: string, scope_type\\: string, scope_value\\: string, doi_only\\: bool\\}\\|null\\) does not accept array\\{label\\: non\\-empty\\-string, scope_type\\: string, value\\: string, doi_only\\: bool\\}\\.$#"
+			count: 1
+			path: admin/class-mtmt-profiles-page.php
+
+		-
+			message: "#^Property Mtmt_Profiles_Page\\:\\:\\$repopulate \\(array\\{label\\: string, scope_type\\: string, scope_value\\: string, doi_only\\: bool\\}\\|null\\) does not accept array\\{label\\: string, scope_type\\: string, value\\: string, doi_only\\: bool\\}\\.$#"
+			count: 1
+			path: admin/class-mtmt-profiles-page.php
+
+		-
+			message: "#^Offset 'pending' on array\\{pending\\: int, approved\\: int, rejected\\: int\\} on left side of \\?\\? always exists and is not nullable\\.$#"
+			count: 1
+			path: admin/class-mtmt-publications-page.php
+
+		-
+			message: "#^Call to method add_category\\(\\) on an unknown class Elementor\\\\Elements_Manager\\.$#"
+			count: 1
+			path: elementor/class-mtmt-elementor-loader.php
+
+		-
+			message: "#^Call to method register\\(\\) on an unknown class Elementor\\\\Widgets_Manager\\.$#"
+			count: 2
+			path: elementor/class-mtmt-elementor-loader.php
+
+		-
+			message: "#^Instantiated class Mtmt_Widget_All_Publications not found\\.$#"
+			count: 1
+			path: elementor/class-mtmt-elementor-loader.php
+
+		-
+			message: "#^Instantiated class Mtmt_Widget_Topic_Publications not found\\.$#"
+			count: 1
+			path: elementor/class-mtmt-elementor-loader.php
+
+		-
+			message: "#^Parameter \\$elements_manager of method Mtmt_Elementor_Loader\\:\\:register_category\\(\\) has invalid type Elementor\\\\Elements_Manager\\.$#"
+			count: 1
+			path: elementor/class-mtmt-elementor-loader.php
+
+		-
+			message: "#^Parameter \\$widgets_manager of method Mtmt_Elementor_Loader\\:\\:register_widgets\\(\\) has invalid type Elementor\\\\Widgets_Manager\\.$#"
+			count: 1
+			path: elementor/class-mtmt-elementor-loader.php
+
+		-
+			message: "#^Function WP_CLI\\\\Utils\\\\format_items not found\\.$#"
+			count: 1
+			path: includes/class-mtmt-cli.php
+
+		-
+			message: "#^Comparison operation \"\\>\" between int\\<1, 50\\> and 0 is always true\\.$#"
+			count: 1
+			path: includes/class-mtmt-widget-ajax.php
+
+		-
+			message: "#^Else branch is unreachable because ternary operator condition is always true\\.$#"
+			count: 1
+			path: includes/class-mtmt-widget-ajax.php

@@ -420,3 +420,14 @@ A Fázis 1 élesben igazolt (767/0/0, JKK profil) után tartott megbeszélésen 
 ---
 
 *Ez a brief a v0.1 rendszertervből + a megrendelői követelménydoksiból + a megbeszélt deltákból állt össze. Ha a felderítő fetch (Fázis 0) ellentmond bárminek itt, a valós API nyer — frissítsd ezt a fájlt és a `docs/field-map.md`-t.*
+
+---
+
+## Kiegészítés (2026-09): lint/static-analysis tooling
+
+A §11 WPCS-előírás mostantól gépi ellenőrzéssel is meg van támogatva:
+- `composer install` — phpcs (WordPress Coding Standards) + phpstan dev-függőségek
+- `composer lint` — phpcs. Jelenleg **522 hiba / 89 warning**, túlnyomórészt formázás (84 auto-javítható `composer lint:fix`-fel — nagy diffet generál, futtasd tudatosan)
+- `composer stan` — phpstan level 5. A jelenlegi 14 hiba `phpstan-baseline.neon`-ban van (nem blokkol, csak ÚJ hiba jelez PR-ban)
+- `composer stan:baseline` — újragenerálja a baseline-t, ha tudatosan elfogadsz új hibákat
+- Két Elementor widget fájl (`elementor/class-mtmt-widget-*-publications.php`) ki van zárva a phpstan-elemzésből, mert az Elementor osztályai (Widget_Base stb.) nincsenek stub-olva ebben a setupban

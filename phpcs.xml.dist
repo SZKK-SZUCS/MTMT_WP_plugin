@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<ruleset name="mtmt-sync">
+    <description>WordPress Coding Standards az mtmt-sync pluginhoz</description>
+
+    <file>.</file>
+    <exclude-pattern>/vendor/*</exclude-pattern>
+    <exclude-pattern>/lib/plugin-update-checker/*</exclude-pattern>
+    <exclude-pattern>/languages/*</exclude-pattern>
+    <exclude-pattern>/bin/*</exclude-pattern>
+
+    <arg value="sp"/>
+    <arg name="basepath" value="."/>
+    <arg name="colors"/>
+    <arg name="extensions" value="php"/>
+
+    <rule ref="WordPress"/>
+    <rule ref="WordPress.NamingConventions.PrefixAllGlobals">
+        <properties>
+            <property name="prefixes" type="array">
+                <element value="mtmt"/>
+                <element value="Mtmt"/>
+            </property>
+        </properties>
+    </rule>
+</ruleset>

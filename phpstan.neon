@@ -1,0 +1,25 @@
+includes:
+    - vendor/szepeviktor/phpstan-wordpress/extension.neon
+    - phpstan-baseline.neon
+
+parameters:
+    level: 5
+    paths:
+        - .
+    excludePaths:
+        - vendor/*
+        - lib/plugin-update-checker/*
+        - bin/*
+        # Elementor Widget_Base-t extendelik; Elementor csak feltételesen van
+        # betöltve, phpstan az "extends unknown class" hibát nem tudja
+        # ignoreErrors-szal elnyomni (a compiler saját javaslata: excludePaths).
+        - elementor/class-mtmt-widget-all-publications.php
+        - elementor/class-mtmt-widget-topic-publications.php
+    ignoreErrors:
+        # A fő plugin fájlban define()-olt konstansok — phpstan fájlonként
+        # elemez, nem látja a mtmt-sync.php top-level define() hívásait.
+        - '#^Constant MTMT_PLUGIN_(DIR|URL|FILE) not found\.$#'
+        # Csak akkor töltődik be, ha WP-CLI aktív — feltételesen elérhető, nem hiba.
+        - '#^Call to static method [a-zA-Z_]+\(\) on an unknown class WP_CLI\.$#'
+        # Vendorolt lib, kizárva a szkennelésből, de a mtmt-sync.php hívja.
+        - '#^Call to static method buildUpdateChecker\(\) on an unknown class YahnisElsts\\PluginUpdateChecker\\.*$#'

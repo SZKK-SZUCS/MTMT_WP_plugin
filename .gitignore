@@ -2,6 +2,7 @@
 # (ha bekerül) verziózva marad, kivéve ha git-almodulként húzzuk be.
 
 node_modules/
+/vendor/
 *.log
 .DS_Store
 Thumbs.db
