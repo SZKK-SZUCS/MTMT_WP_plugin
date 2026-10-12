@@ -22,15 +22,18 @@ trait Mtmt_Widget_Common_Controls {
 		);
 
 		$fields = array(
-			'header_eyebrow'        => __( 'Felső kiskapitális felirat', 'mtmt-sync' ),
-			'header_title'          => __( 'Widget címe', 'mtmt-sync' ),
-			'search_placeholder'    => __( 'Kereső mező helyőrző szövege', 'mtmt-sync' ),
-			'area_filter_all_label' => __( 'Terület-szűrő "minden terület" felirata', 'mtmt-sync' ),
-			'year_tab_all_label'    => __( 'Év-fül "összes év" felirata', 'mtmt-sync' ),
-			'empty_state_text'      => __( 'Szöveg, ha nincs találat', 'mtmt-sync' ),
-			'pagination_prev_label' => __( 'Lapozó "előző" felirata', 'mtmt-sync' ),
-			'pagination_next_label' => __( 'Lapozó "következő" felirata', 'mtmt-sync' ),
-			'no_scope_message'      => __( 'Üzenet, ha nincs kiválasztva terület/profil (csak szerkesztőknek látszik)', 'mtmt-sync' ),
+			'header_eyebrow'           => __( 'Felső kiskapitális felirat', 'mtmt-sync' ),
+			'header_title'             => __( 'Widget címe', 'mtmt-sync' ),
+			'search_placeholder'       => __( 'Kereső mező helyőrző szövege', 'mtmt-sync' ),
+			'area_filter_all_label'    => __( 'Terület-szűrő "minden terület" felirata', 'mtmt-sync' ),
+			'project_filter_all_label' => __( 'Projekt-szűrő "minden projekt" felirata', 'mtmt-sync' ),
+			'project_label'            => __( 'Projektazonosító sor felirata a kártyán', 'mtmt-sync' ),
+			'funding_label'            => __( 'Támogatás sor felirata a kártyán', 'mtmt-sync' ),
+			'year_tab_all_label'       => __( 'Év-fül "összes év" felirata', 'mtmt-sync' ),
+			'empty_state_text'         => __( 'Szöveg, ha nincs találat', 'mtmt-sync' ),
+			'pagination_prev_label'    => __( 'Lapozó "előző" felirata', 'mtmt-sync' ),
+			'pagination_next_label'    => __( 'Lapozó "következő" felirata', 'mtmt-sync' ),
+			'no_scope_message'         => __( 'Üzenet, ha nincs kiválasztva terület/profil (csak szerkesztőknek látszik)', 'mtmt-sync' ),
 		);
 
 		if ( array_key_exists( 'header_subtitle', $defaults ) ) {
@@ -62,6 +65,217 @@ trait Mtmt_Widget_Common_Controls {
 		}
 
 		$this->end_controls_section();
+	}
+
+	/**
+	 * "Alapértelmezett nézet": melyik év-fül legyen aktív a widget betöltésekor.
+	 * Egy már nyitott controls-section-be kerül (a hívó widget Tartalom fülére).
+	 * Alapértelmezés: "Összes" — a régi viselkedés (legfrissebb év) választható.
+	 */
+	protected function register_mtmt_default_view_controls(): void {
+		$this->add_control(
+			'default_view',
+			array(
+				'label'       => __( 'Alapértelmezett nézet', 'mtmt-sync' ),
+				'type'        => \Elementor\Controls_Manager::SELECT,
+				'default'     => 'all',
+				'options'     => array(
+					'all'    => __( 'Összes év', 'mtmt-sync' ),
+					'latest' => __( 'Legfrissebb év', 'mtmt-sync' ),
+					'year'   => __( 'Adott év', 'mtmt-sync' ),
+				),
+				'description' => __( 'Melyik év-fül legyen kiválasztva, amikor a látogató megnyitja az oldalt.', 'mtmt-sync' ),
+			)
+		);
+
+		$this->add_control(
+			'default_view_year',
+			array(
+				'label'       => __( 'Év', 'mtmt-sync' ),
+				'type'        => \Elementor\Controls_Manager::NUMBER,
+				'default'     => (int) gmdate( 'Y' ),
+				'min'         => 1900,
+				'max'         => 2100,
+				'condition'   => array( 'default_view' => 'year' ),
+				'description' => __( 'Ha erre az évre nincs megjeleníthető publikáció, az "Összes" nézet nyílik meg.', 'mtmt-sync' ),
+			)
+		);
+	}
+
+	/**
+	 * A kezdeti aktív év a beállítás és a ténylegesen elérhető évek alapján.
+	 *
+	 * @param array $settings Elementor-beállítások.
+	 * @param int[] $years    Elérhető évek, csökkenő sorrendben.
+	 * @return int 0 = "Összes".
+	 */
+	protected function mtmt_resolve_initial_year( array $settings, array $years ): int {
+		$mode = (string) ( $settings['default_view'] ?? 'all' );
+
+		if ( 'latest' === $mode ) {
+			return (int) ( $years[0] ?? 0 );
+		}
+
+		if ( 'year' === $mode ) {
+			$year = absint( $settings['default_view_year'] ?? 0 );
+			return in_array( $year, array_map( 'intval', $years ), true ) ? $year : 0;
+		}
+
+		return 0;
+	}
+
+	/**
+	 * Projektazonosító-megjelenítés (és az "A" widgetnél a projekt-szűrő)
+	 * kapcsolói — egy már nyitott controls-section-be kerül.
+	 *
+	 * @param bool $with_filter Kerüljön-e be a "projekt-szűrő megjelenítése" kapcsoló.
+	 */
+	protected function register_mtmt_project_controls( bool $with_filter ): void {
+		$this->add_control(
+			'show_funding',
+			array(
+				'label'       => __( 'Támogatás megjelenítése', 'mtmt-sync' ),
+				'type'        => \Elementor\Controls_Manager::SWITCHER,
+				'default'     => 'yes',
+				'description' => __( 'A moderációs felületen megadott támogatás-szöveg (pl. köszönetnyilvánítás) a kártyán, ha ki van töltve.', 'mtmt-sync' ),
+			)
+		);
+
+		$this->add_control(
+			'show_project_ids',
+			array(
+				'label'       => __( 'Projektazonosító megjelenítése', 'mtmt-sync' ),
+				'type'        => \Elementor\Controls_Manager::SWITCHER,
+				'default'     => 'yes',
+				'description' => __( 'A moderációs felületen megadott projektazonosító(k) a kártyán.', 'mtmt-sync' ),
+			)
+		);
+
+		if ( $with_filter ) {
+			$this->add_control(
+				'show_project_filter',
+				array(
+					'label'       => __( 'Projekt szűrő megjelenítése', 'mtmt-sync' ),
+					'type'        => \Elementor\Controls_Manager::SWITCHER,
+					'default'     => 'yes',
+					'description' => __( 'Lenyíló a kereső mellett. Csak akkor jelenik meg, ha legalább egy jóváhagyott publikációhoz van projektazonosító rögzítve.', 'mtmt-sync' ),
+				)
+			);
+		}
+	}
+
+	/**
+	 * "Idézettség (Dimensions)" szekció a Tartalom fülön.
+	 */
+	protected function register_mtmt_dimensions_controls(): void {
+		$this->start_controls_section(
+			'mtmt_dimensions_section',
+			array(
+				'label' => __( 'Idézettség (Dimensions)', 'mtmt-sync' ),
+				'tab'   => \Elementor\Controls_Manager::TAB_CONTENT,
+			)
+		);
+
+		$this->add_control(
+			'show_dimensions_badge',
+			array(
+				'label'       => __( 'Dimensions idézettségi badge megjelenítése', 'mtmt-sync' ),
+				'type'        => \Elementor\Controls_Manager::SWITCHER,
+				'default'     => '',
+				'description' => __( 'DOI-val rendelkező publikációknál mutatja, hányszor idézték (forrás: dimensions.ai). A badge-et a látogató böngészője a badge.dimensions.ai oldalról tölti be, csak amikor a widget láthatóvá válik — érdemes ezt az adatkezelési tájékoztatóban is jelezni.', 'mtmt-sync' ),
+			)
+		);
+
+		$this->add_control(
+			'dimensions_style',
+			array(
+				'label'     => __( 'Badge stílusa', 'mtmt-sync' ),
+				'type'      => \Elementor\Controls_Manager::SELECT,
+				'default'   => 'small_rectangle',
+				'options'   => array(
+					'small_rectangle' => __( 'Kis téglalap', 'mtmt-sync' ),
+					'large_rectangle' => __( 'Nagy téglalap', 'mtmt-sync' ),
+					'small_circle'    => __( 'Kis kör', 'mtmt-sync' ),
+					'medium_circle'   => __( 'Közepes kör', 'mtmt-sync' ),
+					'large_circle'    => __( 'Nagy kör', 'mtmt-sync' ),
+				),
+				'condition' => array( 'show_dimensions_badge' => 'yes' ),
+			)
+		);
+
+		$this->add_control(
+			'dimensions_legend',
+			array(
+				'label'     => __( 'Részletek (jelmagyarázat)', 'mtmt-sync' ),
+				'type'      => \Elementor\Controls_Manager::SELECT,
+				'default'   => 'hover-right',
+				'options'   => array(
+					'hover-right'  => __( 'Rámutatáskor, jobbra', 'mtmt-sync' ),
+					'hover-left'   => __( 'Rámutatáskor, balra', 'mtmt-sync' ),
+					'hover-top'    => __( 'Rámutatáskor, fent', 'mtmt-sync' ),
+					'hover-bottom' => __( 'Rámutatáskor, lent', 'mtmt-sync' ),
+					'always'       => __( 'Mindig látszik', 'mtmt-sync' ),
+					'never'        => __( 'Soha', 'mtmt-sync' ),
+				),
+				'condition' => array( 'show_dimensions_badge' => 'yes' ),
+			)
+		);
+
+		$this->add_control(
+			'dimensions_hide_zero',
+			array(
+				'label'     => __( 'Elrejtés, ha még nincs idézet', 'mtmt-sync' ),
+				'type'      => \Elementor\Controls_Manager::SWITCHER,
+				'default'   => 'yes',
+				'condition' => array( 'show_dimensions_badge' => 'yes' ),
+			)
+		);
+
+		$this->end_controls_section();
+	}
+
+	/**
+	 * A projekt- és Dimensions-beállításokból képzett kártya-megjelenítési
+	 * opciók (Mtmt_Card_Renderer::render() $display_options kiegészítése).
+	 *
+	 * @param array $settings          Elementor-beállítások.
+	 * @param bool  $project_clickable A projekt-chipek szűrő-gombok legyenek-e.
+	 * @return array
+	 */
+	protected function mtmt_extra_display_options( array $settings, bool $project_clickable ): array {
+		$style  = (string) ( $settings['dimensions_style'] ?? '' );
+		$legend = (string) ( $settings['dimensions_legend'] ?? '' );
+
+		return array(
+			'show_funding'         => 'yes' === ( $settings['show_funding'] ?? 'yes' ),
+			'funding_label'        => (string) ( $settings['funding_label'] ?? '' ),
+			'show_project_ids'     => 'yes' === ( $settings['show_project_ids'] ?? 'yes' ),
+			'project_label'        => (string) ( $settings['project_label'] ?? '' ),
+			'project_clickable'    => $project_clickable,
+			'show_dimensions'      => 'yes' === ( $settings['show_dimensions_badge'] ?? '' ),
+			'dimensions_style'     => in_array( $style, Mtmt_Card_Renderer::DIMENSIONS_STYLES, true ) ? $style : 'small_rectangle',
+			'dimensions_legend'    => in_array( $legend, Mtmt_Card_Renderer::DIMENSIONS_LEGENDS, true ) ? $legend : 'hover-right',
+			'dimensions_hide_zero' => 'yes' === ( $settings['dimensions_hide_zero'] ?? 'yes' ),
+		);
+	}
+
+	/**
+	 * Az mtmt_extra_display_options() data-* attribútumokként — a JS minden
+	 * AJAX-kérésnél visszaküldi őket, hogy a fragment-csere ugyanúgy rendereljen.
+	 *
+	 * @param array $opts mtmt_extra_display_options() kimenete.
+	 * @return string Escape-elt attribútum-sztring (vezető szóközzel).
+	 */
+	protected function mtmt_extra_data_attrs( array $opts ): string {
+		return ' data-show-funding="' . ( $opts['show_funding'] ? '1' : '0' ) . '"'
+			. ' data-funding-label="' . esc_attr( $opts['funding_label'] ) . '"'
+			. ' data-show-project-ids="' . ( $opts['show_project_ids'] ? '1' : '0' ) . '"'
+			. ' data-project-label="' . esc_attr( $opts['project_label'] ) . '"'
+			. ' data-project-clickable="' . ( $opts['project_clickable'] ? '1' : '0' ) . '"'
+			. ' data-dimensions="' . ( $opts['show_dimensions'] ? '1' : '0' ) . '"'
+			. ' data-dimensions-style="' . esc_attr( $opts['dimensions_style'] ) . '"'
+			. ' data-dimensions-legend="' . esc_attr( $opts['dimensions_legend'] ) . '"'
+			. ' data-dimensions-hide-zero="' . ( $opts['dimensions_hide_zero'] ? '1' : '0' ) . '"';
 	}
 
 	protected function register_mtmt_style_controls(): void {

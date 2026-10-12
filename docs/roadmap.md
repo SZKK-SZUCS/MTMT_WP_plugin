@@ -774,6 +774,16 @@ Nincs DB-változás, nincs új plugin-beállítás. i18n +5 string (290).
 6. Kattints az "SJR" oszlopfejlécre — rendezzen SJR szerint; a "Szűrés"
    gomb megnyomása tartsa meg ezt a rendezést.
 
+## ✅ Megrendelői visszajelzések — 0.14.0
+
+Alapértelmezett nézet (Összes / legfrissebb / adott év) mindkét widgeten;
+projektazonosító megjelenítés + szűrés (admin lista, widget-kártya, "A"
+widget szűrő); autocomplete-es projektazonosító-mező; Dimensions
+idézettség-badge (opt-in). Részletek: docs/decisions.md #101.
+
+- Utókövetés (#102): admin-kereső, támogatás-sor a kártyán, adatvesztés-
+  mentes migráció (biztonsági mentés az eredeti projektazonosítókról).
+
 ## Backlog — még nincs fázishoz kötve
 
 Jelenleg üres.

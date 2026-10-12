@@ -80,6 +80,7 @@ final class Mtmt_List_Table extends WP_List_Table {
 			'sjr'        => __( 'SJR', 'mtmt-sync' ),
 			'mtmt_state' => __( 'MTMT-státusz', 'mtmt-sync' ),
 			'links'      => __( 'Linkek', 'mtmt-sync' ),
+			'projects'   => __( 'Projektazonosító', 'mtmt-sync' ),
 		);
 
 		if ( get_option( 'mtmt_enable_topic_areas' ) ) {
@@ -124,7 +125,41 @@ final class Mtmt_List_Table extends WP_List_Table {
 			}
 		}
 
+		// Projektazonosító-szűrő és kereső: szabad szöveg (szóközt, kötőjelet is tartalmazhat), nem sanitize_key.
+		$project = self::current_project_filter();
+		if ( '' !== $project ) {
+			$args['project'] = $project;
+		}
+		$search = self::current_search();
+		if ( '' !== $search ) {
+			$args['s'] = $search;
+		}
+
 		return $args;
+	}
+
+	/**
+	 * Az aktív projektazonosító-szűrő az URL-ből (üres = nincs szűrés).
+	 *
+	 * @return string
+	 */
+	public static function current_project_filter(): string {
+		if ( ! isset( $_REQUEST['project'] ) || is_array( $_REQUEST['project'] ) ) {
+			return '';
+		}
+		return trim( sanitize_text_field( wp_unslash( $_REQUEST['project'] ) ) );
+	}
+
+	/**
+	 * Az admin-kereső aktuális szövege (`s`, a WP_List_Table::search_box() konvenciója).
+	 *
+	 * @return string
+	 */
+	public static function current_search(): string {
+		if ( ! isset( $_REQUEST['s'] ) || is_array( $_REQUEST['s'] ) ) {
+			return '';
+		}
+		return trim( sanitize_text_field( wp_unslash( $_REQUEST['s'] ) ) );
 	}
 
 	/**
@@ -148,6 +183,10 @@ final class Mtmt_List_Table extends WP_List_Table {
 	 * @return void
 	 */
 	public function no_items(): void {
+		if ( '' !== self::current_search() ) {
+			esc_html_e( 'Nincs a keresésnek megfelelő publikáció.', 'mtmt-sync' );
+			return;
+		}
 		esc_html_e( 'Nincs publikáció.', 'mtmt-sync' );
 	}
 
@@ -169,6 +208,8 @@ final class Mtmt_List_Table extends WP_List_Table {
 			'status'     => $status,
 			'year'       => $year,
 			'profile_id' => $profile_id,
+			'project'    => self::current_project_filter(),
+			'search'     => self::current_search(),
 			'orderby'    => $orderby,
 			'order'      => $order,
 			'paged'      => $paged,
@@ -295,6 +336,33 @@ final class Mtmt_List_Table extends WP_List_Table {
 	}
 
 	/**
+	 * Projektazonosító(k) — mindegyik egy szűrő-link az adott projektre;
+	 * a zöld pipa jelzi, ha az azonosító(ka)t valaki már leellenőrizte.
+	 *
+	 * @param array $item
+	 * @return string
+	 */
+	public function column_projects( $item ): string {
+		$ids = Mtmt_Project_Ids::parse( (string) ( $item['project_ids'] ?? '' ) );
+		if ( empty( $ids ) ) {
+			return '—';
+		}
+
+		$base  = remove_query_arg( array( 'paged', 'action', 'action2', 'id', '_wpnonce', '_wp_http_referer', 'mtmt_notice' ) );
+		$links = array();
+		foreach ( $ids as $project ) {
+			$links[] = '<a href="' . esc_url( add_query_arg( 'project', rawurlencode( $project ), $base ) ) . '" title="' . esc_attr__( 'Szűrés erre a projektre', 'mtmt-sync' ) . '">' . esc_html( $project ) . '</a>';
+		}
+
+		$html = implode( ', ', $links );
+		if ( ! empty( $item['project_verified'] ) ) {
+			$html .= ' <span class="dashicons dashicons-yes-alt" style="color:#00a32a;font-size:16px;width:16px;height:16px;vertical-align:text-bottom;" title="' . esc_attr__( 'Ellenőrizve', 'mtmt-sync' ) . '"></span>';
+		}
+
+		return $html;
+	}
+
+	/**
 	 * @param array $item
 	 * @return string
 	 */
@@ -356,6 +424,8 @@ final class Mtmt_List_Table extends WP_List_Table {
 		$current_year    = isset( $_REQUEST['year'] ) ? absint( $_REQUEST['year'] ) : 0;
 		$current_profile = isset( $_REQUEST['profile_id'] ) ? absint( $_REQUEST['profile_id'] ) : 0;
 		$current_area    = isset( $_REQUEST['area_id'] ) ? absint( $_REQUEST['area_id'] ) : 0;
+		$current_project = self::current_project_filter();
+		$project_ids     = $this->repository->get_distinct_project_ids();
 		$topic_areas_on  = (bool) get_option( 'mtmt_enable_topic_areas' );
 		$current_orderby = isset( $_REQUEST['orderby'] ) ? sanitize_key( wp_unslash( $_REQUEST['orderby'] ) ) : '';
 		$current_order   = isset( $_REQUEST['order'] ) ? sanitize_key( wp_unslash( $_REQUEST['order'] ) ) : '';
@@ -390,6 +460,14 @@ final class Mtmt_List_Table extends WP_List_Table {
 					<option value=""><?php esc_html_e( 'Minden szakmai terület', 'mtmt-sync' ); ?></option>
 					<?php foreach ( $this->topic_area_repo->get_all() as $area ) : ?>
 						<option value="<?php echo esc_attr( (string) $area['id'] ); ?>" <?php selected( $current_area, (int) $area['id'] ); ?>><?php echo esc_html( $area['label'] ); ?></option>
+					<?php endforeach; ?>
+				</select>
+			<?php endif; ?>
+			<?php if ( ! empty( $project_ids ) || '' !== $current_project ) : ?>
+				<select name="project">
+					<option value=""><?php esc_html_e( 'Minden projekt', 'mtmt-sync' ); ?></option>
+					<?php foreach ( $project_ids as $project ) : ?>
+						<option value="<?php echo esc_attr( $project ); ?>" <?php selected( $current_project, $project ); ?> title="<?php echo esc_attr( $project ); ?>"><?php echo esc_html( Mtmt_Project_Ids::display_label( $project ) ); ?></option>
 					<?php endforeach; ?>
 				</select>
 			<?php endif; ?>

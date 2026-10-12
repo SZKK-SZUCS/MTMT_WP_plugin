@@ -1274,3 +1274,134 @@ activate()` idempotenciája (kétszeri hívás nem duplikál), az önjavító
        vissza. A JS az `area_filter=1`-et csak akkor küldi, ha van
        `.mtmt-area-filter` (a "B" widgetnek nincs). Ha csak a "minden
        terület" opció marad, a JS elrejti a lenyílót.
+
+## Megrendelői visszajelzések — 0.14.0 (2026-10)
+
+101. **Alapértelmezett nézet, projektazonosító megjelenítés/szűrés +
+     autocomplete, Dimensions idézettség-badge.** Öt pontos visszajelzés:
+     - **Alapértelmezett nézet (mindkét widget):** új `default_view`
+       Elementor-beállítás (`all` / `latest` / `year` + `default_view_year`).
+       Alapértelmezés `all` ("Összes"). Mivel az Elementor a soha el nem
+       mentett control-értéknél a `default`-ot adja, a MÁR ELHELYEZETT
+       widgetek is "Összes"-re váltanak — ez a megrendelői kérés ("alapból
+       mindenhol az összes"). Ha a `year` módban megadott évre nincs tétel,
+       "Összes" a visszaesés (nem üres lista). Feloldás:
+       `Mtmt_Widget_Common_Controls::mtmt_resolve_initial_year()`.
+     - **Projektazonosító megjelenítés + szűrés:** eddig csak tárolva volt,
+       sehol nem látszott. Most: admin-lista oszlop (azonosítónként szűrő-
+       link, zöld pipa ha ellenőrizve) + "Projekt" lenyíló a szűrősorban
+       (`project` query-arg, a nézet-állapottal együtt öröklődik);
+       widget-kártyán projekt-sor (`show_project_ids`, alapból be); az "A"
+       widgetben projekt-szűrő lenyíló (`show_project_filter`, csak ha van
+       jóváhagyott tételen azonosító) és a kártya projekt-chipjei
+       kattintásra erre szűrnek. A szabad szöveges keresés a
+       `project_ids`-ben is keres (widget + terület-lenyíló újraszámolás).
+       A "B" widget nem kap projekt-szűrőt (kurált, kiemelt lista).
+       Nyilvánosan csak `approved` tételek azonosítói kerülnek a lenyílóba.
+       Az ellenőrzöttség (`project_verified`) a megjelenítést NEM befolyásolja.
+     - **Tárolás/szűrés:** a `project_ids` TEXT oszlop marad (nincs új
+       tábla), de mentéskor `Mtmt_Project_Ids::normalize()` egységesíti
+       (`, `-szel elválasztva, trimmelve, kis-/nagybetűre érzéketlen
+       duplikátum-szűréssel; elválasztó a vessző, pontosvessző, sortörés —
+       a szóköz NEM, mert pl. "K 123456" egy azonosító). A pontos szűrés
+       `FIND_IN_SET(%s, REPLACE(project_ids, ', ', ','))` — nem ad
+       részleges találatot. A meglévő adatot a DB v4 migráció
+       (`Mtmt_Activator::normalize_project_ids()`, idempotens) alakítja át.
+     - **Autocomplete a gazdagító űrlapon:** vanilla JS chip-mező (rejtett
+       `project_ids` input + látható szövegmező + javaslatlista). Fókuszra
+       az összes korábbi azonosító megjelenik; gépeléskor szűkül, az első
+       javaslat kijelölt (Enter azt veszi fel). "Új azonosító hozzáadása"
+       CSAK akkor jelenik meg, ha a begépelt szövegre már egyetlen korábbi
+       azonosító sem illeszkedik (megrendelői megfogalmazás: "ha addig
+       gépel, amíg már csak ez az aktuális van") — ez véd az elgépelt
+       majdnem-duplikátumok ellen. Vessző/pontosvessző is lezár egy
+       azonosítót; mentéskor a félbehagyott szöveg sem vész el. Ha egy
+       korábbi azonosító más kis-/nagybetűvel kerül begépelésre, a meglévő
+       alakot használja.
+     - **"Támogatás felülbírálása" + "Ellenőrizve" — magyarázat** (a
+       megrendelő rákérdezett): az eredeti terv (CLAUDE.md §4.1, §8.2,
+       §9.1) szerint az MTMT-ből importált támogatás-szöveget (`funding_text`)
+       lehetett volna kézzel felülírni, és a kártyán egy "támogatás-sor"
+       jelent volna meg. A Fázis 0 éles teszt (#3) kiderítette, hogy a
+       publikus API ezt NEM adja, így a `funding_text` mindig üres, a
+       "felülbírálás" valójában a támogatás kézi megadása. A widget-kártya
+       véglegesített mezőlistájából (docs/widget-design.md) a támogatás
+       kimaradt, így a mező jelenleg sehol nem jelenik meg (az űrlap
+       súgószövege ennek ellenére "megjelenik a weboldalon"-t ígér).
+       LEZÁRVA a #102-ben: megjelenik a kártyán.
+       Az "Ellenőrizve" pipa (§8.2/§8.3, #39): a `mtmt_classify` jogú
+       kolléga jelöli vele, hogy a projektazonosító(ka)t ellenőrizte
+       (`verified_by/at` rögzül) — moderációs/adminisztratív jelzés,
+       a megjelenítést nem befolyásolja. Mostantól az űrlapon látszik, ki
+       és mikor ellenőrizte, és a súgószöveg is elmagyarázza.
+     - **Dimensions idézettség-badge** (#79 nyitott pontja lezárva: a
+       megrendelő kérte). Widget-szintű opt-in (`show_dimensions_badge`,
+       alapból KI — külső script miatt), stílus (`data-style`),
+       jelmagyarázat (`data-legend`), "0 idézetnél elrejtés"
+       (`data-hide-zero-citations`). Csak DOI-s tételnél renderel jelölő
+       `<span class="__dimensions_badge_embed__">`-t. A `badge.js`-t a
+       `widget-frontend.js` csak akkor tölti be, ha egy ilyen widget a
+       látótérbe kerül (IntersectionObserver), és minden AJAX-csere után
+       `window.__dimensions_embed.addBadges()`-szel ébreszti fel az új
+       jelölőket (a Dimensions dokumentációja szerint enélkül a dinamikusan
+       beszúrt badge-ek üresek maradnak). Elementor-szerkesztőben az
+       `element_ready` hookkal is inicializál.
+     DB-verzió 3 -> 4 (csak adat-normalizálás, nincs sémaváltozás).
+     i18n +40 string (329, mind lefordítva), repo-szintű `php -l` tiszta,
+     az autocomplete JS headless Chromiumban végigkattintva.
+
+102. **Admin-kereső, támogatás-sor a kártyán, adatvesztés-mentes migráció**
+     (a #101 utáni megrendelői visszajelzés: "az admin listázóban is kellene
+     search bar", "amiket megállapítottál fixáld", "frissítéskor ne legyen
+     adatvesztés").
+     - **Admin-kereső:** `WP_List_Table::search_box()` a moderációs lista
+       fölött, `s` query-arg (`Mtmt_List_Table::current_search()`), ami a
+       nézet-állapottal együtt öröklődik (szerkesztés, sor-művelet, mentés
+       utáni redirect). A közös keresési WHERE (`add_search_and_project_where()`)
+       mostantól a DOI-ban is keres, csupa számjegynél az `mtid`-re is pontos
+       egyezést ad — ez a widget-keresőre is érvényes (a terület-lenyíló
+       újraszámolása a DOI-t is figyeli).
+     - **Támogatás-sor (a #101-ben feltárt hiba javítása):** a
+       `funding_override` eddig sehol nem jelent meg, miközben az űrlap
+       súgója ezt ígérte, és az eredeti terv (§9.1) is kérte. Most
+       `Mtmt_Card_Renderer::render_funding()` a kártyán "Támogatás:" sort ad
+       (`funding_override`, ennek hiányában a — jelenleg mindig üres —
+       `funding_text`), sortöréseket megtartva. Widget-kapcsoló
+       `show_funding` (alapból BE, mert a súgó eddig is ezt ígérte, és csak
+       kitöltött mezőnél jelenik meg bármi), felirat `funding_label`.
+       Az űrlapon a mező felirata "Támogatás" lett ("felülbírálás" helyett,
+       mert felülbírálni való MTMT-adat nincs) — az adatbázis-oszlop
+       (`funding_override`) változatlan, így adatmozgatás nem kell.
+     - **Migráció — adatvesztés elleni garanciák** (`Mtmt_Activator::
+       normalize_project_ids()`, DB v4):
+       (a) `Mtmt_Project_Ids::parse()`-ből kikerült a 100 karakteres
+       csonkolás — a régi, akár hosszú szabad szöveges értékek sem vágódnak;
+       (b) ha a normalizálás üres eredményt adna, a sor érintetlen marad;
+       (c) minden módosítandó sor EREDETI értéke előbb a
+       `mtmt_project_ids_backup_v4` opcióba kerül (id => eredeti, nem
+       autoload, korábbi mentést sosem ír felül), és csak sikeres mentés-
+       visszaolvasás után történik átírás; (d) az UPDATE feltétele az
+       eredeti érték is (párhuzamos szerkesztést nem ír felül);
+       (e) idempotens. Az "Adatok törlése" (Mtmt_Reset) a mentést is törli.
+       Minden más mező (státusz, kiemelés, indexkép, támogatás, ellenőrzés,
+       terület-hozzárendelés) a frissítéskor érintetlen; a meglévő Elementor-
+       widgetek mentett beállításai megmaradnak, az új kapcsolók az
+       alapértéküket kapják.
+     - **Ellenőrzés élő WordPressen** (WP + MariaDB + Elementor, lokális
+       tesztkörnyezet): 0.13.2-vel aktivált, v3-as adatbázisra kézzel
+       rögzített, vegyes formátumú projektazonosítókkal (pontosvessző,
+       sortörés, kis-/nagybetűs ismétlés, csak írásjel, hosszú szabad
+       szöveg) frissítve 0.14.0-ra: a DB-verzió 4 lett, a normalizálás
+       helyes, a mentés teljes, újrafuttatva nincs változás, és a többi
+       oszlop MD5-ellenőrzőösszege változatlan. Szűrés (FIND_IN_SET:
+       pontos, kis-/nagybetű-független, részleges egyezés nincs), admin-
+       kereső + projekt-szűrő együtt, gazdagító űrlap, widget AJAX-végpont
+       és mindkét Elementor widget (alapértelmezett nézet: összes /
+       legfrissebb / adott év; Dimensions-jelölő; támogatás- és projekt-sor)
+       renderelve ellenőrizve.
+     - Kisebb: hosszú (régi, szabad szöveges) projektazonosító a lenyílókban
+       csak a FELIRATBAN rövidül (`Mtmt_Project_Ids::display_label()`), az
+       érték a teljes azonosító; a kártya meta-sorában az első elem nem kap
+       bal margót, ha a DOI ki van kapcsolva.
+     i18n +10 string (337, mind lefordítva).
+

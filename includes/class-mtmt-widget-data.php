@@ -54,7 +54,8 @@ final class Mtmt_Widget_Data {
 	 *                                 "területre/profilra szűkítve" — a két mód kölcsönösen kizárja egymást, de a
 	 *                                 repository szinten mindkettő egyszerre is AND-elhető, ha valaki mégis megadná).
 	 *     @type bool   $featured_only Csak `is_featured=1` (a "B" widget mindig ezt adja).
-	 *     @type string $search        Cím/szerző/forrás LIKE-keresés.
+	 *     @type string $search        Cím/szerző/forrás/projektazonosító LIKE-keresés.
+	 *     @type string $project       Pontos projektazonosító ("A" widget projekt-szűrője; üres = nincs).
 	 *     @type string $sort          Rendezés (widget-beállítás): newest|oldest|title|sjr.
 	 *     @type int    $paged
 	 *     @type int    $per_page
@@ -69,6 +70,7 @@ final class Mtmt_Widget_Data {
 				'profile_id'    => 0,
 				'featured_only' => false,
 				'search'        => '',
+				'project'       => '',
 				'sort'          => 'newest',
 				'paged'         => 1,
 				'per_page'      => 20,
@@ -89,6 +91,7 @@ final class Mtmt_Widget_Data {
 			'year'          => (int) $args['year'],
 			'featured_only' => (bool) $args['featured_only'],
 			'search'        => (string) $args['search'],
+			'project'       => (string) $args['project'],
 			'paged'         => (int) $args['paged'],
 			'per_page'      => (int) $args['per_page'],
 			'orderby'       => $orderby,
@@ -147,6 +150,7 @@ final class Mtmt_Widget_Data {
 	 *     @type int    $profile_id
 	 *     @type bool   $featured_only
 	 *     @type string $search
+	 *     @type string $project
 	 * }
 	 * @return int[]
 	 */
@@ -157,6 +161,7 @@ final class Mtmt_Widget_Data {
 				'profile_id'    => 0,
 				'featured_only' => false,
 				'search'        => '',
+				'project'       => '',
 			),
 			$scope
 		);
@@ -166,6 +171,7 @@ final class Mtmt_Widget_Data {
 			'profile_id'    => (int) $scope['profile_id'],
 			'featured_only' => (bool) $scope['featured_only'],
 			'search'        => (string) $scope['search'],
+			'project'       => (string) $scope['project'],
 		);
 		if ( (int) $scope['area_id'] > 0 ) {
 			$repo_args['ids'] = $this->topic_area_repo->get_publication_ids_for_area( (int) $scope['area_id'] );
@@ -187,6 +193,26 @@ final class Mtmt_Widget_Data {
 		set_transient( $cache_key, $years, self::CACHE_TTL );
 
 		return $years;
+	}
+
+	/**
+	 * A widget projekt-szűrő lenyílójához: a jóváhagyott tételeken előforduló
+	 * projektazonosítók (a nem jóváhagyott tételek azonosítói nem kerülnek ki
+	 * a nyilvános oldalra).
+	 *
+	 * @return string[]
+	 */
+	public function get_filterable_project_ids(): array {
+		$cache_key = 'mtmt_widget_projects_' . md5( Mtmt_Widget_Cache::version() );
+		$cached    = get_transient( $cache_key );
+		if ( false !== $cached ) {
+			return $cached;
+		}
+
+		$ids = $this->repository->get_distinct_project_ids( 'approved' );
+		set_transient( $cache_key, $ids, self::CACHE_TTL );
+
+		return $ids;
 	}
 
 	/**

@@ -61,7 +61,8 @@
 }
 
 .mtmt-search-input,
-.mtmt-area-filter {
+.mtmt-area-filter,
+.mtmt-project-filter {
 	padding: 0.55em 0.8em;
 	border: 1px solid var(--mtmt-border);
 	border-radius: 6px;
@@ -72,7 +73,8 @@
 }
 
 .mtmt-search-input:focus,
-.mtmt-area-filter:focus {
+.mtmt-area-filter:focus,
+.mtmt-project-filter:focus {
 	outline: none;
 	border-color: var(--mtmt-accent);
 	box-shadow: 0 0 0 3px color-mix(in srgb, var(--mtmt-accent) 18%, transparent);
@@ -364,6 +366,77 @@
 	margin-left: 0.5em;
 }
 
+/* Ha a DOI ki van kapcsolva, az első elem (badge / idézettség) ne kapjon bal margót. */
+.mtmt-pub-card-meta > :first-child {
+	margin-left: 0;
+}
+
+/* Támogatás-sor (docs/decisions.md #102). */
+.mtmt-pub-card-funding {
+	margin: 0.35em 0 0;
+	font-size: 0.85em;
+	line-height: 1.55;
+	color: var(--mtmt-muted);
+}
+
+.mtmt-pub-card-funding-label {
+	font-weight: 600;
+}
+
+/* Projektazonosító sor (docs/decisions.md #101). */
+.mtmt-pub-card-projects {
+	margin: 0.35em 0 0;
+	font-size: 0.85em;
+	line-height: 1.8;
+	color: var(--mtmt-muted);
+}
+
+.mtmt-pub-card-projects-label {
+	margin-right: 0.15em;
+}
+
+.mtmt-badge-project {
+	margin-right: 0.35em;
+	background: #f1f5f9;
+	color: #334155;
+	border: 1px solid var(--mtmt-border);
+	font-family: inherit;
+}
+
+/* A téma gyakran erősen formázza a <button>-okat — itt visszaállítjuk a badge-kinézetet. */
+.mtmt-badge.mtmt-project-chip {
+	-webkit-appearance: none;
+	appearance: none;
+	padding: 0.25em 0.7em;
+	border-radius: 999px;
+	font-size: 0.75em;
+	font-weight: 600;
+	line-height: 1.6;
+	text-transform: none;
+	letter-spacing: normal;
+	box-shadow: none;
+	background: #f1f5f9;
+	color: #334155;
+	cursor: pointer;
+	transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.mtmt-badge.mtmt-project-chip:hover,
+.mtmt-badge.mtmt-project-chip:focus-visible {
+	background: #f1f5f9;
+	border-color: var(--mtmt-accent);
+	color: var(--mtmt-accent);
+	outline: none;
+}
+
+/* Dimensions idézettség-badge (badge.dimensions.ai rajzolja ki). */
+.mtmt-pub-card-citations {
+	display: inline-block;
+	vertical-align: middle;
+	margin-left: 0.5em;
+	line-height: 0;
+}
+
 .mtmt-badge-topic-area {
 	background: #eef2ff;
 	color: #3b4ba0;
@@ -570,6 +643,7 @@
 	.mtmt-page-btn,
 	.mtmt-search-input,
 	.mtmt-area-filter,
+	.mtmt-project-filter,
 	.mtmt-widget-list {
 		transition: none !important;
 		animation: none !important;

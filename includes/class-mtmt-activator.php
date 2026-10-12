@@ -139,6 +139,81 @@ final class Mtmt_Activator {
 			}
 		}
 
+		self::normalize_project_ids( $publications_table );
+
 		update_option( 'mtmt_db_version', MTMT_DB_VERSION );
+	}
+
+	/** Az eredeti (migráció előtti) project_ids értékek mentése — ld. normalize_project_ids(). */
+	public const PROJECT_IDS_BACKUP_OPTION = 'mtmt_project_ids_backup_v4';
+
+	/**
+	 * DB v4: a `project_ids` oszlop egységes tárolási formára hozása
+	 * (Mtmt_Project_Ids::normalize() — ", "-szel elválasztva, trimmelve,
+	 * duplikátum nélkül), hogy a projektazonosítóra szűrés a korábban
+	 * szabad szövegként beírt értékekre is működjön.
+	 *
+	 * Adatvesztés elleni garanciák (docs/decisions.md #102):
+	 * - nincs csonkolás, csak elválasztó/szóköz-egységesítés és
+	 *   (kis-/nagybetűre érzéketlen) ismétlődés-kiszűrés;
+	 * - ha a normalizálás üres eredményt adna (pl. csak írásjel volt a
+	 *   mezőben), a sor érintetlen marad;
+	 * - minden ténylegesen módosított sor EREDETI értéke a
+	 *   PROJECT_IDS_BACKUP_OPTION opcióba kerül (id => eredeti), nem
+	 *   autoload-olva; egy korábbi mentést sosem ír felül, csak bővít;
+	 * - idempotens: a már normalizált sorokat nem írja újra, így többszöri
+	 *   (pl. újraaktiválás miatti) futás sem okoz változást.
+	 *
+	 * @param string $publications_table
+	 */
+	private static function normalize_project_ids( string $publications_table ): void {
+		global $wpdb;
+
+		if ( ! class_exists( 'Mtmt_Project_Ids' ) ) {
+			return;
+		}
+
+		$rows = $wpdb->get_results( "SELECT id, project_ids FROM {$publications_table} WHERE project_ids IS NOT NULL AND project_ids <> ''", ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- saját táblanév, nincs felhasználói input.
+
+		$changes = array();
+		foreach ( (array) $rows as $row ) {
+			$original   = (string) $row['project_ids'];
+			$normalized = Mtmt_Project_Ids::normalize( $original );
+			if ( '' === $normalized || $normalized === $original ) {
+				continue;
+			}
+			$changes[ (int) $row['id'] ] = array( $original, $normalized );
+		}
+
+		if ( empty( $changes ) ) {
+			return;
+		}
+
+		// Előbb a mentés, csak utána az átírás — ha a mentés nem sikerül, nem írunk át semmit.
+		$backup = get_option( self::PROJECT_IDS_BACKUP_OPTION, array() );
+		if ( ! is_array( $backup ) ) {
+			$backup = array();
+		}
+		foreach ( $changes as $id => $pair ) {
+			if ( ! array_key_exists( $id, $backup ) ) {
+				$backup[ $id ] = $pair[0];
+			}
+		}
+		update_option( self::PROJECT_IDS_BACKUP_OPTION, $backup, false );
+		$stored = get_option( self::PROJECT_IDS_BACKUP_OPTION, array() );
+		if ( ! is_array( $stored ) || count( array_intersect_key( $stored, $changes ) ) !== count( $changes ) ) {
+			return;
+		}
+
+		foreach ( $changes as $id => $pair ) {
+			$wpdb->update(
+				$publications_table,
+				array( 'project_ids' => $pair[1] ),
+				array(
+					'id'          => $id,
+					'project_ids' => $pair[0], // Csak ha közben senki nem írta át.
+				)
+			);
+		}
 	}
 }

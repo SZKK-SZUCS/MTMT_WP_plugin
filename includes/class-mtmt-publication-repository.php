@@ -225,7 +225,8 @@ final class Mtmt_Publication_Repository {
 	 * Moderációs lista, szűrve/lapozva (CLAUDE.md §8.1).
 	 *
 	 * @param array $args status, year, profile_id, ids (előre kiválogatott
-	 *                    id-lista, pl. terület-szűréshez), orderby, order,
+	 *                    id-lista, pl. terület-szűréshez), search, project
+	 *                    (pontos projektazonosító), orderby, order,
 	 *                    paged, per_page.
 	 * @return array{items:array[],total:int}
 	 */
@@ -237,6 +238,7 @@ final class Mtmt_Publication_Repository {
 				'profile_id'    => 0,
 				'ids'           => null,
 				'search'        => '',
+				'project'       => '',
 				'featured_only' => false,
 				'orderby'       => 'published_year',
 				'order'         => 'DESC',
@@ -264,14 +266,7 @@ final class Mtmt_Publication_Repository {
 		if ( ! empty( $args['featured_only'] ) ) {
 			$where[] = 'is_featured = 1';
 		}
-		if ( '' !== trim( (string) $args['search'] ) ) {
-			// Cím / szerzők / forrás LIKE-egyezés — widget kereső mezőhöz (Fázis 5).
-			$like     = '%' . $this->wpdb->esc_like( trim( (string) $args['search'] ) ) . '%';
-			$where[]  = '(title LIKE %s OR authors_text LIKE %s OR source_title LIKE %s)';
-			$params[] = $like;
-			$params[] = $like;
-			$params[] = $like;
-		}
+		$this->add_search_and_project_where( $args, $where, $params );
 		if ( is_array( $args['ids'] ) ) {
 			$ids = array_map( 'absint', $args['ids'] );
 			if ( empty( $ids ) ) {
@@ -307,6 +302,62 @@ final class Mtmt_Publication_Repository {
 			'items' => $items ?: array(),
 			'total' => $total,
 		);
+	}
+
+	/**
+	 * Közös WHERE-darabok a get_list() és a get_distinct_years_filtered()
+	 * számára: szabad szöveges keresés (cím / szerzők / forrás /
+	 * projektazonosító / DOI LIKE, csupa számjegynél MTMT-azonosító is) és
+	 * pontos projektazonosító-szűrés.
+	 *
+	 * A projekt-szűrés a normalizált tárolási formára épít (Mtmt_Project_Ids,
+	 * ", "-szel elválasztva) — FIND_IN_SET a kollációnak megfelelően kis-/
+	 * nagybetűre érzéketlen, és nem ad részleges találatot (pl. "K 12" nem
+	 * egyezik a "K 123"-mal).
+	 *
+	 * @param array    $args
+	 * @param string[] $where  Referencia.
+	 * @param array    $params Referencia.
+	 */
+	private function add_search_and_project_where( array $args, array &$where, array &$params ): void {
+		$search = trim( (string) ( $args['search'] ?? '' ) );
+		if ( '' !== $search ) {
+			$like    = '%' . $this->wpdb->esc_like( $search ) . '%';
+			$clauses = array( 'title LIKE %s', 'authors_text LIKE %s', 'source_title LIKE %s', 'project_ids LIKE %s', 'doi LIKE %s' );
+			$params  = array_merge( $params, array( $like, $like, $like, $like, $like ) );
+			// Csupa számjegy -> MTMT-azonosítóra (mtid) is pontos egyezés (admin-keresőhöz hasznos).
+			if ( ctype_digit( $search ) ) {
+				$clauses[] = 'mtid = %d';
+				$params[]  = (int) $search;
+			}
+			$where[] = '(' . implode( ' OR ', $clauses ) . ')';
+		}
+
+		$project = trim( (string) ( $args['project'] ?? '' ) );
+		if ( '' !== $project ) {
+			$where[]  = "FIND_IN_SET(%s, REPLACE(project_ids, ', ', ',')) > 0";
+			$params[] = $project;
+		}
+	}
+
+	/**
+	 * Az összes eddig rögzített projektazonosító egyedi, rendezett listája —
+	 * a gazdagító űrlap autocomplete-jéhez, az admin-lista szűrőjéhez és a
+	 * widget projekt-szűrőjéhez.
+	 *
+	 * @param string $status Üres = minden státusz; 'approved' = csak a
+	 *                       nyilvánosan is megjelenő tételek azonosítói.
+	 * @return string[]
+	 */
+	public function get_distinct_project_ids( string $status = '' ): array {
+		$sql = "SELECT project_ids FROM {$this->table} WHERE project_ids IS NOT NULL AND project_ids <> ''";
+		if ( in_array( $status, self::VALID_STATUSES, true ) ) {
+			$rows = $this->wpdb->get_col( $this->wpdb->prepare( $sql . ' AND status = %s', $status ) );
+		} else {
+			$rows = $this->wpdb->get_col( $sql );
+		}
+
+		return Mtmt_Project_Ids::unique_from_rows( (array) $rows );
 	}
 
 	/**
@@ -359,8 +410,9 @@ final class Mtmt_Publication_Repository {
 	 *     @type string $status        Alapértelmezetten 'approved' (a widgetek mindig ezt kérik).
 	 *     @type int    $profile_id
 	 *     @type bool   $featured_only
-	 *     @type string $search        Cím/szerző/forrás LIKE-keresés — a keresés
-	 *                                 utáni év-fülekhez (üres évek kihagyása).
+	 *     @type string $search        Cím/szerző/forrás/projektazonosító LIKE-keresés —
+	 *                                 a keresés utáni év-fülekhez (üres évek kihagyása).
+	 *     @type string $project       Pontos projektazonosító (üres = nincs szűrés).
 	 *     @type int[]|null $ids
 	 * }
 	 * @return int[]
@@ -372,6 +424,7 @@ final class Mtmt_Publication_Repository {
 				'profile_id'    => 0,
 				'featured_only' => false,
 				'search'        => '',
+				'project'       => '',
 				'ids'           => null,
 			),
 			$args
@@ -391,13 +444,7 @@ final class Mtmt_Publication_Repository {
 		if ( ! empty( $args['featured_only'] ) ) {
 			$where[] = 'is_featured = 1';
 		}
-		if ( '' !== trim( (string) $args['search'] ) ) {
-			$like     = '%' . $this->wpdb->esc_like( trim( (string) $args['search'] ) ) . '%';
-			$where[]  = '(title LIKE %s OR authors_text LIKE %s OR source_title LIKE %s)';
-			$params[] = $like;
-			$params[] = $like;
-			$params[] = $like;
-		}
+		$this->add_search_and_project_where( $args, $where, $params );
 		if ( is_array( $args['ids'] ) ) {
 			$ids = array_map( 'absint', $args['ids'] );
 			if ( empty( $ids ) ) {
@@ -543,7 +590,9 @@ final class Mtmt_Publication_Repository {
 			$data['funding_override'] = $fields['funding_override'];
 		}
 		if ( array_key_exists( 'project_ids', $fields ) ) {
-			$data['project_ids'] = $fields['project_ids'];
+			// Egységes tárolási forma, hogy a szűrés/autocomplete működjön (Mtmt_Project_Ids).
+			$normalized          = Mtmt_Project_Ids::normalize( (string) $fields['project_ids'] );
+			$data['project_ids'] = '' === $normalized ? null : $normalized;
 		}
 		if ( array_key_exists( 'is_featured', $fields ) ) {
 			$data['is_featured'] = ! empty( $fields['is_featured'] ) ? 1 : 0;

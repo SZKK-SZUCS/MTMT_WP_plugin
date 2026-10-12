@@ -151,7 +151,9 @@ final class Mtmt_Topic_Area_Repository {
 
 		if ( '' !== trim( $search ) ) {
 			$like     = '%' . $this->wpdb->esc_like( trim( $search ) ) . '%';
-			$where[]  = '(p.title LIKE %s OR p.authors_text LIKE %s OR p.source_title LIKE %s)';
+			$where[]  = '(p.title LIKE %s OR p.authors_text LIKE %s OR p.source_title LIKE %s OR p.project_ids LIKE %s OR p.doi LIKE %s)';
+			$params[] = $like;
+			$params[] = $like;
 			$params[] = $like;
 			$params[] = $like;
 			$params[] = $like;

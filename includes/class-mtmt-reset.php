@@ -123,6 +123,12 @@ final class Mtmt_Reset {
 			}
 		}
 
+		// A projektazonosító-migráció (DB v4) biztonsági mentése a publikáció-
+		// sorok id-jére hivatkozik — ha azok törlődtek, a mentés is okafogyott.
+		if ( ! isset( $failed[ $wpdb->prefix . 'mtmt_publications' ] ) && class_exists( 'Mtmt_Activator' ) ) {
+			delete_option( Mtmt_Activator::PROJECT_IDS_BACKUP_OPTION );
+		}
+
 		if ( class_exists( 'Mtmt_Widget_Cache' ) ) {
 			Mtmt_Widget_Cache::bump();
 		}

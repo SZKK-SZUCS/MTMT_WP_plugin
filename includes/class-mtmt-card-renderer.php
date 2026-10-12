@@ -26,17 +26,37 @@ final class Mtmt_Card_Renderer {
 	 *                                   egyéb-azonosító logó-gombok elmaradnak (CLAUDE.md §9.1 "hivatkozás-stílus").
 	 *     @type string $ext_id_badge_mode 'icon' | 'text' | 'both' (alapértelmezett) — az egyéb azonosítós
 	 *                                   gombok "Csak ikon"/"Csak szöveg"/"Ikon és szöveg" megjelenítése.
+	 *     @type bool   $show_funding      Támogatás-sor megjelenjen-e (funding_override, ennek
+	 *                                     hiányában az — jelenleg mindig üres — MTMT funding_text).
+	 *     @type string $funding_label     A támogatás-sor felirata (widget-beállítás).
+	 *     @type bool   $show_project_ids  Projektazonosító(k) sora megjelenjen-e.
+	 *     @type string $project_label     A projekt-sor felirata (widget-beállítás).
+	 *     @type bool   $project_clickable A projekt-chipek gombok legyenek-e (az "A" widget
+	 *                                     projekt-szűrőjét állítják be kattintásra).
+	 *     @type bool   $show_dimensions   Dimensions idézettség-badge (csak DOI-s tételnél).
+	 *     @type string $dimensions_style  Dimensions badge stílus (self::DIMENSIONS_STYLES).
+	 *     @type string $dimensions_legend Dimensions jelmagyarázat (self::DIMENSIONS_LEGENDS).
+	 *     @type bool   $dimensions_hide_zero 0 idézetnél ne jelenjen meg a badge.
 	 * }
 	 * @return string Kész HTML.
 	 */
 	public static function render( array $publication, array $display_options = array() ): string {
 		$display_options = array_merge(
 			array(
-				'show_topic_area'   => false,
-				'show_doi_link'     => true,
-				'show_sjr_badge'    => true,
-				'citation_style'    => 'full',
-				'ext_id_badge_mode' => 'both',
+				'show_topic_area'      => false,
+				'show_doi_link'        => true,
+				'show_sjr_badge'       => true,
+				'citation_style'       => 'full',
+				'ext_id_badge_mode'    => 'both',
+				'show_funding'         => false,
+				'funding_label'        => '',
+				'show_project_ids'     => true,
+				'project_label'        => '',
+				'project_clickable'    => false,
+				'show_dimensions'      => false,
+				'dimensions_style'     => 'small_rectangle',
+				'dimensions_legend'    => 'hover-right',
+				'dimensions_hide_zero' => true,
 			),
 			$display_options
 		);
@@ -89,8 +109,20 @@ final class Mtmt_Card_Renderer {
 		if ( $display_options['show_sjr_badge'] && ! empty( $publication['sjr_quartile'] ) ) {
 			$meta_parts[] = '<span class="mtmt-badge mtmt-badge-sjr ' . esc_attr( self::sjr_badge_class( (string) $publication['sjr_quartile'] ) ) . '">' . esc_html( (string) $publication['sjr_quartile'] ) . '</span>';
 		}
+		if ( $display_options['show_dimensions'] ) {
+			$meta_parts[] = self::render_dimensions_badge( $publication, $display_options );
+		}
+		$meta_parts = array_values( array_filter( $meta_parts ) );
 		if ( ! empty( $meta_parts ) ) {
 			$out .= '<p class="mtmt-pub-card-meta">' . implode( ' ', $meta_parts ) . '</p>';
+		}
+
+		if ( $display_options['show_funding'] ) {
+			$out .= self::render_funding( $publication, (string) $display_options['funding_label'] );
+		}
+
+		if ( $display_options['show_project_ids'] ) {
+			$out .= self::render_project_ids( $publication, (string) $display_options['project_label'], (bool) $display_options['project_clickable'] );
 		}
 
 		if ( $full ) {
@@ -111,6 +143,98 @@ final class Mtmt_Card_Renderer {
 		}
 
 		$out .= '</div>'; // .mtmt-pub-card vége
+
+		return $out;
+	}
+
+	/** Engedélyezett Dimensions badge-stílusok (badge.dimensions.ai `data-style`). */
+	public const DIMENSIONS_STYLES = array( 'small_rectangle', 'large_rectangle', 'small_circle', 'medium_circle', 'large_circle' );
+
+	/** Engedélyezett Dimensions jelmagyarázat-módok (`data-legend`). */
+	public const DIMENSIONS_LEGENDS = array( 'hover-right', 'hover-left', 'hover-top', 'hover-bottom', 'always', 'never' );
+
+	/**
+	 * Dimensions idézettség-badge helye (docs/decisions.md #79, #101). Csak a
+	 * jelölő `<span>`-t adja ki; magát a badge-et a látogató böngészőjében a
+	 * `badge.dimensions.ai/badge.js` rajzolja ki, amit a widget-frontend.js
+	 * csak akkor tölt be, ha a widget látótérbe kerül (lazy-load).
+	 * DOI nélküli tételnél nincs mit lekérdezni -> üres string.
+	 *
+	 * @param array $publication
+	 * @param array $display_options
+	 * @return string
+	 */
+	private static function render_dimensions_badge( array $publication, array $display_options ): string {
+		$doi = trim( (string) ( $publication['doi'] ?? '' ) );
+		if ( '' === $doi ) {
+			return '';
+		}
+
+		$style  = in_array( $display_options['dimensions_style'], self::DIMENSIONS_STYLES, true ) ? $display_options['dimensions_style'] : 'small_rectangle';
+		$legend = in_array( $display_options['dimensions_legend'], self::DIMENSIONS_LEGENDS, true ) ? $display_options['dimensions_legend'] : 'hover-right';
+
+		return '<span class="mtmt-pub-card-citations"><span class="__dimensions_badge_embed__"'
+			. ' data-doi="' . esc_attr( $doi ) . '"'
+			. ' data-style="' . esc_attr( $style ) . '"'
+			. ' data-legend="' . esc_attr( $legend ) . '"'
+			. ( $display_options['dimensions_hide_zero'] ? ' data-hide-zero-citations="true"' : '' )
+			. '></span></span>';
+	}
+
+	/**
+	 * Támogatás-sor (CLAUDE.md §9.1 "támogatás-sor, a funding_override
+	 * elsőbbséggel"; docs/decisions.md #102). A kézi `funding_override` nyer;
+	 * a `funding_text` az MTMT publikus API-jából jelenleg mindig üres (#3),
+	 * de ha egyszer jönne, tartalékként megjelenik.
+	 *
+	 * @param array  $publication
+	 * @param string $label
+	 * @return string
+	 */
+	private static function render_funding( array $publication, string $label ): string {
+		$text = trim( (string) ( $publication['funding_override'] ?? '' ) );
+		if ( '' === $text ) {
+			$text = trim( (string) ( $publication['funding_text'] ?? '' ) );
+		}
+		if ( '' === $text ) {
+			return '';
+		}
+
+		if ( '' === $label ) {
+			$label = __( 'Támogatás:', 'mtmt-sync' );
+		}
+
+		return '<p class="mtmt-pub-card-funding"><span class="mtmt-pub-card-funding-label">' . esc_html( $label ) . '</span> ' . nl2br( esc_html( $text ) ) . '</p>';
+	}
+
+	/**
+	 * Projektazonosító(k) sora. Az "A" widgetben (ha van projekt-szűrő) a
+	 * chipek gombok, kattintásra arra a projektre szűrnek.
+	 *
+	 * @param array  $publication
+	 * @param string $label
+	 * @param bool   $clickable
+	 * @return string
+	 */
+	private static function render_project_ids( array $publication, string $label, bool $clickable ): string {
+		$ids = Mtmt_Project_Ids::parse( (string) ( $publication['project_ids'] ?? '' ) );
+		if ( empty( $ids ) ) {
+			return '';
+		}
+
+		if ( '' === $label ) {
+			$label = __( 'Projektazonosító:', 'mtmt-sync' );
+		}
+
+		$out = '<p class="mtmt-pub-card-projects"><span class="mtmt-pub-card-projects-label">' . esc_html( $label ) . '</span> ';
+		foreach ( $ids as $id ) {
+			if ( $clickable ) {
+				$out .= '<button type="button" class="mtmt-badge mtmt-badge-project mtmt-project-chip" data-project="' . esc_attr( $id ) . '" title="' . esc_attr__( 'Szűrés erre a projektre', 'mtmt-sync' ) . '">' . esc_html( $id ) . '</button>';
+			} else {
+				$out .= '<span class="mtmt-badge mtmt-badge-project">' . esc_html( $id ) . '</span>';
+			}
+		}
+		$out .= '</p>';
 
 		return $out;
 	}

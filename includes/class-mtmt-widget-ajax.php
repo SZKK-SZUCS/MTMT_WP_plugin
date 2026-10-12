@@ -55,6 +55,7 @@ final class Mtmt_Widget_Ajax {
 			'profile_id'    => isset( $_POST['profile_id'] ) ? absint( $_POST['profile_id'] ) : 0,
 			'featured_only' => ! empty( $_POST['featured_only'] ),
 			'search'        => isset( $_POST['search'] ) ? sanitize_text_field( wp_unslash( $_POST['search'] ) ) : '',
+			'project'       => isset( $_POST['project'] ) ? sanitize_text_field( wp_unslash( $_POST['project'] ) ) : '',
 			// A rendezés widget-beállítás (nem látogatói kapcsoló); a JS minden
 			// kérésnél visszaküldi a data-sort-order attribútumból, hogy
 			// keresés/év-váltás/lapozás után is a beállított sorrend maradjon.
@@ -65,11 +66,22 @@ final class Mtmt_Widget_Ajax {
 		);
 
 		$display_options = array(
-			'show_topic_area'   => ! empty( $_POST['show_topic_area'] ),
-			'show_doi_link'     => ! empty( $_POST['show_doi_link'] ),
-			'show_sjr_badge'    => ! empty( $_POST['show_sjr_badge'] ),
-			'citation_style'    => ( isset( $_POST['citation_style'] ) && 'compact' === $_POST['citation_style'] ) ? 'compact' : 'full',
-			'ext_id_badge_mode' => ( isset( $_POST['ext_id_badge_mode'] ) && in_array( $_POST['ext_id_badge_mode'], array( 'icon', 'text' ), true ) ) ? $_POST['ext_id_badge_mode'] : 'both',
+			'show_topic_area'      => ! empty( $_POST['show_topic_area'] ),
+			'show_doi_link'        => ! empty( $_POST['show_doi_link'] ),
+			'show_sjr_badge'       => ! empty( $_POST['show_sjr_badge'] ),
+			'citation_style'       => ( isset( $_POST['citation_style'] ) && 'compact' === $_POST['citation_style'] ) ? 'compact' : 'full',
+			'ext_id_badge_mode'    => ( isset( $_POST['ext_id_badge_mode'] ) && in_array( $_POST['ext_id_badge_mode'], array( 'icon', 'text' ), true ) ) ? $_POST['ext_id_badge_mode'] : 'both',
+			// Projektazonosító + Dimensions badge (docs/decisions.md #101) — a
+			// renderer a stílus/jelmagyarázat értékeket whitelist alapján ellenőrzi.
+			'show_funding'         => ! empty( $_POST['show_funding'] ),
+			'funding_label'        => isset( $_POST['funding_label'] ) ? sanitize_text_field( wp_unslash( $_POST['funding_label'] ) ) : '',
+			'show_project_ids'     => ! empty( $_POST['show_project_ids'] ),
+			'project_label'        => isset( $_POST['project_label'] ) ? sanitize_text_field( wp_unslash( $_POST['project_label'] ) ) : '',
+			'project_clickable'    => ! empty( $_POST['project_clickable'] ),
+			'show_dimensions'      => ! empty( $_POST['show_dimensions'] ),
+			'dimensions_style'     => isset( $_POST['dimensions_style'] ) ? sanitize_key( wp_unslash( $_POST['dimensions_style'] ) ) : '',
+			'dimensions_legend'    => isset( $_POST['dimensions_legend'] ) ? sanitize_key( wp_unslash( $_POST['dimensions_legend'] ) ) : '',
+			'dimensions_hide_zero' => ! empty( $_POST['dimensions_hide_zero'] ),
 		);
 
 		// A widget-példány Tartalom fülén szerkeszthető feliratok (Mtmt_Widget_Common_Controls) —
@@ -128,6 +140,7 @@ final class Mtmt_Widget_Ajax {
 				'profile_id'    => $args['profile_id'],
 				'featured_only' => $args['featured_only'],
 				'search'        => $args['search'],
+				'project'       => $args['project'],
 			)
 		);
 
@@ -188,6 +201,27 @@ final class Mtmt_Widget_Ajax {
 		foreach ( $areas as $area ) {
 			$id   = (int) $area['id'];
 			$out .= '<option value="' . esc_attr( (string) $id ) . '"' . selected( $selected_id, $id, false ) . '>' . esc_html( (string) $area['label'] ) . '</option>';
+		}
+
+		return $out;
+	}
+
+	/**
+	 * A projekt-szűrő lenyíló belső HTML-je ("minden projekt" + azonosítók).
+	 *
+	 * @param string[] $project_ids
+	 * @param string   $selected   Üres = "minden projekt".
+	 * @param string   $all_label
+	 * @return string
+	 */
+	public static function render_project_options( array $project_ids, string $selected = '', string $all_label = '' ): string {
+		if ( '' === $all_label ) {
+			$all_label = __( 'Minden projekt', 'mtmt-sync' );
+		}
+
+		$out = '<option value="">' . esc_html( $all_label ) . '</option>';
+		foreach ( $project_ids as $id ) {
+			$out .= '<option value="' . esc_attr( (string) $id ) . '"' . selected( $selected, (string) $id, false ) . '>' . esc_html( Mtmt_Project_Ids::display_label( (string) $id ) ) . '</option>';
 		}
 
 		return $out;

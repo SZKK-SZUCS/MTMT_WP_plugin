@@ -3,7 +3,7 @@
  * Plugin Name: MTMT Sync
  * Contributor: Szurofka Márton, MFÜI
  * Description: MTMT-alapú publikációs lista jóváhagyással és Elementor megjelenítéssel.
- * Version: 0.13.2
+ * Version: 0.14.0
  * Requires at least: 6.4
  * Requires PHP: 8.1
  * Text Domain: mtmt-sync
@@ -14,8 +14,8 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'MTMT_VERSION', '0.13.2' );
-define( 'MTMT_DB_VERSION', '3' );
+define( 'MTMT_VERSION', '0.14.0' );
+define( 'MTMT_DB_VERSION', '4' );
 define( 'MTMT_CAPS_VERSION', '1' );
 define( 'MTMT_PLUGIN_FILE', __FILE__ );
 define( 'MTMT_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
@@ -42,6 +42,7 @@ require_once MTMT_PLUGIN_DIR . 'includes/class-mtmt-capabilities.php';
 require_once MTMT_PLUGIN_DIR . 'includes/class-mtmt-api-client.php';
 require_once MTMT_PLUGIN_DIR . 'includes/class-mtmt-mapper.php';
 require_once MTMT_PLUGIN_DIR . 'includes/class-mtmt-widget-cache.php';
+require_once MTMT_PLUGIN_DIR . 'includes/class-mtmt-project-ids.php';
 require_once MTMT_PLUGIN_DIR . 'includes/class-mtmt-publication-repository.php';
 require_once MTMT_PLUGIN_DIR . 'includes/class-mtmt-query-profile-repository.php';
 require_once MTMT_PLUGIN_DIR . 'includes/class-mtmt-topic-area-repository.php';

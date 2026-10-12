@@ -109,6 +109,8 @@ final class Mtmt_Widget_Topic_Publications extends \Elementor\Widget_Base {
 			)
 		);
 
+		$this->register_mtmt_project_controls( false );
+
 		$this->add_control(
 			'per_page',
 			array(
@@ -134,6 +136,8 @@ final class Mtmt_Widget_Topic_Publications extends \Elementor\Widget_Base {
 				),
 			)
 		);
+
+		$this->register_mtmt_default_view_controls();
 
 		$this->add_control(
 			'citation_style',
@@ -183,9 +187,13 @@ final class Mtmt_Widget_Topic_Publications extends \Elementor\Widget_Base {
 
 		$this->end_controls_section();
 
+		$this->register_mtmt_dimensions_controls();
+
 		$this->register_mtmt_text_controls(
 			array(
 				'search_placeholder'    => __( 'Keresés cím, szerző vagy forrás szerint…', 'mtmt-sync' ),
+				'project_label'         => __( 'Projektazonosító:', 'mtmt-sync' ),
+				'funding_label'         => __( 'Támogatás:', 'mtmt-sync' ),
 				'year_tab_all_label'    => __( 'Összes', 'mtmt-sync' ),
 				'empty_state_text'      => __( 'Nincs kiemelt publikáció ebben a körben.', 'mtmt-sync' ),
 				'pagination_prev_label' => __( 'Előző', 'mtmt-sync' ),
@@ -275,6 +283,9 @@ final class Mtmt_Widget_Topic_Publications extends \Elementor\Widget_Base {
 			'ext_id_badge_mode' => $ext_id_badge_mode,
 		);
 
+		$extra_options   = $this->mtmt_extra_display_options( $settings, false );
+		$display_options = array_merge( $display_options, $extra_options );
+
 		$scope = array(
 			'area_id'       => $area_id,
 			'profile_id'    => $profile_id,
@@ -282,7 +293,7 @@ final class Mtmt_Widget_Topic_Publications extends \Elementor\Widget_Base {
 		);
 
 		$years        = $widget_data->get_available_years( $scope );
-		$initial_year = $years[0] ?? 0;
+		$initial_year = $this->mtmt_resolve_initial_year( $settings, $years );
 
 		$initial = $widget_data->query(
 			array_merge(
@@ -315,7 +326,8 @@ final class Mtmt_Widget_Topic_Publications extends \Elementor\Widget_Base {
 			data-empty-text="<?php echo esc_attr( $empty_state_text ); ?>"
 			data-prev-label="<?php echo esc_attr( $prev_label ); ?>"
 			data-next-label="<?php echo esc_attr( $next_label ); ?>"
-			data-year-all-label="<?php echo esc_attr( $year_tab_all_label ); ?>">
+			data-year-all-label="<?php echo esc_attr( $year_tab_all_label ); ?>"
+			<?php echo $this->mtmt_extra_data_attrs( $extra_options ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- a helper maga escape-el. ?>>
 
 			<?php if ( $show_search ) : ?>
 			<div class="mtmt-widget-controls">

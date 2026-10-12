@@ -79,6 +79,8 @@ final class Mtmt_Widget_All_Publications extends \Elementor\Widget_Base {
 			)
 		);
 
+		$this->register_mtmt_project_controls( true );
+
 		$this->add_control(
 			'per_page',
 			array(
@@ -104,6 +106,8 @@ final class Mtmt_Widget_All_Publications extends \Elementor\Widget_Base {
 				),
 			)
 		);
+
+		$this->register_mtmt_default_view_controls();
 
 		$this->add_control(
 			'citation_style',
@@ -154,17 +158,22 @@ final class Mtmt_Widget_All_Publications extends \Elementor\Widget_Base {
 
 		$this->end_controls_section();
 
+		$this->register_mtmt_dimensions_controls();
+
 		$this->register_mtmt_text_controls(
 			array(
-				'header_eyebrow'        => __( 'PUBLIKÁCIÓK', 'mtmt-sync' ),
-				'header_title'          => __( 'Lektorált publikációk', 'mtmt-sync' ),
-				'header_subtitle'       => '',
-				'search_placeholder'    => __( 'Keresés cím, szerző vagy forrás szerint…', 'mtmt-sync' ),
-				'area_filter_all_label' => __( 'Minden szakmai terület', 'mtmt-sync' ),
-				'year_tab_all_label'    => __( 'Összes', 'mtmt-sync' ),
-				'empty_state_text'      => __( 'Nincs a szűrésnek megfelelő publikáció.', 'mtmt-sync' ),
-				'pagination_prev_label' => __( 'Előző', 'mtmt-sync' ),
-				'pagination_next_label' => __( 'Következő', 'mtmt-sync' ),
+				'header_eyebrow'           => __( 'PUBLIKÁCIÓK', 'mtmt-sync' ),
+				'header_title'             => __( 'Lektorált publikációk', 'mtmt-sync' ),
+				'header_subtitle'          => '',
+				'search_placeholder'       => __( 'Keresés cím, szerző vagy forrás szerint…', 'mtmt-sync' ),
+				'area_filter_all_label'    => __( 'Minden szakmai terület', 'mtmt-sync' ),
+				'project_filter_all_label' => __( 'Minden projekt', 'mtmt-sync' ),
+				'project_label'            => __( 'Projektazonosító:', 'mtmt-sync' ),
+				'funding_label'            => __( 'Támogatás:', 'mtmt-sync' ),
+				'year_tab_all_label'       => __( 'Összes', 'mtmt-sync' ),
+				'empty_state_text'         => __( 'Nincs a szűrésnek megfelelő publikáció.', 'mtmt-sync' ),
+				'pagination_prev_label'    => __( 'Előző', 'mtmt-sync' ),
+				'pagination_next_label'    => __( 'Következő', 'mtmt-sync' ),
 			)
 		);
 
@@ -201,6 +210,7 @@ final class Mtmt_Widget_All_Publications extends \Elementor\Widget_Base {
 		$header_subtitle       = (string) ( $settings['header_subtitle'] ?? '' );
 		$search_placeholder    = (string) $settings['search_placeholder'];
 		$area_filter_all_label = (string) $settings['area_filter_all_label'];
+		$project_all_label     = (string) ( $settings['project_filter_all_label'] ?? '' );
 		$year_tab_all_label    = (string) $settings['year_tab_all_label'];
 		$empty_state_text      = (string) $settings['empty_state_text'];
 		$prev_label            = (string) $settings['pagination_prev_label'];
@@ -214,8 +224,13 @@ final class Mtmt_Widget_All_Publications extends \Elementor\Widget_Base {
 			'ext_id_badge_mode' => $ext_id_badge_mode,
 		);
 
+		$project_ids         = ( 'yes' === ( $settings['show_project_filter'] ?? 'yes' ) ) ? $widget_data->get_filterable_project_ids() : array();
+		$show_project_filter = ! empty( $project_ids );
+		$extra_options       = $this->mtmt_extra_display_options( $settings, $show_project_filter );
+		$display_options     = array_merge( $display_options, $extra_options );
+
 		$years        = $widget_data->get_available_years();
-		$initial_year = $years[0] ?? 0;
+		$initial_year = $this->mtmt_resolve_initial_year( $settings, $years );
 
 		$initial = $widget_data->query(
 			array(
@@ -244,7 +259,8 @@ final class Mtmt_Widget_All_Publications extends \Elementor\Widget_Base {
 			data-prev-label="<?php echo esc_attr( $prev_label ); ?>"
 			data-next-label="<?php echo esc_attr( $next_label ); ?>"
 			data-year-all-label="<?php echo esc_attr( $year_tab_all_label ); ?>"
-			data-area-all-label="<?php echo esc_attr( $area_filter_all_label ); ?>">
+			data-area-all-label="<?php echo esc_attr( $area_filter_all_label ); ?>"
+			<?php echo $this->mtmt_extra_data_attrs( $extra_options ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- a helper maga escape-el. ?>>
 
 			<div class="mtmt-widget-header">
 				<p class="mtmt-eyebrow"><?php echo esc_html( $header_eyebrow ); ?></p>
@@ -254,7 +270,7 @@ final class Mtmt_Widget_All_Publications extends \Elementor\Widget_Base {
 				<?php endif; ?>
 			</div>
 
-			<?php if ( $show_search || ( $show_topic_filter && ! empty( $areas ) ) ) : ?>
+			<?php if ( $show_search || ( $show_topic_filter && ! empty( $areas ) ) || $show_project_filter ) : ?>
 			<div class="mtmt-widget-controls">
 				<?php if ( $show_search ) : ?>
 					<input type="search" class="mtmt-search-input" placeholder="<?php echo esc_attr( $search_placeholder ); ?>">
@@ -262,6 +278,11 @@ final class Mtmt_Widget_All_Publications extends \Elementor\Widget_Base {
 				<?php if ( $show_topic_filter && ! empty( $areas ) ) : ?>
 					<select class="mtmt-area-filter">
 						<?php echo Mtmt_Widget_Ajax::render_area_options( $areas, 0, $area_filter_all_label ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- saját, escape-elt HTML-t épít. ?>
+					</select>
+				<?php endif; ?>
+				<?php if ( $show_project_filter ) : ?>
+					<select class="mtmt-project-filter" aria-label="<?php echo esc_attr__( 'Szűrés projektazonosítóra', 'mtmt-sync' ); ?>">
+						<?php echo Mtmt_Widget_Ajax::render_project_options( $project_ids, '', $project_all_label ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- saját, escape-elt HTML-t épít. ?>
 					</select>
 				<?php endif; ?>
 			</div>

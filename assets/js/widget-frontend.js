@@ -7,18 +7,19 @@
 ( function () {
 	'use strict';
 
-	/** @type {WeakMap<Element, {year:number, areaId:number, search:string, sort:string, paged:number}>} */
+	/** @type {WeakMap<Element, {year:number, areaId:number, project:string, search:string, sort:string, paged:number}>} */
 	var state = new WeakMap();
 
 	/**
 	 * @param {Element} widget
-	 * @return {{year:number, areaId:number, search:string, sort:string, paged:number}}
+	 * @return {{year:number, areaId:number, project:string, search:string, sort:string, paged:number}}
 	 */
 	function getState( widget ) {
 		if ( ! state.has( widget ) ) {
 			state.set( widget, {
 				year: parseInt( widget.getAttribute( 'data-year' ) || '0', 10 ) || 0,
 				areaId: parseInt( widget.getAttribute( 'data-area-filter' ) || '0', 10 ) || 0,
+				project: '',
 				search: '',
 				// Widget-beállítás (nincs hozzá frontend kapcsoló), de minden
 				// AJAX-kérésnél elküldjük, hogy a beállított sorrend keresés/
@@ -55,6 +56,15 @@
 		body.set( 'pagination_prev_label', widget.getAttribute( 'data-prev-label' ) || '' );
 		body.set( 'pagination_next_label', widget.getAttribute( 'data-next-label' ) || '' );
 		body.set( 'year_tab_all_label', widget.getAttribute( 'data-year-all-label' ) || '' );
+		body.set( 'show_funding', widget.getAttribute( 'data-show-funding' ) === '1' ? '1' : '0' );
+		body.set( 'funding_label', widget.getAttribute( 'data-funding-label' ) || '' );
+		body.set( 'show_project_ids', widget.getAttribute( 'data-show-project-ids' ) === '1' ? '1' : '0' );
+		body.set( 'project_label', widget.getAttribute( 'data-project-label' ) || '' );
+		body.set( 'project_clickable', widget.getAttribute( 'data-project-clickable' ) === '1' ? '1' : '0' );
+		body.set( 'show_dimensions', widget.getAttribute( 'data-dimensions' ) === '1' ? '1' : '0' );
+		body.set( 'dimensions_style', widget.getAttribute( 'data-dimensions-style' ) || '' );
+		body.set( 'dimensions_legend', widget.getAttribute( 'data-dimensions-legend' ) || '' );
+		body.set( 'dimensions_hide_zero', widget.getAttribute( 'data-dimensions-hide-zero' ) === '1' ? '1' : '0' );
 
 		if ( 'topic' === widget.getAttribute( 'data-widget-type' ) ) {
 			body.set( 'area_id', widget.getAttribute( 'data-area-id' ) || '0' );
@@ -62,6 +72,7 @@
 			body.set( 'featured_only', '1' );
 		} else {
 			body.set( 'area_id', String( s.areaId ) );
+			body.set( 'project', s.project );
 			// Van terület-szűrő lenyíló -> a szerver keresés után szűkítse a
 			// listáját a találatot adó területekre.
 			if ( widget.querySelector( '.mtmt-area-filter' ) ) {
@@ -88,6 +99,7 @@
 				var yearTabs = widget.querySelector( '.mtmt-year-tabs' );
 				if ( list ) {
 					list.innerHTML = json.data.html;
+					refreshDimensionsBadges( widget );
 				}
 				if ( pagination ) {
 					pagination.innerHTML = json.data.pagination;
@@ -123,6 +135,121 @@
 			.then( function () {
 				widget.classList.remove( 'is-loading' );
 			} );
+	}
+
+	// --- Dimensions idézettség-badge (docs/decisions.md #101) -----------------
+	// A badge.dimensions.ai script CSAK akkor töltődik be, ha az oldalon van
+	// olyan widget, amelyiken a badge be van kapcsolva, ÉS az a widget a
+	// látótérbe kerül (lazy-load). AJAX-csere után az új badge-eket a
+	// Dimensions saját API-jával (`__dimensions_embed.addBadges()`) kell
+	// "felébreszteni", különben üresek maradnak.
+	var DIMENSIONS_SRC = 'https://badge.dimensions.ai/badge.js';
+	var dimensionsState = 'idle'; // idle | loading | ready
+
+	function loadDimensionsScript() {
+		if ( 'idle' !== dimensionsState ) {
+			return;
+		}
+		dimensionsState = 'loading';
+		var script = document.createElement( 'script' );
+		script.src = DIMENSIONS_SRC;
+		script.async = true;
+		script.charset = 'utf-8';
+		script.onload = function () {
+			dimensionsState = 'ready';
+			if ( window.__dimensions_embed && typeof window.__dimensions_embed.addBadges === 'function' ) {
+				window.__dimensions_embed.addBadges();
+			}
+		};
+		script.onerror = function () {
+			dimensionsState = 'idle';
+		};
+		document.head.appendChild( script );
+	}
+
+	/**
+	 * @param {Element} widget
+	 */
+	function refreshDimensionsBadges( widget ) {
+		if ( '1' !== widget.getAttribute( 'data-dimensions' ) ) {
+			return;
+		}
+		if ( 'ready' === dimensionsState && window.__dimensions_embed && typeof window.__dimensions_embed.addBadges === 'function' ) {
+			window.__dimensions_embed.addBadges();
+		} else {
+			loadDimensionsScript();
+		}
+	}
+
+	/**
+	 * @param {Element} widget
+	 */
+	function initDimensions( widget ) {
+		if ( '1' !== widget.getAttribute( 'data-dimensions' ) || widget.getAttribute( 'data-dimensions-init' ) ) {
+			return;
+		}
+		widget.setAttribute( 'data-dimensions-init', '1' );
+
+		if ( ! ( 'IntersectionObserver' in window ) ) {
+			refreshDimensionsBadges( widget );
+			return;
+		}
+		var observer = new IntersectionObserver( function ( entries ) {
+			for ( var i = 0; i < entries.length; i++ ) {
+				if ( entries[ i ].isIntersecting ) {
+					observer.disconnect();
+					refreshDimensionsBadges( widget );
+					return;
+				}
+			}
+		}, { rootMargin: '200px 0px' } );
+		observer.observe( widget );
+	}
+
+	function initAllDimensions() {
+		var widgets = document.querySelectorAll( '.mtmt-widget[data-dimensions="1"]' );
+		for ( var i = 0; i < widgets.length; i++ ) {
+			initDimensions( widgets[ i ] );
+		}
+	}
+
+	if ( 'loading' === document.readyState ) {
+		document.addEventListener( 'DOMContentLoaded', initAllDimensions );
+	} else {
+		initAllDimensions();
+	}
+
+	// Elementor szerkesztő-előnézet: a widget újrarenderelésekor (beállítás-
+	// váltás) új DOM-elem jön létre, azt is inicializálni kell.
+	window.addEventListener( 'elementor/frontend/init', function () {
+		if ( ! window.elementorFrontend || ! window.elementorFrontend.hooks ) {
+			return;
+		}
+		var onReady = function ( $scope ) {
+			var el = $scope && $scope[ 0 ] ? $scope[ 0 ].querySelector( '.mtmt-widget' ) : null;
+			if ( el ) {
+				initDimensions( el );
+			}
+		};
+		window.elementorFrontend.hooks.addAction( 'frontend/element_ready/mtmt_all_publications.default', onReady );
+		window.elementorFrontend.hooks.addAction( 'frontend/element_ready/mtmt_topic_publications.default', onReady );
+	} );
+
+	/**
+	 * Projekt-szűrő beállítása (lenyílóból vagy egy kártya projekt-chipjéről).
+	 *
+	 * @param {Element} widget
+	 * @param {string} project
+	 */
+	function setProjectFilter( widget, project ) {
+		var s = getState( widget );
+		s.project = project;
+		s.paged = 1;
+		var select = widget.querySelector( '.mtmt-project-filter' );
+		if ( select ) {
+			select.value = project;
+		}
+		fetchAndRender( widget );
 	}
 
 	/**
@@ -164,6 +291,16 @@
 			ps.paged = parseInt( pageBtn.getAttribute( 'data-page' ) || '1', 10 ) || 1;
 			fetchAndRender( pagerWidget );
 			pagerWidget.scrollIntoView( { behavior: 'smooth', block: 'start' } );
+			return;
+		}
+
+		var projectChip = e.target.closest( '.mtmt-project-chip' );
+		if ( projectChip ) {
+			var chipWidget = projectChip.closest( '.mtmt-widget' );
+			if ( chipWidget && chipWidget.querySelector( '.mtmt-project-filter' ) ) {
+				setProjectFilter( chipWidget, projectChip.getAttribute( 'data-project' ) || '' );
+				chipWidget.scrollIntoView( { behavior: 'smooth', block: 'start' } );
+			}
 			return;
 		}
 
@@ -211,6 +348,13 @@
 	} );
 
 	document.addEventListener( 'change', function ( e ) {
+		if ( e.target.classList && e.target.classList.contains( 'mtmt-project-filter' ) ) {
+			var projectWidget = e.target.closest( '.mtmt-widget' );
+			if ( projectWidget ) {
+				setProjectFilter( projectWidget, e.target.value || '' );
+			}
+			return;
+		}
 		if ( ! e.target.classList || ! e.target.classList.contains( 'mtmt-area-filter' ) ) {
 			return;
 		}
