@@ -1405,3 +1405,9 @@ activate()` idempotenciája (kétszeri hívás nem duplikál), az önjavító
        bal margót, ha a DOI ki van kapcsolva.
      i18n +10 string (337, mind lefordítva).
 
+103. **Dimensions idézettség-badge a kártya legalján.** Megrendelői
+     visszajelzés (0.14.0 élesítése után): ha be van kapcsolva, a badge
+     ne a DOI/SJR meta-sorban, hanem a kártya-infók legalsó soraként
+     jelenjen meg (az egyéb azonosítós logó-gombok alatt). A renderer
+     külön `.mtmt-pub-card-citations-row` blokkba teszi; DOI nélkül nincs
+     sor. Csak megjelenítési változás, adat/beállítás nem változik.

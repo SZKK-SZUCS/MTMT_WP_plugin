@@ -109,10 +109,6 @@ final class Mtmt_Card_Renderer {
 		if ( $display_options['show_sjr_badge'] && ! empty( $publication['sjr_quartile'] ) ) {
 			$meta_parts[] = '<span class="mtmt-badge mtmt-badge-sjr ' . esc_attr( self::sjr_badge_class( (string) $publication['sjr_quartile'] ) ) . '">' . esc_html( (string) $publication['sjr_quartile'] ) . '</span>';
 		}
-		if ( $display_options['show_dimensions'] ) {
-			$meta_parts[] = self::render_dimensions_badge( $publication, $display_options );
-		}
-		$meta_parts = array_values( array_filter( $meta_parts ) );
 		if ( ! empty( $meta_parts ) ) {
 			$out .= '<p class="mtmt-pub-card-meta">' . implode( ' ', $meta_parts ) . '</p>';
 		}
@@ -129,6 +125,14 @@ final class Mtmt_Card_Renderer {
 			$ext_ids_html = Mtmt_External_Id_Icons::render_buttons( $publication['external_ids'] ?? null, (string) $display_options['ext_id_badge_mode'] );
 			if ( '' !== $ext_ids_html ) {
 				$out .= $ext_ids_html; // Mtmt_External_Id_Icons már maga escape-eli a tartalmát.
+			}
+		}
+
+		// Idézettség-badge: a kártya-infók LEGALSÓ sora (megrendelői kérés, docs/decisions.md #103).
+		if ( $display_options['show_dimensions'] ) {
+			$citations_html = self::render_dimensions_badge( $publication, $display_options );
+			if ( '' !== $citations_html ) {
+				$out .= '<div class="mtmt-pub-card-citations-row">' . $citations_html . '</div>';
 			}
 		}
 

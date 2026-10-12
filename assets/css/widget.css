@@ -430,10 +430,13 @@
 }
 
 /* Dimensions idézettség-badge (badge.dimensions.ai rajzolja ki). */
+.mtmt-pub-card-citations-row {
+	margin: 0.5em 0 0;
+}
+
 .mtmt-pub-card-citations {
 	display: inline-block;
 	vertical-align: middle;
-	margin-left: 0.5em;
 	line-height: 0;
 }
 
