@@ -4,7 +4,7 @@ Tags: mtmt, publications, elementor, publikaciok, tudomanyos
 Requires at least: 6.4
 Tested up to: 6.7
 Requires PHP: 8.1
-Stable tag: 0.13.2
+Stable tag: 0.14.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -103,6 +103,37 @@ egyikkel sem, csak a látogató-vezérelt alapbeállítással) működik, tiszt�
 üzemeltetési döntés, telepítésenként eltérhet.
 
 == Changelog ==
+
+= 0.14.0 =
+* Új widget-beállítás mindkét Elementor widgeten: "Alapértelmezett nézet"
+  (Összes év / Legfrissebb év / Adott év). Alapértelmezés: "Összes év" —
+  a már elhelyezett widgetek is ezzel nyílnak meg (korábban a legfrissebb
+  év volt a kezdő fül). Ha a beállított évre nincs tétel, az "Összes" nyílik.
+* Projektazonosító megjelenik a weboldalon (kártyán, kikapcsolható) és az
+  admin listában (új oszlop, kattintásra szűr). Új "Projekt" szűrő az admin
+  listában és az összesítő widgetben (lenyíló + a kártya projekt-chipjére
+  kattintva). A kereső a projektazonosítóban is keres.
+* A gazdagító űrlapon a projektazonosító mező autocomplete-es lett: fókuszra
+  és gépeléskor felajánlja a korábban rögzített azonosítókat; ha a begépelt
+  szövegre egyik sem illeszkedik, "Új azonosító hozzáadása" jelenik meg.
+  Több azonosító chip-ként adható meg. Az "Ellenőrizve" mellett látszik, ki
+  és mikor ellenőrizte.
+* A projektazonosítók tárolása egységes formára áll (", "-szel elválasztva,
+  duplikátum nélkül) — a meglévő értékeket egy egyszeri DB-frissítés (v4)
+  automatikusan átalakítja.
+* Új opcionális widget-beállítás: Dimensions idézettségi badge (DOI-val
+  rendelkező tételeknél), stílus/jelmagyarázat választható. Alapból
+  kikapcsolva; a külső script csak akkor töltődik be, ha a widget látható.
+* Kereső a moderációs listában (cím, szerzők, forrás, projektazonosító,
+  DOI; számra az MTMT-azonosító is). A keresés a szűrőkkel kombinálható,
+  és szerkesztésből visszatérve megmarad.
+* Javítva: a gazdagító űrlapon megadott támogatás eddig sehol nem jelent
+  meg, pedig a súgó ezt ígérte. Mostantól "Támogatás:" sorként látszik a
+  widget-kártyán (kikapcsolható). Az űrlapon a mező neve "Támogatás" lett
+  ("Támogatás felülbírálása" helyett) — az adat ugyanabban a mezőben marad.
+* Adatbiztonság a frissítésnél: a projektazonosítók átalakítása előtt az
+  eredeti értékek biztonsági mentésbe kerülnek (`mtmt_project_ids_backup_v4`
+  opció), nincs csonkolás, és minden más rögzített adat érintetlen marad.
 
 = 0.13.2 =
 * Widget szakmai terület szűrő: keresés után már csak azok a területek
