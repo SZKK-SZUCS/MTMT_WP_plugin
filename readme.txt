@@ -4,7 +4,7 @@ Tags: mtmt, publications, elementor, publikaciok, tudomanyos
 Requires at least: 6.4
 Tested up to: 6.7
 Requires PHP: 8.1
-Stable tag: 0.14.0
+Stable tag: 0.14.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -103,6 +103,11 @@ egyikkel sem, csak a látogató-vezérelt alapbeállítással) működik, tiszt�
 üzemeltetési döntés, telepítésenként eltérhet.
 
 == Changelog ==
+
+= 0.14.1 =
+* A Dimensions idézettségi badge (ha be van kapcsolva) mostantól a
+  publikáció-kártya legalsó soraként jelenik meg, az egyéb azonosítók
+  (WoS/Scopus/…) alatt, nem a DOI/SJR sorban.
 
 = 0.14.0 =
 * Új widget-beállítás mindkét Elementor widgeten: "Alapértelmezett nézet"
