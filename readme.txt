@@ -4,7 +4,7 @@ Tags: mtmt, publications, elementor, publikaciok, tudomanyos
 Requires at least: 6.4
 Tested up to: 6.7
 Requires PHP: 8.1
-Stable tag: 0.14.1
+Stable tag: 0.15.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -103,6 +103,22 @@ egyikkel sem, csak a látogató-vezérelt alapbeállítással) működik, tiszt�
 üzemeltetési döntés, telepítésenként eltérhet.
 
 == Changelog ==
+
+= 0.15.0 =
+* Új beállítás (Beállítások → Funkciók): „Projektazonosítók ellenőrzése
+  kötelező”. Bekapcsolva a gazdagító űrlapon megjelenik az „Ellenőrizve”
+  pipa (besorolási joggal), és a weboldalon csak az ellenőrzött
+  publikációk projektazonosítói látszanak és szűrhetők. Kikapcsolva
+  (alapértelmezés) a megadott azonosítók azonnal megjelennek, ellenőrzés
+  nélkül. A korábban rögzített „Ellenőrizve” értékek megmaradnak.
+* A Jogosultságok oldal jelzi, ha a „Besorolás” jogosultságra jelenleg
+  nincs szükség (sem a Szakmai terület, sem a kötelező ellenőrzés nincs
+  bekapcsolva).
+* Javítva: lapozáskor (és projekt-chipre kattintáskor) a widget fölötti
+  tartalom felcsúszott, az oldal eltolódott. A görgetés mostantól csak az
+  ablakot mozgatja, és figyelembe veszi a ragadós fejlécet.
+* A Dimensions badge sora nem foglal helyet, amíg a badge nem jelent meg
+  (vagy 0 idézetnél el van rejtve).
 
 = 0.14.1 =
 * A Dimensions idézettségi badge (ha be van kapcsolva) mostantól a
