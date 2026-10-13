@@ -193,8 +193,10 @@ final class Mtmt_Publications_Page {
 			'project_ids'       => isset( $_POST['project_ids'] ) ? sanitize_text_field( wp_unslash( $_POST['project_ids'] ) ) : '',
 		);
 
-		// Az "Ellenőrizve" pipát csak classify-jogosultsággal lehet állítani.
-		if ( current_user_can( Mtmt_Capabilities::CLASSIFY ) ) {
+		// Az "Ellenőrizve" pipa csak kötelező ellenőrzésnél létezik, és csak
+		// classify-jogosultsággal állítható. Kikapcsolt ellenőrzésnél a korábban
+		// rögzített érték érintetlen marad (nem küldjük a mezőt).
+		if ( Mtmt_Project_Ids::verification_required() && current_user_can( Mtmt_Capabilities::CLASSIFY ) ) {
 			$fields['project_verified'] = ! empty( $_POST['project_verified'] );
 		}
 
@@ -281,6 +283,7 @@ final class Mtmt_Publications_Page {
 		wp_enqueue_media();
 
 		$can_classify      = current_user_can( Mtmt_Capabilities::CLASSIFY );
+		$verify_required   = Mtmt_Project_Ids::verification_required();
 		$featured_enabled  = (bool) get_option( 'mtmt_enable_featured' );
 		$topic_areas_on    = (bool) get_option( 'mtmt_enable_topic_areas' );
 		$all_areas         = $topic_areas_on ? $this->topic_area_repo->get_all() : array();
@@ -365,12 +368,12 @@ final class Mtmt_Publications_Page {
 								<input type="text" id="mtmt-project" class="regular-text" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="mtmt-project-suggestions" aria-autocomplete="list" placeholder="<?php echo esc_attr__( 'Kezdd el gépelni az azonosítót…', 'mtmt-sync' ); ?>">
 								<ul class="mtmt-project-suggestions" id="mtmt-project-suggestions" role="listbox" hidden></ul>
 							</div>
-							<?php if ( $can_classify ) : ?>
+							<?php if ( $verify_required && $can_classify ) : ?>
 								<label class="mtmt-project-verified"><input type="checkbox" name="project_verified" value="1" <?php checked( ! empty( $item['project_verified'] ) ); ?>> <?php esc_html_e( 'Ellenőrizve', 'mtmt-sync' ); ?></label>
-							<?php elseif ( ! empty( $item['project_verified'] ) ) : ?>
-								<span class="description">✓ <?php esc_html_e( 'Ellenőrizve', 'mtmt-sync' ); ?></span>
+							<?php elseif ( $verify_required ) : ?>
+								<span class="description"><?php echo ! empty( $item['project_verified'] ) ? '✓ ' . esc_html__( 'Ellenőrizve', 'mtmt-sync' ) : esc_html__( 'Még nincs ellenőrizve — a weboldalon csak ellenőrzés után jelenik meg.', 'mtmt-sync' ); ?></span>
 							<?php endif; ?>
-							<?php if ( ! empty( $item['project_verified'] ) && ! empty( $item['verified_by'] ) ) : ?>
+							<?php if ( $verify_required && ! empty( $item['project_verified'] ) && ! empty( $item['verified_by'] ) ) : ?>
 								<?php $verifier = get_userdata( (int) $item['verified_by'] ); ?>
 								<p class="description">
 									<?php
@@ -384,7 +387,9 @@ final class Mtmt_Publications_Page {
 								</p>
 							<?php endif; ?>
 							<p class="description"><?php esc_html_e( 'A publikációhoz tartozó pályázati/projekt-azonosító(k), pl. "K 123456". Gépeléskor felajánlja a korábban már használt azonosítókat; ha még nincs ilyen, "Új azonosító hozzáadása" jelenik meg. Több azonosító is megadható. Az azonosítók megjelennek a weboldalon, és szűrni is lehet rájuk.', 'mtmt-sync' ); ?></p>
-							<p class="description"><?php esc_html_e( 'Az "Ellenőrizve" pipát a besorolási jogú kolléga teszi be, miután megnézte, hogy a publikáció valóban a megadott projekt(ek) eredménye (pl. szerepel benne a köszönetnyilvánítás). Rögzíti, ki és mikor ellenőrizte.', 'mtmt-sync' ); ?></p>
+							<?php if ( $verify_required ) : ?>
+								<p class="description"><?php esc_html_e( 'Az "Ellenőrizve" pipát a besorolási jogú kolléga teszi be, miután megnézte, hogy a publikáció valóban a megadott projekt(ek) eredménye (pl. szerepel benne a köszönetnyilvánítás). Rögzíti, ki és mikor ellenőrizte. A weboldalon csak az ellenőrzött azonosítók jelennek meg.', 'mtmt-sync' ); ?></p>
+							<?php endif; ?>
 						</td>
 					</tr>
 					<?php if ( $topic_areas_on ) : ?>

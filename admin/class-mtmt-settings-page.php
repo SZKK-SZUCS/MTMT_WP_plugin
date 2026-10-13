@@ -97,6 +97,15 @@ final class Mtmt_Settings_Page {
 				<p class="description">
 					<?php esc_html_e( 'Fontos cikkeket kiemeltként jelölhetsz meg a moderációs listán — ezeket egy külön widget is meg tudja jeleníteni.', 'mtmt-sync' ); ?>
 				</p>
+				<p>
+					<label>
+						<input type="checkbox" name="require_project_verification" value="1" <?php checked( Mtmt_Project_Ids::verification_required() ); ?>>
+						<?php esc_html_e( 'Projektazonosítók ellenőrzése kötelező', 'mtmt-sync' ); ?>
+					</label>
+				</p>
+				<p class="description">
+					<?php esc_html_e( 'Ha be van kapcsolva, a gazdagító űrlapon megjelenik az "Ellenőrizve" pipa (csak besorolási joggal állítható), és a weboldalon csak az ellenőrzött publikációk projektazonosítói jelennek meg és szűrhetők. Ha ki van kapcsolva, a megadott azonosítók azonnal megjelennek, és nincs szükség ellenőrzésre.', 'mtmt-sync' ); ?>
+				</p>
 				<?php submit_button( __( 'Mentés', 'mtmt-sync' ) ); ?>
 			</form>
 
@@ -307,6 +316,9 @@ final class Mtmt_Settings_Page {
 		if ( 'save_features' === $action ) {
 			update_option( 'mtmt_enable_topic_areas', ! empty( $_POST['enable_topic_areas'] ) ? 1 : 0 );
 			update_option( 'mtmt_enable_featured', ! empty( $_POST['enable_featured'] ) ? 1 : 0 );
+			update_option( Mtmt_Project_Ids::OPTION_REQUIRE_VERIFICATION, ! empty( $_POST['require_project_verification'] ) ? 1 : 0 );
+			// A projektazonosítók nyilvános láthatósága ettől függ -> widget-cache ürítése.
+			Mtmt_Widget_Cache::bump();
 
 			return array(
 				'type'    => 'success',

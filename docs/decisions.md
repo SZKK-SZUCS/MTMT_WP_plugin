@@ -1411,3 +1411,35 @@ activate()` idempotenciája (kétszeri hívás nem duplikál), az önjavító
      jelenjen meg (az egyéb azonosítós logó-gombok alatt). A renderer
      külön `.mtmt-pub-card-citations-row` blokkba teszi; DOI nélkül nincs
      sor. Csak megjelenítési változás, adat/beállítás nem változik.
+
+104. **Kötelező projektazonosító-ellenőrzés kapcsoló + lapozási görgetés
+     javítása** (0.15.0, megrendelői visszajelzés).
+     - **Új beállítás** `mtmt_require_project_verification`
+       (`Mtmt_Project_Ids::verification_required()`), alapból KI — így a
+       frissítés nem változtat a weboldal viselkedésén (eddig is minden
+       megadott azonosító látszott). BE: a gazdagító űrlapon megjelenik az
+       "Ellenőrizve" pipa (csak `mtmt_classify`), az admin-listában "nem
+       ellenőrzött" jelzés, és nyilvánosan (kártya, widget projekt-szűrő,
+       keresés, terület-lenyíló újraszámolás) csak a `project_verified = 1`
+       tételek azonosítói szerepelnek. KI: nincs pipa; a mentés nem küldi a
+       `project_verified` mezőt, így a korábban rögzített érték megmarad
+       (visszakapcsoláskor újra érvényes). A kapcsoló mentése üríti a
+       widget-cache-t. Megrendelői kérés szerint a `mtmt_classify`
+       jogosultság csak a bekapcsolt funkciókhoz kell: a Jogosultságok oldal
+       kiírja, mire kell jelenleg, ill. hogy jelenleg nincs rá szükség (ha
+       sem a Szakmai terület, sem a kötelező ellenőrzés nincs bekapcsolva).
+     - **Lapozási "oldal-eltolódás" hibája:** az élő jkk.sze.hu-n mérve a
+       widget egyik Elementor-szülőkonténere `overflow: hidden`, és az
+       `Element.scrollIntoView()` ezt a konténert görgette el (scrollTop
+       ~300px) az ablak helyett — ettől csúszott fel a widget fölötti
+       tartalom. Most `scrollWidgetIntoView()` csak `window.scrollTo()`-t
+       használ, a ragadós/fix sávok (admin-bar, fejléc) magasságát
+       `elementsFromPoint`-tal méri, és nem görget, ha a widget teteje már
+       látszik.
+     - A Dimensions-sor (`.mtmt-pub-card-citations-row`) `:has(... :empty)`
+       szabállyal nem foglal helyet, amíg nincs badge (lazy-load előtt,
+       ill. 0 idézetnél) — élesben mérve eddig ~26px üres sávot adott.
+     - "Hatalmas badge-ikonok": élesben (asztali és 375px mobil nézet, A és
+       B widget, Elementor-szerkesztő) nem reprodukálható — az ikonok 20px,
+       a nyíl 16px, a Dimensions "Nagy téglalap" 110×22px. Pontosítás kérve.
+

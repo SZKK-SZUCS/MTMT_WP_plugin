@@ -19,6 +19,22 @@ final class Mtmt_Project_Ids {
 	/** Tárolási elválasztó (a szűrő-SQL ezt cseréli sima vesszőre). */
 	public const SEPARATOR = ', ';
 
+	/** Plugin-beállítás: kötelező-e a projektazonosítók ellenőrzése (docs/decisions.md #104). */
+	public const OPTION_REQUIRE_VERIFICATION = 'mtmt_require_project_verification';
+
+	/**
+	 * Be van-e kapcsolva a kötelező ellenőrzés. Ha igen: a gazdagító űrlapon
+	 * megjelenik az "Ellenőrizve" pipa (besorolási jog kell hozzá), és a
+	 * weboldalon csak az ellenőrzött publikációk projektazonosítói látszanak /
+	 * szűrhetők. Ha nem: a megadott azonosítók azonnal megjelennek, az
+	 * "Ellenőrizve" pipa el van rejtve (a korábban rögzített érték megmarad).
+	 *
+	 * @return bool
+	 */
+	public static function verification_required(): bool {
+		return (bool) get_option( self::OPTION_REQUIRE_VERIFICATION );
+	}
+
 	/**
 	 * Nyers szövegből azonosító-lista. Elválasztó: vessző, pontosvessző vagy
 	 * sortörés (a szóköz NEM, mert pl. a "K 123456" egyetlen azonosító).

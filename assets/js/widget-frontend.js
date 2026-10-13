@@ -236,6 +236,63 @@
 	} );
 
 	/**
+	 * A képernyő tetején lévő fix/ragadós sávok (admin-bar, ragadós fejléc)
+	 * együttes magassága — ennyivel a widget teteje alá kell görgetni, hogy a
+	 * fejléc ne takarja ki.
+	 *
+	 * @return {number}
+	 */
+	function topOverlayHeight() {
+		if ( ! document.elementsFromPoint ) {
+			return 0;
+		}
+		var bottom = 0;
+		var x = Math.round( window.innerWidth / 2 );
+		var maxY = Math.min( 240, window.innerHeight / 3 );
+		// A felső sávot végigmintavételezzük, mert a "lebegő" fejléc nem mindig
+		// tapad a 0. pixelhez (pl. admin-bar alatt, kis réssel).
+		for ( var y = 1; y < maxY; y += 8 ) {
+			var stack = document.elementsFromPoint( x, y );
+			for ( var i = 0; i < stack.length; i++ ) {
+				for ( var el = stack[ i ]; el && el !== document.body && el !== document.documentElement; el = el.parentElement ) {
+					var pos = window.getComputedStyle( el ).position;
+					if ( 'fixed' !== pos && 'sticky' !== pos ) {
+						continue;
+					}
+					var r = el.getBoundingClientRect();
+					if ( r.top < maxY && r.height < window.innerHeight / 2 && r.width > window.innerWidth * 0.3 ) {
+						bottom = Math.max( bottom, r.bottom );
+					}
+				}
+			}
+		}
+		return bottom;
+	}
+
+	/**
+	 * Lapozás / projekt-chip után a widget tetejére görget, de CSAK az ablakot
+	 * (window.scrollTo). Az Element.scrollIntoView() korábban egy overflow:hidden
+	 * Elementor-konténert is "elgörgetett" — ettől csúszott fel a widget fölötti
+	 * tartalom és tolódott el az oldal (docs/decisions.md #104). Ha a widget
+	 * teteje már látszik, nem görget.
+	 *
+	 * @param {Element} widget
+	 */
+	function scrollWidgetIntoView( widget ) {
+		var offset = topOverlayHeight() + 16;
+		var top = widget.getBoundingClientRect().top;
+		if ( top >= offset && top < window.innerHeight * 0.6 ) {
+			return;
+		}
+		var target = Math.max( 0, window.pageYOffset + top - offset );
+		try {
+			window.scrollTo( { top: target, behavior: 'smooth' } );
+		} catch ( err ) {
+			window.scrollTo( 0, target );
+		}
+	}
+
+	/**
 	 * Projekt-szűrő beállítása (lenyílóból vagy egy kártya projekt-chipjéről).
 	 *
 	 * @param {Element} widget
@@ -290,7 +347,7 @@
 			var ps = getState( pagerWidget );
 			ps.paged = parseInt( pageBtn.getAttribute( 'data-page' ) || '1', 10 ) || 1;
 			fetchAndRender( pagerWidget );
-			pagerWidget.scrollIntoView( { behavior: 'smooth', block: 'start' } );
+			scrollWidgetIntoView( pagerWidget );
 			return;
 		}
 
@@ -299,7 +356,7 @@
 			var chipWidget = projectChip.closest( '.mtmt-widget' );
 			if ( chipWidget && chipWidget.querySelector( '.mtmt-project-filter' ) ) {
 				setProjectFilter( chipWidget, projectChip.getAttribute( 'data-project' ) || '' );
-				chipWidget.scrollIntoView( { behavior: 'smooth', block: 'start' } );
+				scrollWidgetIntoView( chipWidget );
 			}
 			return;
 		}

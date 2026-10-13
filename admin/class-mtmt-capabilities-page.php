@@ -93,6 +93,28 @@ final class Mtmt_Capabilities_Page {
 							<p class="description">
 								<?php esc_html_e( 'Szakmai terület hozzárendelése egy publikációhoz, és a projektazonosító ellenőrzése.', 'mtmt-sync' ); ?>
 							</p>
+							<?php
+							$classify_uses = array();
+							if ( get_option( 'mtmt_enable_topic_areas' ) ) {
+								$classify_uses[] = __( 'szakmai terület besorolás', 'mtmt-sync' );
+							}
+							if ( Mtmt_Project_Ids::verification_required() ) {
+								$classify_uses[] = __( 'projektazonosító-ellenőrzés', 'mtmt-sync' );
+							}
+							?>
+							<?php if ( empty( $classify_uses ) ) : ?>
+								<p class="description"><strong><?php esc_html_e( 'Jelenleg nincs szükség erre a jogosultságra: sem a „Szakmai terület" funkció, sem a kötelező projektazonosító-ellenőrzés nincs bekapcsolva (Beállítások).', 'mtmt-sync' ); ?></strong></p>
+							<?php else : ?>
+								<p class="description">
+									<?php
+									printf(
+										/* translators: %s: bekapcsolt funkciók listája */
+										esc_html__( 'Jelenleg ehhez kell: %s.', 'mtmt-sync' ),
+										esc_html( implode( ', ', $classify_uses ) )
+									);
+									?>
+								</p>
+							<?php endif; ?>
 						</td>
 					</tr>
 				</table>

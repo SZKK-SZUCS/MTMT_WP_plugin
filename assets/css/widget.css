@@ -434,6 +434,12 @@
 	margin: 0.5em 0 0;
 }
 
+/* Amíg a Dimensions nem rajzolta ki a badge-et (vagy 0 idézetnél elrejti),
+   a sor ne foglaljon helyet. */
+.mtmt-pub-card-citations-row:has(.__dimensions_badge_embed__:empty) {
+	display: none;
+}
+
 .mtmt-pub-card-citations {
 	display: inline-block;
 	vertical-align: middle;

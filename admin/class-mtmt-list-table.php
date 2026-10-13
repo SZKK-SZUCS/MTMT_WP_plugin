@@ -355,7 +355,12 @@ final class Mtmt_List_Table extends WP_List_Table {
 		}
 
 		$html = implode( ', ', $links );
-		if ( ! empty( $item['project_verified'] ) ) {
+		if ( ! Mtmt_Project_Ids::verification_required() ) {
+			return $html;
+		}
+		if ( empty( $item['project_verified'] ) ) {
+			$html .= '<br><span class="description">' . esc_html__( 'nem ellenőrzött', 'mtmt-sync' ) . '</span>';
+		} else {
 			$html .= ' <span class="dashicons dashicons-yes-alt" style="color:#00a32a;font-size:16px;width:16px;height:16px;vertical-align:text-bottom;" title="' . esc_attr__( 'Ellenőrizve', 'mtmt-sync' ) . '"></span>';
 		}
 

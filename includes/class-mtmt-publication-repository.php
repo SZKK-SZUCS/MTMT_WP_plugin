@@ -323,7 +323,9 @@ final class Mtmt_Publication_Repository {
 		$search = trim( (string) ( $args['search'] ?? '' ) );
 		if ( '' !== $search ) {
 			$like    = '%' . $this->wpdb->esc_like( $search ) . '%';
-			$clauses = array( 'title LIKE %s', 'authors_text LIKE %s', 'source_title LIKE %s', 'project_ids LIKE %s', 'doi LIKE %s' );
+			// Ha a projektazonosítók csak ellenőrzés után nyilvánosak, a nem ellenőrzöttekre ne lehessen rákeresni.
+			$project_like = ! empty( $args['project_verified_only'] ) ? '(project_ids LIKE %s AND project_verified = 1)' : 'project_ids LIKE %s';
+			$clauses      = array( 'title LIKE %s', 'authors_text LIKE %s', 'source_title LIKE %s', $project_like, 'doi LIKE %s' );
 			$params  = array_merge( $params, array( $like, $like, $like, $like, $like ) );
 			// Csupa számjegy -> MTMT-azonosítóra (mtid) is pontos egyezés (admin-keresőhöz hasznos).
 			if ( ctype_digit( $search ) ) {
@@ -337,6 +339,9 @@ final class Mtmt_Publication_Repository {
 		if ( '' !== $project ) {
 			$where[]  = "FIND_IN_SET(%s, REPLACE(project_ids, ', ', ',')) > 0";
 			$params[] = $project;
+			if ( ! empty( $args['project_verified_only'] ) ) {
+				$where[] = 'project_verified = 1';
+			}
 		}
 	}
 
@@ -345,12 +350,16 @@ final class Mtmt_Publication_Repository {
 	 * a gazdagító űrlap autocomplete-jéhez, az admin-lista szűrőjéhez és a
 	 * widget projekt-szűrőjéhez.
 	 *
-	 * @param string $status Üres = minden státusz; 'approved' = csak a
-	 *                       nyilvánosan is megjelenő tételek azonosítói.
+	 * @param string $status        Üres = minden státusz; 'approved' = csak a
+	 *                              nyilvánosan is megjelenő tételek azonosítói.
+	 * @param bool   $verified_only Csak ellenőrzött (project_verified=1) tételekből.
 	 * @return string[]
 	 */
-	public function get_distinct_project_ids( string $status = '' ): array {
+	public function get_distinct_project_ids( string $status = '', bool $verified_only = false ): array {
 		$sql = "SELECT project_ids FROM {$this->table} WHERE project_ids IS NOT NULL AND project_ids <> ''";
+		if ( $verified_only ) {
+			$sql .= ' AND project_verified = 1';
+		}
 		if ( in_array( $status, self::VALID_STATUSES, true ) ) {
 			$rows = $this->wpdb->get_col( $this->wpdb->prepare( $sql . ' AND status = %s', $status ) );
 		} else {

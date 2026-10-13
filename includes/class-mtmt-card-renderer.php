@@ -221,6 +221,11 @@ final class Mtmt_Card_Renderer {
 	 * @return string
 	 */
 	private static function render_project_ids( array $publication, string $label, bool $clickable ): string {
+		// Kötelező ellenőrzésnél a nem ellenőrzött azonosítók nem nyilvánosak (docs/decisions.md #104).
+		if ( Mtmt_Project_Ids::verification_required() && empty( $publication['project_verified'] ) ) {
+			return '';
+		}
+
 		$ids = Mtmt_Project_Ids::parse( (string) ( $publication['project_ids'] ?? '' ) );
 		if ( empty( $ids ) ) {
 			return '';

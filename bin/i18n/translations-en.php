@@ -399,4 +399,13 @@ return array(
 	'Támogatás megjelenítése' => 'Show funding',
 	'Támogatás sor felirata a kártyán' => 'Funding row label on the card',
 	'Támogatás:' => 'Funding:',
+	'Az "Ellenőrizve" pipát a besorolási jogú kolléga teszi be, miután megnézte, hogy a publikáció valóban a megadott projekt(ek) eredménye (pl. szerepel benne a köszönetnyilvánítás). Rögzíti, ki és mikor ellenőrizte. A weboldalon csak az ellenőrzött azonosítók jelennek meg.' => 'The "Verified" checkbox is ticked by a colleague with classification rights after checking that the publication really is an output of the given project(s) (e.g. the acknowledgement mentions it). It records who verified it and when. Only verified identifiers appear on the website.',
+	'Ha be van kapcsolva, a gazdagító űrlapon megjelenik az "Ellenőrizve" pipa (csak besorolási joggal állítható), és a weboldalon csak az ellenőrzött publikációk projektazonosítói jelennek meg és szűrhetők. Ha ki van kapcsolva, a megadott azonosítók azonnal megjelennek, és nincs szükség ellenőrzésre.' => 'If enabled, the "Verified" checkbox appears on the enrichment form (only settable with classification rights), and only the project identifiers of verified publications appear and can be filtered on the website. If disabled, entered identifiers appear immediately and no verification is needed.',
+	'Jelenleg ehhez kell: %s.' => 'Currently needed for: %s.',
+	'Jelenleg nincs szükség erre a jogosultságra: sem a „Szakmai terület" funkció, sem a kötelező projektazonosító-ellenőrzés nincs bekapcsolva (Beállítások).' => 'This permission is currently not needed: neither the "Topic area" feature nor mandatory project identifier verification is enabled (Settings).',
+	'Még nincs ellenőrizve — a weboldalon csak ellenőrzés után jelenik meg.' => 'Not verified yet — it only appears on the website after verification.',
+	'Projektazonosítók ellenőrzése kötelező' => 'Project identifier verification required',
+	'nem ellenőrzött' => 'not verified',
+	'projektazonosító-ellenőrzés' => 'project identifier verification',
+	'szakmai terület besorolás' => 'topic area classification',
 );

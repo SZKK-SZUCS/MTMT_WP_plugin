@@ -92,6 +92,8 @@ final class Mtmt_Widget_Data {
 			'featured_only' => (bool) $args['featured_only'],
 			'search'        => (string) $args['search'],
 			'project'       => (string) $args['project'],
+			// Kötelező ellenőrzésnél nyilvánosan csak az ellenőrzött azonosítók szűrhetők/kereshetők.
+			'project_verified_only' => Mtmt_Project_Ids::verification_required(),
 			'paged'         => (int) $args['paged'],
 			'per_page'      => (int) $args['per_page'],
 			'orderby'       => $orderby,
@@ -172,6 +174,7 @@ final class Mtmt_Widget_Data {
 			'featured_only' => (bool) $scope['featured_only'],
 			'search'        => (string) $scope['search'],
 			'project'       => (string) $scope['project'],
+			'project_verified_only' => Mtmt_Project_Ids::verification_required(),
 		);
 		if ( (int) $scope['area_id'] > 0 ) {
 			$repo_args['ids'] = $this->topic_area_repo->get_publication_ids_for_area( (int) $scope['area_id'] );
@@ -203,13 +206,14 @@ final class Mtmt_Widget_Data {
 	 * @return string[]
 	 */
 	public function get_filterable_project_ids(): array {
-		$cache_key = 'mtmt_widget_projects_' . md5( Mtmt_Widget_Cache::version() );
-		$cached    = get_transient( $cache_key );
+		$verified_only = Mtmt_Project_Ids::verification_required();
+		$cache_key     = 'mtmt_widget_projects_' . md5( Mtmt_Widget_Cache::version() . '|' . ( $verified_only ? 'v' : 'a' ) );
+		$cached        = get_transient( $cache_key );
 		if ( false !== $cached ) {
 			return $cached;
 		}
 
-		$ids = $this->repository->get_distinct_project_ids( 'approved' );
+		$ids = $this->repository->get_distinct_project_ids( 'approved', $verified_only );
 		set_transient( $cache_key, $ids, self::CACHE_TTL );
 
 		return $ids;
