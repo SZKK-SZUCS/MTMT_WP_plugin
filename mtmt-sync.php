@@ -3,7 +3,7 @@
  * Plugin Name: MTMT Sync
  * Contributor: Szurofka Márton, MFÜI
  * Description: MTMT-alapú publikációs lista jóváhagyással és Elementor megjelenítéssel.
- * Version: 0.15.0
+ * Version: 0.16.0
  * Requires at least: 6.4
  * Requires PHP: 8.1
  * Text Domain: mtmt-sync
@@ -14,7 +14,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'MTMT_VERSION', '0.15.0' );
+define( 'MTMT_VERSION', '0.16.0' );
 define( 'MTMT_DB_VERSION', '4' );
 define( 'MTMT_CAPS_VERSION', '1' );
 define( 'MTMT_PLUGIN_FILE', __FILE__ );
@@ -54,6 +54,7 @@ require_once MTMT_PLUGIN_DIR . 'includes/class-mtmt-cron.php';
 require_once MTMT_PLUGIN_DIR . 'includes/class-mtmt-author-formatter.php';
 require_once MTMT_PLUGIN_DIR . 'includes/class-mtmt-external-id-icons.php';
 require_once MTMT_PLUGIN_DIR . 'includes/class-mtmt-placeholder-image.php';
+require_once MTMT_PLUGIN_DIR . 'includes/class-mtmt-search-link.php';
 require_once MTMT_PLUGIN_DIR . 'includes/class-mtmt-card-renderer.php';
 require_once MTMT_PLUGIN_DIR . 'includes/class-mtmt-widget-data.php';
 require_once MTMT_PLUGIN_DIR . 'includes/class-mtmt-widget-ajax.php';

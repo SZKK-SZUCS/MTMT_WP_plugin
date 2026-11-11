@@ -786,4 +786,25 @@ idézettség-badge (opt-in). Részletek: docs/decisions.md #101.
 
 ## Backlog — még nincs fázishoz kötve
 
-Jelenleg üres.
+- **Idézettség szerinti rendezés a widgetekben** (2026-10, várhatóan
+  megrendelői kérés lesz; egyelőre VÁRAKOZIK, döntés kell a forrásról).
+  Lehetőségek:
+  1. *MTMT `citationCount`* (összes idézet) — a `depth=1` publication-
+     objektumban benne van (élesben ellenőrizve), a tárolt `raw_json`-ból
+     DB-migrációval visszamenőleg is kinyerhető, utána a heti sync frissíti.
+     Új oszlop (`citation_count`) + index, widget "Rendezés" új opció.
+     Licenc-szempontból tiszta. Hátrány: a sorrend eltérhet a kártyán
+     látható Dimensions-számtól (más adatbázis).
+  2. *MTMT `independentCitationCount`* (önidézetek nélkül) — ugyanígy
+     elérhető; szakmailag "tisztább", de kisebb szám. Az 1-gyel együtt is
+     felkínálható (két rendezési opció).
+  3. *MTMT WoS/Scopus idézetszám* (`wosCitationCount`, `scopusCitationCount`,
+     `wosScopusCitationCount`) — szintén a rekordban van, ha a nemzetközi
+     indexek számítanak.
+  4. *Dimensions-szám* — csak a Dimensions Metrics API-ból kérhető le
+     szerveroldalon; a válasz szerint "Any use by an unregistered
+     organization is not authorized" → az egyetemnek regisztrálnia kell
+     (info@dimensions.ai). Utána: heti cron-lekérés DOI-nként, tárolás,
+     rendezés. DOI nélküli tételeknek nincs értéke.
+  Kiegészítés: ha MTMT-forrást választunk, érdemes lehet a kártyán is
+  megjeleníteni az MTMT-számot (opcionálisan), hogy a sorrend érthető legyen.

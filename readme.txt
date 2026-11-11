@@ -4,7 +4,7 @@ Tags: mtmt, publications, elementor, publikaciok, tudomanyos
 Requires at least: 6.4
 Tested up to: 6.7
 Requires PHP: 8.1
-Stable tag: 0.15.0
+Stable tag: 0.16.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -103,6 +103,17 @@ egyikkel sem, csak a látogató-vezérelt alapbeállítással) működik, tiszt�
 üzemeltetési döntés, telepítésenként eltérhet.
 
 == Changelog ==
+
+= 0.16.0 =
+* Megosztható keresés: a listázó widgetek keresőmezője az URL `mtmt_q`
+  paraméterében tükröződik. Egy link megnyitásakor a keresőmező már
+  kitöltve jelenik meg, és a találatok szűrve látszanak.
+* Új beállítás (Beállítások → Listázó oldal): itt adható meg az az oldal,
+  ahol a publikáció-listázó widget található.
+* Új Elementor widget: „MTMT keresés-gomb”. „Keresési érték” és „Listázó
+  oldal” mezővel (az oldal alapértéke a Beállításokból jön, gombonként
+  felülírható). A stílus-fülön teljes Normál/Hover beállítás: háttér és
+  színátmenet, keret, árnyék, hover-animáció és -mozgás, átmenet, ikon.
 
 = 0.15.0 =
 * Új beállítás (Beállítások → Funkciók): „Projektazonosítók ellenőrzése

@@ -109,6 +109,43 @@ final class Mtmt_Settings_Page {
 				<?php submit_button( __( 'Mentés', 'mtmt-sync' ) ); ?>
 			</form>
 
+			<h2><?php esc_html_e( 'Listázó oldal (keresés-gomb)', 'mtmt-sync' ); ?></h2>
+			<form method="post">
+				<?php wp_nonce_field( $nonce_action ); ?>
+				<input type="hidden" name="mtmt_action" value="save_list_page">
+				<table class="form-table">
+					<tr>
+						<th><label for="mtmt-list-page-id"><?php esc_html_e( 'Listázó oldal', 'mtmt-sync' ); ?></label></th>
+						<td>
+							<?php
+							wp_dropdown_pages(
+								array(
+									'name'              => 'list_page_id',
+									'id'                => 'mtmt-list-page-id',
+									'selected'          => absint( get_option( Mtmt_Search_Link::OPTION_LIST_PAGE ) ),
+									'show_option_none'  => __( '— Nincs kiválasztva —', 'mtmt-sync' ),
+									'option_none_value' => '0',
+								)
+							);
+							?>
+							<?php if ( '' !== Mtmt_Search_Link::get_list_page_url() ) : ?>
+								<a href="<?php echo esc_url( Mtmt_Search_Link::get_list_page_url() ); ?>" target="_blank" rel="noopener"><?php esc_html_e( 'Megnyitás', 'mtmt-sync' ); ?></a>
+							<?php endif; ?>
+						</td>
+					</tr>
+				</table>
+				<p class="description">
+					<?php
+					printf(
+						/* translators: %s: az URL-paraméter neve (kód) */
+						esc_html__( 'Az az oldal, ahol a publikáció-listázó widget található. A „MTMT keresés-gomb" Elementor widget ide mutat alapértelmezetten (widgetenként felülírható). A keresés a link %s paraméterében utazik, így a listázó oldal keresőmezője már kitöltve nyílik meg.', 'mtmt-sync' ),
+						'<code>?' . esc_html( Mtmt_Search_Link::QUERY_ARG ) . '=…</code>'
+					);
+					?>
+				</p>
+				<?php submit_button( __( 'Mentés', 'mtmt-sync' ) ); ?>
+			</form>
+
 			<h2><?php esc_html_e( 'Alapértelmezett borítókép', 'mtmt-sync' ); ?></h2>
 			<form method="post">
 				<?php wp_nonce_field( $nonce_action ); ?>
@@ -319,6 +356,20 @@ final class Mtmt_Settings_Page {
 			update_option( Mtmt_Project_Ids::OPTION_REQUIRE_VERIFICATION, ! empty( $_POST['require_project_verification'] ) ? 1 : 0 );
 			// A projektazonosítók nyilvános láthatósága ettől függ -> widget-cache ürítése.
 			Mtmt_Widget_Cache::bump();
+
+			return array(
+				'type'    => 'success',
+				'message' => __( 'Mentve.', 'mtmt-sync' ),
+			);
+		}
+
+		if ( 'save_list_page' === $action ) {
+			$page_id = isset( $_POST['list_page_id'] ) ? absint( $_POST['list_page_id'] ) : 0;
+			// Csak létező oldalt fogadunk el (a dropdown manipulált értéke ellen).
+			if ( $page_id && 'page' !== get_post_type( $page_id ) ) {
+				$page_id = 0;
+			}
+			update_option( Mtmt_Search_Link::OPTION_LIST_PAGE, $page_id );
 
 			return array(
 				'type'    => 'success',

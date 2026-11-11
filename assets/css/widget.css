@@ -665,3 +665,99 @@
 		transform: translateY(-50%);
 	}
 }
+
+/*
+ * MTMT keresés-gomb widget (elementor/class-mtmt-widget-search-button.php).
+ * Az alapkinézet itt van; az Elementor stílus-fül controljai a widget-azonosítós
+ * szelektorokkal (nagyobb specificitás) felülírják. A hover-mozgás és az ikon
+ * transzformációi CSS-változókból állnak össze, hogy a külön controlok ne
+ * írják felül egymást.
+ */
+.mtmt-search-button-wrap {
+	display: flex;
+	justify-content: flex-start;
+}
+
+.mtmt-search-button {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.6em;
+	box-sizing: border-box;
+	padding: 0.75em 1.5em;
+	border: 0 solid transparent;
+	border-radius: 6px;
+	background-color: var(--mtmt-accent, #16aebd);
+	color: #fff;
+	font-weight: 600;
+	line-height: 1.2;
+	text-align: center;
+	text-decoration: none;
+	cursor: pointer;
+	transition-property: color, background-color, background-image, border-color, border-radius, box-shadow, text-shadow, transform, opacity;
+	transition-duration: 0.3s;
+	transition-timing-function: ease;
+}
+
+.mtmt-search-button:hover,
+.mtmt-search-button:focus {
+	color: #fff;
+	text-decoration: none;
+}
+
+.mtmt-search-button:focus-visible {
+	outline: 2px solid currentColor;
+	outline-offset: 3px;
+}
+
+.mtmt-search-button--icon-before {
+	flex-direction: row-reverse;
+}
+
+.mtmt-search-button__text {
+	min-width: 0;
+}
+
+.mtmt-search-button__icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	line-height: 1;
+	color: inherit;
+	fill: currentColor;
+	transform: translateX(var(--mtmt-icon-shift, 0)) rotate(var(--mtmt-icon-rot, 0deg));
+	transition-property: color, fill, transform;
+	transition-duration: 0.3s;
+	transition-timing-function: ease;
+}
+
+.mtmt-search-button__icon svg {
+	width: 1em;
+	height: 1em;
+	fill: currentColor;
+}
+
+.mtmt-search-button.mtmt-has-hover-transform:hover,
+.mtmt-search-button.mtmt-has-hover-transform:focus-visible {
+	transform: translateY(var(--mtmt-btn-hover-ty, 0)) scale(var(--mtmt-btn-hover-scale, 1)) rotate(var(--mtmt-btn-hover-rot, 0deg));
+}
+
+.mtmt-search-button-notice {
+	margin: 0;
+	padding: 0.75em 1em;
+	border: 1px dashed #b32d2e;
+	color: #b32d2e;
+	font-size: 0.9em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.mtmt-search-button,
+	.mtmt-search-button__icon {
+		transition-duration: 0.01ms !important;
+	}
+
+	.mtmt-search-button.mtmt-has-hover-transform:hover,
+	.mtmt-search-button.mtmt-has-hover-transform:focus-visible {
+		transform: none;
+	}
+}

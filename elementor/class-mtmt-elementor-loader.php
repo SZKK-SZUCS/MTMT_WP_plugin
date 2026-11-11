@@ -46,6 +46,10 @@ final class Mtmt_Elementor_Loader {
 		require_once MTMT_PLUGIN_DIR . 'elementor/class-mtmt-widget-all-publications.php';
 		$widgets_manager->register( new Mtmt_Widget_All_Publications() );
 
+		// A keresés-gomb független a listázó widgetektől és a funkció-kapcsolóktól.
+		require_once MTMT_PLUGIN_DIR . 'elementor/class-mtmt-widget-search-button.php';
+		$widgets_manager->register( new Mtmt_Widget_Search_Button() );
+
 		// A "B" widget csak akkor jelenik meg, ha a "kiemelt cikk" funkció be van kapcsolva.
 		if ( get_option( 'mtmt_enable_featured' ) ) {
 			require_once MTMT_PLUGIN_DIR . 'elementor/class-mtmt-widget-topic-publications.php';

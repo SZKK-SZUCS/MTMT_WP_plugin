@@ -27,11 +27,16 @@ parameters:
 
 		-
 			message: "#^Call to method register\\(\\) on an unknown class Elementor\\\\Widgets_Manager\\.$#"
-			count: 2
+			count: 3
 			path: elementor/class-mtmt-elementor-loader.php
 
 		-
 			message: "#^Instantiated class Mtmt_Widget_All_Publications not found\\.$#"
+			count: 1
+			path: elementor/class-mtmt-elementor-loader.php
+
+		-
+			message: "#^Instantiated class Mtmt_Widget_Search_Button not found\\.$#"
 			count: 1
 			path: elementor/class-mtmt-elementor-loader.php
 

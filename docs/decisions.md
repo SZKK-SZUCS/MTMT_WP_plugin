@@ -1443,3 +1443,50 @@ activate()` idempotenciája (kétszeri hívás nem duplikál), az önjavító
        B widget, Elementor-szerkesztő) nem reprodukálható — az ikonok 20px,
        a nyíl 16px, a Dimensions "Nagy téglalap" 110×22px. Pontosítás kérve.
 
+
+105. **Megosztható keresés (URL-szinkron) + "MTMT keresés-gomb" widget** (0.16.0-hoz,
+     megrendelői kérés).
+     - **URL-szinkron:** a listázó widgetek keresőmezője az URL `mtmt_q`
+       paraméterében tükröződik (`assets/js/widget-frontend.js`:
+       `syncSearchToUrl`, `initSearchFromUrl`). Betöltéskor az URL értéke
+       beíródik a mezőbe és ugyanaz az AJAX-keresés fut le, mint gépelésnél
+       (év-fülek, terület-lenyíló helyesen újraszámolódnak). `replaceState`,
+       nem `pushState`: gépelés közben nem telítődik a Vissza-gomb. Üres
+       keresésnél a paraméter törlődik, a többi paraméter és a #horgony
+       megmarad. A paraméter neve előtagozott (`mtmt_q`), hogy ne ütközzön a
+       téma/más pluginok `q`/`s` paraméterével; a PHP-konstans
+       (`Mtmt_Search_Link::QUERY_ARG`) az egyetlen forrás, a JS a widget
+       `data-search-param` attribútumából olvassa. Szándékosan KLIENSOLDALI
+       betöltés (nem szerveroldali előrenderelés): az oldal-gyorsítótárak
+       (query-stringes oldalak) így nem keverik a kimenetet. Hátrány: a
+       szűretlen lista egy pillanatra látszik, amíg az AJAX visszatér. Az
+       Elementor szerkesztőben nem nyúl az URL-hez. Több keresős widget
+       esetén egy oldalon ugyanaz a paraméter vonatkozik mindre. Csak a
+       keresés kerül az URL-be (év/terület/projekt/lapozás nem).
+     - **Beállítás:** Beállítások -> "Listázó oldal (keresés-gomb)" (WP oldal-
+       választó, `mtmt_list_page_id`, csak létező `page` fogadható el).
+       A permalinket futásidőben oldjuk fel, így az oldal slugjának
+       átírása nem töri el a linkeket.
+     - **Widget** (`elementor/class-mtmt-widget-search-button.php`,
+       "MTMT" kategória, mindig regisztrálva, nem függ a funkció-
+       kapcsolóktól): "Keresési érték" + "Listázó oldal" (URL control, az
+       alapértéke a Beállításokból jön; a nem módosított gomb így követi a
+       Beállítások későbbi változását; ha a mezőt törlik, a Beállítások
+       értéke lép életbe). Link: `Mtmt_Search_Link::build_url()` (rawurlencode,
+       200 karakteres korlát, címke-eltávolítás, `esc_url_raw` a
+       nem engedélyezett protokollok ellen). Nincs listázó oldal -> a
+       látogató semmit nem lát, a szerkesztő figyelmeztetést.
+     - **Stílus-fül:** tipográfia, szélesség/magasság/belső margó, Normál
+       és Hover állapot külön (szín, háttér + színátmenet, keret,
+       lekerekítés, doboz- és szöveg-árnyék, szöveg-körvonal), hover-
+       animáció, hover-transzformáció (eltolás/méretezés/forgatás —
+       CSS-változókból áll össze egy `transform`-má), átmenet-idő és -lefutás,
+       ikon (méret, távolság, szín, hover-eltolás/-forgatás). A
+       `prefers-reduced-motion` tiszteletben van tartva. Ha a hover-
+       animáció (elementor-animation-*) és a hover-transzformáció együtt
+       szerepel, a saját transzformáció nyer.
+     - Ellenőrizve: build_url PHP-stubokkal (kódolás, meglévő query/horgony,
+       felülírás, üres/hosszú érték); a JS-logika böngészőben, ál-AJAX-szal
+       (előtöltés URL-ből, gépelés, törlés, history nem nő). NEM ellenőrizve:
+       valódi WP + Elementor környezet (widget a panelen, stílus-controlok,
+       hover-animációk, Elementor-szerkesztő).

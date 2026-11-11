@@ -312,6 +312,7 @@ final class Mtmt_Widget_Topic_Publications extends \Elementor\Widget_Base {
 			data-ajax-url="<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>"
 			data-nonce="<?php echo esc_attr( wp_create_nonce( Mtmt_Widget_Ajax::NONCE_ACTION ) ); ?>"
 			data-widget-type="topic"
+			data-search-param="<?php echo esc_attr( Mtmt_Search_Link::QUERY_ARG ); ?>"
 			data-area-id="<?php echo esc_attr( (string) $area_id ); ?>"
 			data-profile-id="<?php echo esc_attr( (string) $profile_id ); ?>"
 			data-featured-only="1"
