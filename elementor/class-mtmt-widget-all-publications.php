@@ -247,6 +247,7 @@ final class Mtmt_Widget_All_Publications extends \Elementor\Widget_Base {
 			data-ajax-url="<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>"
 			data-nonce="<?php echo esc_attr( wp_create_nonce( Mtmt_Widget_Ajax::NONCE_ACTION ) ); ?>"
 			data-widget-type="all"
+			data-search-param="<?php echo esc_attr( Mtmt_Search_Link::QUERY_ARG ); ?>"
 			data-per-page="<?php echo esc_attr( (string) $per_page ); ?>"
 			data-sort-order="<?php echo esc_attr( $sort_order ); ?>"
 			data-citation-style="<?php echo esc_attr( $citation_style ); ?>"

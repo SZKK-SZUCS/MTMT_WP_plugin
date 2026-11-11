@@ -54,6 +54,7 @@ require_once MTMT_PLUGIN_DIR . 'includes/class-mtmt-cron.php';
 require_once MTMT_PLUGIN_DIR . 'includes/class-mtmt-author-formatter.php';
 require_once MTMT_PLUGIN_DIR . 'includes/class-mtmt-external-id-icons.php';
 require_once MTMT_PLUGIN_DIR . 'includes/class-mtmt-placeholder-image.php';
+require_once MTMT_PLUGIN_DIR . 'includes/class-mtmt-search-link.php';
 require_once MTMT_PLUGIN_DIR . 'includes/class-mtmt-card-renderer.php';
 require_once MTMT_PLUGIN_DIR . 'includes/class-mtmt-widget-data.php';
 require_once MTMT_PLUGIN_DIR . 'includes/class-mtmt-widget-ajax.php';

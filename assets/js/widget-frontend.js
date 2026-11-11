@@ -323,6 +323,90 @@
 
 	var searchDebounceTimers = new WeakMap();
 
+	// --- Megosztható keresés (URL <-> keresőmező) ---------------------------
+	// A keresett szöveg az URL `mtmt_q` paraméterében (a név a widget
+	// `data-search-param` attribútumából jön, hogy a PHP legyen az egyetlen
+	// forrás) utazik, így a címsor másolható link. `replaceState`-et használunk,
+	// nem `pushState`-et: gépelés közben ne telítsük a Vissza-gomb előzményeit.
+	// Az Elementor szerkesztőben nem nyúlunk az URL-hez (a szerkesztő iframe-je).
+	var SEARCH_MAX_LENGTH = 200;
+
+	function isEditorMode() {
+		return !! ( document.body && document.body.classList.contains( 'elementor-editor-active' ) );
+	}
+
+	/**
+	 * @param {Element} widget
+	 * @param {string} value
+	 */
+	function syncSearchToUrl( widget, value ) {
+		var param = widget.getAttribute( 'data-search-param' );
+		if ( ! param || isEditorMode() || ! window.history || ! window.history.replaceState ) {
+			return;
+		}
+		try {
+			var url = new URL( window.location.href );
+			var trimmed = ( value || '' ).trim();
+			if ( trimmed ) {
+				url.searchParams.set( param, trimmed );
+			} else {
+				url.searchParams.delete( param );
+			}
+			window.history.replaceState( window.history.state, '', url.toString() );
+		} catch ( err ) {
+			// Régi böngésző / szokatlan URL — a keresés URL nélkül is működik.
+		}
+	}
+
+	/**
+	 * Oldalbetöltéskor: ha az URL-ben van keresett szöveg, beírjuk a mezőbe és
+	 * lefuttatjuk a keresést (ugyanaz az AJAX-út, mint gépelésnél, így az
+	 * év-fülek és a szűrők is helyesen újraszámolódnak).
+	 *
+	 * @param {Element} widget
+	 */
+	function initSearchFromUrl( widget ) {
+		if ( widget.getAttribute( 'data-search-init' ) || isEditorMode() ) {
+			return;
+		}
+		var param = widget.getAttribute( 'data-search-param' );
+		var input = widget.querySelector( '.mtmt-search-input' );
+		if ( ! param || ! input ) {
+			return;
+		}
+		widget.setAttribute( 'data-search-init', '1' );
+
+		var value = '';
+		try {
+			value = ( new URLSearchParams( window.location.search ).get( param ) || '' ).trim();
+		} catch ( err ) {
+			return;
+		}
+		if ( ! value ) {
+			return;
+		}
+		value = value.substring( 0, SEARCH_MAX_LENGTH );
+
+		input.value = value;
+		var s = getState( widget );
+		s.search = value;
+		s.paged = 1;
+		fetchAndRender( widget );
+	}
+
+	function initAllSearchFromUrl() {
+		var widgets = document.querySelectorAll( '.mtmt-widget' );
+		for ( var i = 0; i < widgets.length; i++ ) {
+			initSearchFromUrl( widgets[ i ] );
+		}
+	}
+
+	if ( 'loading' === document.readyState ) {
+		document.addEventListener( 'DOMContentLoaded', initAllSearchFromUrl );
+	} else {
+		initAllSearchFromUrl();
+	}
+
 	document.addEventListener( 'click', function ( e ) {
 		var yearTab = e.target.closest( '.mtmt-year-tab' );
 		if ( yearTab ) {
@@ -399,6 +483,7 @@
 		searchDebounceTimers.set(
 			widget,
 			setTimeout( function () {
+				syncSearchToUrl( widget, s.search );
 				fetchAndRender( widget );
 			}, 400 )
 		);

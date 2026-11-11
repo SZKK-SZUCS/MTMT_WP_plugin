@@ -15,6 +15,7 @@ parameters:
         # ignoreErrors-szal elnyomni (a compiler saját javaslata: excludePaths).
         - elementor/class-mtmt-widget-all-publications.php
         - elementor/class-mtmt-widget-topic-publications.php
+        - elementor/class-mtmt-widget-search-button.php
     ignoreErrors:
         # A fő plugin fájlban define()-olt konstansok — phpstan fájlonként
         # elemez, nem látja a mtmt-sync.php top-level define() hívásait.
